@@ -339,7 +339,7 @@ input[type=text], input[type=number], textarea.inp-ta { font-weight: 500; }
 <body>
 <div class="scan"></div>
 <header>
-  <div><div class="logo-sub">Sistema de Periodização</div><div class="logo">TRAINING<span>OS</span></div></div>
+  <div><div class="logo-sub">Sistema de Periodização</div><div class="logo" onclick="goHome()" style="cursor:pointer" title="Voltar ao início">TRAINING<span>OS</span></div></div>
   <div class="hdr-r">
     <div class="sync"><div class="sd" id="sd"></div><span id="sl">Não conectado</span></div>
     <div class="navt">
@@ -629,23 +629,33 @@ function buildPrompt(){
       return n.includes(nivelSimples.toLowerCase()) || n.includes('iniciante');
     }).slice(0,40);
 
-    // Filtra protocolos pelo perfil
-    protocolo = (b.protocolos||[]).find(p =>
-      p.objetivo?.toLowerCase().includes(S.objetivo.toLowerCase().split(' ')[0]) &&
-      p.nivel?.toLowerCase().includes(nivelSimples.toLowerCase()) &&
-      String(p.dias)===String(S.dias)
-    ) || (b.protocolos||[]).find(p =>
-      p.objetivo?.toLowerCase().includes(S.objetivo.toLowerCase().split(' ')[0]) &&
-      p.nivel?.toLowerCase().includes(nivelSimples.toLowerCase())
+    // Filtra protocolos pelo perfil — usa campos reais: seq, fase, metodo, nivel, objetivo, dias_semana
+    protocolo = (b.protocolos||[]).find(p => {
+      const obj=(p.objetivo||'').toLowerCase();
+      const niv=(p.nivel||'').toLowerCase();
+      const dias=String(p.dias_semana||p.dias||'');
+      return obj.includes(S.objetivo.toLowerCase().split(' ')[0]) &&
+             niv.includes(nivelSimples.toLowerCase()) &&
+             dias===String(S.dias);
+    }) || (b.protocolos||[]).find(p => {
+      const obj=(p.objetivo||'').toLowerCase();
+      const niv=(p.nivel||'').toLowerCase();
+      return obj.includes(S.objetivo.toLowerCase().split(' ')[0]) &&
+             niv.includes(nivelSimples.toLowerCase());
+    }) || (b.protocolos||[]).find(p =>
+      (p.nivel||'').toLowerCase().includes(nivelSimples.toLowerCase())
     );
 
-    // Filtra split
-    split = (b.splits||[]).find(s => String(s.dias)===String(S.dias) && s.nivel?.toLowerCase().includes(nivelSimples.toLowerCase()));
+    // Filtra split pelo número de dias e nível
+    split = (b.splits||[]).find(s =>
+      String(s.dias)===String(S.dias) &&
+      (s.nivel||'').toLowerCase().includes(nivelSimples.toLowerCase())
+    ) || (b.splits||[]).find(s => String(s.dias)===String(S.dias));
 
-    // Filtra métodos
+    // Filtra métodos pelo nível
     metodosFiltrados = (b.metodos||[]).filter(m => {
-      const q=m.quando?.toLowerCase()||'';
-      return q.includes(nivelSimples.toLowerCase()) || q.includes('iniciante');
+      const niv=(m.nivel||m.quando||'').toLowerCase();
+      return niv.includes(nivelSimples.toLowerCase()) || niv.includes('todos') || niv.includes('iniciante');
     }).slice(0,10);
   }
 
@@ -658,11 +668,15 @@ function buildPrompt(){
     : '';
 
   const protStr = protocolo
-    ? `\nPROTOCOLO RECOMENDADO PARA ESTE PERFIL:\n- Split: ${protocolo.split} | Volume: ${protocolo.volume} | Intensidade: ${protocolo.intensidade}\n- Métodos: ${protocolo.metodos} | Progressão: ${protocolo.progressao}`
+    ? `\nPROTOCOLO RECOMENDADO PARA ESTE PERFIL (Sequência ${protocolo.seq||''}):
+- Fase: ${protocolo.fase||''} | Método: ${protocolo.metodo||''} | Séries/Reps: ${protocolo.series_reps||''}
+- Nível: ${protocolo.nivel||''} | Objetivo: ${protocolo.objetivo||''}
+- Progressão: ${protocolo.progressao||''} | Observação: ${protocolo.observacao||''}`
     : '';
 
   const splitStr = split
-    ? `\nSPLIT RECOMENDADO:\n- ${split.nome}: ${split.diasTreino} | Grupos: ${split.grupos}`
+    ? `\nSPLIT RECOMENDADO: ${split.nome||''} (${split.dias||''} dias)
+- Dias: ${split.dias_treino||split.diasTreino||''} | Grupos: ${split.grupos||''}`
     : '';
 
   return `Você é especialista em ciência do treinamento de força baseado em Bompa, Israetel e Verkhoshansky.
@@ -1003,6 +1017,21 @@ if(isIOS() && !isStandalone() && !localStorage.getItem('pwa_dismissed')){
     b.querySelector('.install-sub').textContent='Toque em Compartilhar → Adicionar à Tela de Início';
     b.querySelector('.install-btn').style.display='none';
   }, 3000);
+}
+
+
+function goHome(){
+  // If on step 3, go to step 1 keeping data
+  document.querySelectorAll('#va .step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s1').classList.add('active');
+}
+
+function confirmarApagar(){
+  if(!confirm('Apagar o treino atual? Esta ação não pode ser desfeita.')) return;
+  S.prog=null; S.semAti=0; S.sessAti=0;
+  ls(LS.P, null);
+  try{ localStorage.removeItem(LS.P); }catch(e){}
+  goHome();
 }
 
 </script>
