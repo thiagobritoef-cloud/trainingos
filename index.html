@@ -6,7 +6,7 @@
 <title>TrainingOS — Gerador de Treino Periodizado</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#07070c;--sf:rgba(255,255,255,.03);--br:rgba(255,255,255,.07);--ac:#E8520A;--ac2:#ff7a3d;--tx:#e8e0d4;--mu:#6b6560;--mu2:#a0988e;--er:#ff6b6b;--ok:#4ecb71;--mo:'JetBrains Mono',monospace;--sa:'DM Sans',sans-serif;--di:'Bebas Neue',sans-serif}
+:root{--bg:#07070c;--sf:rgba(255,255,255,.03);--br:rgba(255,255,255,.07);--ac:#00C853;--ac2:#00E676;--tx:#e8e0d4;--mu:#6b6560;--mu2:#a0988e;--er:#ff6b6b;--ok:#4ecb71;--mo:'JetBrains Mono',monospace;--sa:'DM Sans',sans-serif;--di:'Bebas Neue',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--tx);font-family:var(--sa);min-height:100vh;overflow-x:hidden}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:2px}
@@ -310,6 +310,29 @@ textarea.inp-ta{
 textarea.inp-ta:focus{border-color:var(--ac);background:rgba(232,82,10,.06);box-shadow:0 0 0 1px rgba(232,82,10,.3)}
 textarea.inp-ta::placeholder{color:var(--mu)}
 .limitacoes-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.25);padding:3px 10px;border-radius:2px;font-size:11px;color:#ff8080;margin-top:8px}
+
+
+/* ── THICK FONTS ─────────────────────────────────────────── */
+body { font-weight: 500; }
+.logo { font-weight: 900; letter-spacing: 5px; }
+.lbl, .lb { font-weight: 700; letter-spacing: 4px; }
+.chip, .ch { font-weight: 600; }
+.btn { font-weight: 900; letter-spacing: 4px; }
+.btn2 { font-weight: 700; letter-spacing: 2px; }
+.sec-title, .tt, .pt { font-family: var(--di); -webkit-text-stroke: 0.5px currentColor; }
+.res-title, .rn { -webkit-text-stroke: 0.5px currentColor; }
+.sess-name, .sn { font-weight: 900; -webkit-text-stroke: 0.3px currentColor; }
+.exname, .ex { font-weight: 600; }
+.rev-val, .rv { font-weight: 600; }
+.mval, .mv { font-weight: 900; -webkit-text-stroke: 0.3px currentColor; }
+.tab, .tb, .stab { font-weight: 600; }
+.ntab, .nt { font-weight: 700; }
+.ac-name, .an { font-weight: 900; }
+input[type=text], input[type=number], textarea.inp-ta { font-weight: 500; }
+.ci { font-weight: 600; }
+.exs, .es { font-weight: 800; }
+.logo-sub { font-weight: 700; }
+.scan, .scanline { background: linear-gradient(90deg, transparent, #00C853, transparent); }
 
 </style>
 </head>
