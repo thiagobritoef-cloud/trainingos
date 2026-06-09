@@ -679,9 +679,9 @@ function buildPrompt(){
 - Dias: ${split.dias_treino||split.diasTreino||''} | Grupos: ${split.grupos||''}`
     : '';
 
-  return `INSTRUÇÃO CRÍTICA: Retorne APENAS o JSON puro. Sem texto antes, sem texto depois, sem perguntas, sem explicações, sem markdown, sem blocos de código. Apenas o JSON começando com { e terminando com }.
+  return `Gere um programa de treino de musculação periodizado em formato JSON para o atleta abaixo. Responda SOMENTE com o JSON, sem nenhum texto adicional.
 
-Você é especialista em ciência do treinamento de força baseado em Bompa, Israetel e Verkhoshansky.
+Baseie-se em: Bompa (periodização), Israetel (MEV/MAV/MRV), Verkhoshansky (sobrecarga ondulatória).
 
 PERFIL DO ATLETA:
 - Sexo: ${S.sexo} | Idade: ${S.idade} anos | Peso: ${S.peso}kg | Altura: ${S.altura}cm | IMC: ${imc}
