@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TrainingOS — Gerador de Treino Periodizado</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#07070c;--sf:rgba(255,255,255,.03);--br:rgba(255,255,255,.07);--ac:#E8520A;--ac2:#ff7a3d;--tx:#e8e0d4;--mu:#6b6560;--mu2:#a0988e;--er:#ff6b6b;--ok:#4ecb71;--mo:'JetBrains Mono',monospace;--sa:'DM Sans',sans-serif;--di:'Bebas Neue',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:var(--sa);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--ac);border-radius:2px}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.022;pointer-events:none;z-index:9999}
+.scan{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ac),transparent);animation:sc 5s linear infinite;z-index:1000;pointer-events:none}
+@keyframes sc{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--br);position:sticky;top:0;z-index:100;background:rgba(7,7,12,.95);backdrop-filter:blur(14px);flex-wrap:wrap;gap:10px}
+.logo{font-family:var(--di);font-size:24px;letter-spacing:4px}.logo span{color:var(--ac)}
+.logo-sub{font-size:9px;letter-spacing:3px;color:var(--ac);text-transform:uppercase;margin-bottom:2px}
+.hdr-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sync{font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--mu);flex-shrink:0;transition:background .3s}
+.sd.ok{background:var(--ok);box-shadow:0 0 6px var(--ok)}.sd.er{background:var(--er)}.sd.sy{background:var(--ac);animation:pu .8s ease infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+.navt{display:flex;border:1px solid var(--br);border-radius:2px;overflow:hidden}
+.nt{padding:7px 16px;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;color:var(--mu);background:transparent;border:none;font-family:var(--sa)}
+.nt.on{background:var(--ac);color:#fff}.nt:hover:not(.on){background:rgba(255,255,255,.04);color:var(--tx)}
+/* MAIN */
+main{max-width:980px;margin:0 auto;padding:32px 20px 80px}
+.step{display:none;animation:fu .4s ease both}.step.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* BASE STATUS */
+.base-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--sf);border:1px solid var(--br);border-radius:2px;margin-bottom:24px;font-size:12px;color:var(--mu)}
+.base-bar.loaded{border-color:rgba(78,203,113,.3);background:rgba(78,203,113,.04);color:var(--ok)}
+.base-bar.loading{border-color:rgba(232,82,10,.3);background:rgba(232,82,10,.04);color:var(--ac)}
+.base-bar.err{border-color:rgba(255,107,107,.3);background:rgba(255,107,107,.04);color:var(--er)}
+/* TITULO */
+.tt{font-family:var(--di);font-size:46px;letter-spacing:2px;line-height:1;margin-bottom:6px}.tt span{color:var(--ac)}
+.ts{font-size:13px;color:var(--mu);margin-bottom:28px}
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fi{display:flex;flex-direction:column;gap:8px}.fi.full{grid-column:1/-1}
+.lb{font-size:10px;letter-spacing:3px;color:var(--ac);text-transform:uppercase}
+input[type=text],input[type=number]{background:var(--sf);border:1px solid rgba(232,82,10,.25);color:var(--tx);padding:12px 14px;font-family:var(--sa);font-size:14px;width:100%;outline:none;transition:all .2s;border-radius:2px;-webkit-appearance:none}
+input:focus{border-color:var(--ac);background:rgba(232,82,10,.06);box-shadow:0 0 0 1px rgba(232,82,10,.3)}
+input::placeholder{color:var(--mu)}
+.chs{display:flex;gap:8px;flex-wrap:wrap}.chs.col{flex-direction:column}.chs.r1 .ch{flex:1}
+.ch{padding:10px 14px;border:1px solid var(--br);cursor:pointer;font-size:13px;color:var(--mu2);transition:all .2s;user-select:none;border-radius:2px;text-align:center}
+.ch:hover{border-color:rgba(255,255,255,.22);color:var(--tx)}.ch.on{border-color:var(--ac);color:var(--ac);background:rgba(232,82,10,.08)}
+/* BUTTONS */
+.btn{background:var(--ac);color:#fff;border:none;padding:13px 32px;font-family:var(--di);font-size:18px;letter-spacing:3px;cursor:pointer;transition:all .2s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));display:inline-flex;align-items:center;gap:8px}
+.btn:hover:not(:disabled){background:var(--ac2);transform:translateY(-1px);box-shadow:0 8px 20px rgba(232,82,10,.4)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn2{background:transparent;border:1px solid rgba(232,82,10,.45);color:var(--ac);padding:9px 20px;font-size:12px;letter-spacing:1.5px;cursor:pointer;transition:all .2s;text-transform:uppercase;font-family:var(--sa);border-radius:2px}
+.btn2:hover{background:rgba(232,82,10,.09)}
+.br{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:24px}
+/* CARD */
+.card{background:var(--sf);border:1px solid var(--br);padding:20px;border-radius:3px}
+.ca{border-color:rgba(232,82,10,.2);background:rgba(232,82,10,.04)}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rk{font-size:10px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:2px}
+.rv{font-size:14px;font-weight:500}
+/* PROGRESS */
+.pw{height:2px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden;margin-top:16px}
+.pb{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));animation:pa 12s ease forwards}
+@keyframes pa{0%{width:0}100%{width:90%}}
+.pl{font-size:10px;color:var(--mu);text-align:center;margin-top:6px;font-family:var(--mo);letter-spacing:1px}
+.sp{width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.eb{margin-top:14px;padding:13px;border:1px solid rgba(255,107,107,.3);background:rgba(255,107,107,.04);border-radius:3px}
+.et{color:var(--er);font-size:13px;margin-bottom:6px}
+.eb pre{font-family:var(--mo);font-size:11px;color:var(--mu);white-space:pre-wrap;word-break:break-all;background:rgba(0,0,0,.5);padding:8px;border-radius:2px;max-height:100px;overflow:auto}
+/* RESULTADO */
+.rh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.rn{font-family:var(--di);font-size:32px;letter-spacing:2px;line-height:1}
+.rs{font-size:13px;color:var(--mu);margin-top:4px}
+.ra{display:flex;gap:8px;flex-wrap:wrap}
+.tgs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tg{padding:3px 9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:2px}
+.ta{background:rgba(232,82,10,.12);border:1px solid rgba(232,82,10,.3);color:var(--ac)}
+.tm{background:rgba(255,255,255,.04);border:1px solid var(--br);color:var(--mu2)}
+.tw{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tb{padding:7px 14px;border:1px solid rgba(255,255,255,.08);cursor:pointer;font-size:12px;transition:all .15s;border-radius:2px;white-space:nowrap}
+.tb.on{border-color:var(--ac);color:var(--ac);background:rgba(232,82,10,.08)}
+.tb:hover:not(.on){border-color:rgba(255,255,255,.18)}.tb-s{padding:5px 10px;font-size:11px}
+.wm{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.mc{background:var(--sf);border:1px solid var(--br);padding:12px 16px;border-radius:3px}
+.mk{font-size:10px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:2px}
+.mv{font-family:var(--di);font-size:18px;letter-spacing:2px;color:var(--ac)}
+.mvs{font-size:13px;color:var(--tx);font-family:var(--sa);margin-top:2px}
+.sc{background:var(--sf);border:1px solid var(--br);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.sh{padding:14px 20px 12px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+.sn{font-family:var(--di);font-size:21px;letter-spacing:2px}
+.wu{font-size:12px;color:var(--mu);max-width:220px;line-height:1.6;border-left:2px solid rgba(232,82,10,.4);padding:7px 10px;background:rgba(255,255,255,.02)}
+.wl{color:var(--ac);font-size:9px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:2px}
+.eh{display:grid;grid-template-columns:28px 1fr 50px 80px 96px 66px 148px;gap:8px;padding:8px 20px;font-size:9px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;border-bottom:1px solid rgba(232,82,10,.15);background:rgba(232,82,10,.025)}
+.er{display:grid;grid-template-columns:28px 1fr 50px 80px 96px 66px 148px;gap:8px;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.04);align-items:center;transition:background .15s}
+.er:last-child{border-bottom:none}.er:hover{background:rgba(255,255,255,.02)}
+.en{font-family:var(--di);font-size:14px;color:var(--ac)}.ex{font-size:14px;font-weight:500}
+.eo{font-size:11px;color:var(--mu);margin-top:2px;line-height:1.4}
+.es{font-family:var(--mo);font-size:13px;font-weight:600}.ep{font-size:13px}
+.ec{font-size:11px;color:var(--mu2);font-family:var(--mo)}.ed{font-size:11px;color:var(--mu)}
+.cw{position:relative}
+.cl{font-size:9px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;margin-bottom:3px}
+.ci{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--tx);padding:6px 24px 6px 8px;font-family:var(--mo);font-size:12px;width:100%;outline:none;border-radius:2px;transition:all .2s}
+.ci:focus{border-color:var(--ac);background:rgba(232,82,10,.07)}.ci.sv{border-color:rgba(78,203,113,.4);background:rgba(78,203,113,.05)}
+.cd{width:6px;height:6px;background:var(--ok);border-radius:50%;position:absolute;right:7px;top:60%;transform:translateY(-50%);opacity:0;transition:opacity .3s}.cd.show{opacity:1}
+.ot{padding:13px 20px}.ot ul{list-style:none}
+.ot li{padding:4px 0;font-size:13px;color:var(--mu2);line-height:1.6;display:flex;gap:8px}
+.ot li::before{content:'→';color:var(--ac);flex-shrink:0}
+.bge{display:inline-flex;align-items:center;gap:6px;background:rgba(232,82,10,.1);border:1px solid rgba(232,82,10,.25);padding:4px 12px;border-radius:2px;font-size:13px;color:var(--ac);margin-top:6px}
+/* PROMPT BOX */
+.pb-box{background:rgba(0,0,0,.35);border:1px solid rgba(232,82,10,.25);border-radius:3px;padding:16px;margin-top:16px}
+.pb-t{font-size:10px;letter-spacing:3px;color:var(--ac);text-transform:uppercase;margin-bottom:10px}
+.pb-steps{font-size:13px;color:var(--mu2);line-height:2;margin-bottom:12px}
+.pb-steps strong{color:var(--ac)}.pb-steps a{color:var(--ac)}
+/* JSON INPUT */
+.ji{width:100%;height:110px;background:var(--sf);border:1px solid rgba(232,82,10,.25);color:var(--tx);padding:11px;font-family:var(--mo);font-size:12px;outline:none;border-radius:2px;resize:vertical;margin-top:8px;transition:all .2s}
+.ji:focus{border-color:var(--ac);background:rgba(232,82,10,.06)}
+/* SHEETS INFO */
+.si{margin-top:20px;padding:16px 20px;background:var(--sf);border:1px solid var(--br);border-radius:3px}
+.sit{font-size:10px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;margin-bottom:9px}
+.sis{font-size:13px;color:var(--mu2);line-height:2}
+.sis code{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:2px;font-family:var(--mo);font-size:11px;color:var(--tx)}
+.sis strong{color:var(--ac)}
+/* PAINEL */
+.pt{font-family:var(--di);font-size:42px;letter-spacing:2px;line-height:1;margin-bottom:5px}.pt span{color:var(--ac)}
+.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:13px;margin-bottom:22px}
+.ac{background:var(--sf);border:1px solid var(--br);border-radius:3px;padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.ac:hover{border-color:rgba(232,82,10,.4);background:rgba(232,82,10,.04);transform:translateY(-1px)}
+.ac.sel{border-color:var(--ac);background:rgba(232,82,10,.07)}
+.an{font-family:var(--di);font-size:20px;letter-spacing:2px;margin-bottom:4px}
+.am{font-size:12px;color:var(--mu);line-height:1.8}
+.ab{position:absolute;top:12px;right:12px;font-size:10px;padding:2px 7px;border-radius:2px;letter-spacing:1px;text-transform:uppercase}
+.bok{background:rgba(78,203,113,.12);border:1px solid rgba(78,203,113,.3);color:var(--ok)}
+.bno{background:rgba(255,255,255,.04);border:1px solid var(--br);color:var(--mu)}
+.dp{background:var(--sf);border:1px solid var(--br);border-radius:3px;overflow:hidden}
+.dh{padding:13px 20px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:rgba(232,82,10,.03)}
+.dt{font-family:var(--di);font-size:19px;letter-spacing:2px;color:var(--ac)}
+.ch2{display:grid;grid-template-columns:65px 1fr 1fr 125px 125px;gap:8px;padding:7px 20px;font-size:9px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;border-bottom:1px solid rgba(232,82,10,.15);background:rgba(232,82,10,.025)}
+.cr{display:grid;grid-template-columns:65px 1fr 1fr 125px 125px;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.04);align-items:center}
+.cr:last-child{border-bottom:none}.cr:hover{background:rgba(255,255,255,.02)}
+.cv{font-family:var(--mo);font-size:14px;color:var(--ok);font-weight:600}
+.emp{text-align:center;padding:40px 20px;color:var(--mu)}
+.emp .ei{font-size:36px;margin-bottom:9px}.emp p{font-size:13px;line-height:1.7}
+.sb{background:var(--sf);border:1px solid rgba(232,82,10,.3);border-radius:3px;padding:22px;margin-bottom:20px}
+.sb-t{font-family:var(--di);font-size:22px;letter-spacing:2px;color:var(--ac);margin-bottom:13px}
+.ss{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.sn{font-family:var(--di);font-size:24px;color:var(--ac);flex-shrink:0;line-height:1;width:28px}
+.st{font-size:13px;color:var(--mu2);line-height:1.8}.st code{background:rgba(255,255,255,.07);padding:2px 5px;border-radius:2px;font-family:var(--mo);font-size:11px;color:var(--tx)}.st strong{color:var(--tx)}
+.ur{display:flex;gap:8px;margin-top:12px}.ur input{flex:1}
+.us{font-size:12px;color:var(--mu);margin-top:6px;font-family:var(--mo)}
+.lp{text-align:center;padding:32px;color:var(--mu);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:9px}
+/* BASE STATS */
+.bs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.bsc{background:rgba(232,82,10,.06);border:1px solid rgba(232,82,10,.2);padding:10px 16px;border-radius:2px;text-align:center;min-width:90px}
+.bsn{font-family:var(--di);font-size:22px;color:var(--ac);letter-spacing:1px}
+.bsl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+@media(max-width:680px){
+  header{padding:13px 15px}
+  .navt{order:3;width:100%}.nt{flex:1;text-align:center}
+  main{padding:22px 12px 60px}
+  .fg{grid-template-columns:1fr}.fi.full{grid-column:1}
+  .rg{grid-template-columns:1fr 1fr}
+  .tt,.pt{font-size:32px}
+  .eh,.er{grid-template-columns:24px 1fr 44px 76px 110px}
+  .eh>*:nth-child(n+6),.er>*:nth-child(n+6){display:none}
+  .ch2,.cr{grid-template-columns:55px 1fr 105px}
+  .ch2>*:nth-child(n+4),.cr>*:nth-child(n+4){display:none}
+}
+
+/* ── VIDEO MODAL ─────────────────────────────────────────── */
+.vm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;animation:vmIn .2s ease}
+@keyframes vmIn{from{opacity:0}to{opacity:1}}
+.vm-box{background:#0e0e16;border:1px solid rgba(232,82,10,.3);border-radius:4px;width:100%;max-width:720px;overflow:hidden;animation:vmUp .25s ease}
+@keyframes vmUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.vm-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vm-title{font-family:var(--di);font-size:20px;letter-spacing:2px;color:var(--tx)}
+.vm-close{background:rgba(232,82,10,.15);border:1px solid rgba(232,82,10,.4);color:var(--ac);width:32px;height:32px;border-radius:2px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.vm-close:hover{background:var(--ac);color:#fff}
+.vm-frame{position:relative;padding-bottom:56.25%;height:0;background:#000}
+.vm-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.vm-foot{padding:10px 20px;font-size:11px;color:var(--mu);font-family:var(--mo);letter-spacing:1px;text-align:center}
+.vbtn{display:inline-flex;align-items:center;gap:5px;background:rgba(232,82,10,.12);border:1px solid rgba(232,82,10,.35);color:var(--ac);padding:3px 10px;border-radius:2px;font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:var(--sa);letter-spacing:.5px;text-decoration:none;margin-left:6px;vertical-align:middle}
+.vbtn:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
+.vbtn svg{width:10px;height:10px;flex-shrink:0}
+
+
+/* VIDEO MODAL */
+.vm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;animation:vmIn .2s ease}
+@keyframes vmIn{from{opacity:0}to{opacity:1}}
+.vm-box{background:#0e0e16;border:1px solid rgba(232,82,10,.3);border-radius:4px;width:100%;max-width:720px;overflow:hidden;animation:vmUp .25s ease}
+@keyframes vmUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.vm-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vm-title{font-family:var(--di);font-size:18px;letter-spacing:2px;color:var(--tx);flex:1;margin-right:12px}
+.vm-close{background:rgba(232,82,10,.15);border:1px solid rgba(232,82,10,.4);color:var(--ac);width:32px;height:32px;border-radius:2px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.vm-close:hover{background:var(--ac);color:#fff}
+.vm-frame{position:relative;padding-bottom:56.25%;height:0;background:#000}
+.vm-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.vm-foot{padding:10px 20px;font-size:11px;color:var(--mu);font-family:var(--mo);letter-spacing:1px;text-align:center}
+.vbtn{display:inline-flex;align-items:center;gap:4px;background:rgba(232,82,10,.12);border:1px solid rgba(232,82,10,.35);color:var(--ac);padding:2px 9px;border-radius:2px;font-size:10px;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:var(--sa);letter-spacing:.5px;margin-left:7px;vertical-align:middle}
+.vbtn:hover{background:var(--ac);color:#fff}
+
+
+/* ── MOBILE IMPROVEMENTS ───────────────────────────────── */
+@media(max-width:768px){
+  header{padding:12px 16px;gap:8px}
+  .logo{font-size:20px;letter-spacing:3px}
+  .logo-sub{font-size:8px}
+  .navt{order:3;width:100%}
+  .nt{flex:1;text-align:center;padding:10px 8px;font-size:11px}
+  .hdr-r{width:100%;justify-content:space-between}
+  .sync{font-size:10px}
+  main{padding:20px 14px 100px}
+  .tt{font-size:36px}
+  .pt{font-size:32px}
+  .fg{grid-template-columns:1fr}
+  .fi.full{grid-column:1}
+  .rg{grid-template-columns:1fr 1fr}
+  .btn{font-size:16px;padding:14px 24px;width:100%;justify-content:center}
+  .btn2{font-size:11px;padding:9px 16px}
+  .btn-row{flex-direction:column-reverse;gap:10px}
+  .btn-row .btn{width:100%}
+  .btn-row .btn2{width:100%;text-align:center}
+  .bs{gap:8px}
+  .bsc{min-width:70px;padding:8px 10px}
+  .bsn{font-size:18px}
+  /* Exercise table mobile */
+  .eh{display:none}
+  .er{grid-template-columns:1fr;padding:14px 16px;gap:6px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .er>div{display:flex;align-items:center;gap:8px}
+  .er>div::before{font-size:9px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;min-width:70px;flex-shrink:0}
+  .er .en::before{content:'Nº'}
+  .er .es::before{content:'Séries'}
+  .er .ep::before{content:'Reps'}
+  .er .ec::before{content:'Carga'}
+  .er .ed::before{content:'Descanso'}
+  .er .cw{flex-direction:column;align-items:stretch}
+  .er .cw::before{content:'Minha Carga';font-size:9px;letter-spacing:1px;color:var(--mu);text-transform:uppercase}
+  .ci{width:100%}
+  /* Session card mobile */
+  .sh{flex-direction:column;gap:10px}
+  .wu{max-width:100%}
+  /* Semana tabs mobile */
+  .tw{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .tw::-webkit-scrollbar{height:2px}
+  .tb{flex-shrink:0}
+  /* Week meta */
+  .wm{flex-direction:column;gap:8px}
+  .mc{padding:10px 14px}
+  /* Painel */
+  .ag{grid-template-columns:1fr}
+  .ch2,.cr{grid-template-columns:55px 1fr 100px}
+  .ch2>*:nth-child(n+4),.cr>*:nth-child(n+4){display:none}
+  /* Cards atleta */
+  .ac{padding:14px}
+  /* Base stats */
+  .bs{justify-content:space-between}
+  /* Modal video */
+  .vm-box{margin:0;border-radius:0;max-height:100vh;display:flex;flex-direction:column}
+  .vm-overlay{padding:0;align-items:flex-end}
+  .vm-frame{flex:1}
+  /* Install banner */
+  .install-banner{display:flex}
+}
+
+/* ── PWA INSTALL BANNER ─────────────────────────────────── */
+.install-banner{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:linear-gradient(135deg,#0e0e16,#1a1a2e);
+  border-top:1px solid rgba(232,82,10,.4);
+  padding:14px 20px;
+  align-items:center;gap:14px;
+  box-shadow:0 -4px 24px rgba(0,0,0,.5);
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.install-icon{width:44px;height:44px;background:var(--ac);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.install-text{flex:1}
+.install-title{font-family:var(--di);font-size:16px;letter-spacing:2px;color:var(--tx)}
+.install-sub{font-size:11px;color:var(--mu);margin-top:2px}
+.install-btn{background:var(--ac);color:#fff;border:none;padding:10px 18px;font-family:var(--di);font-size:14px;letter-spacing:2px;cursor:pointer;border-radius:2px;flex-shrink:0}
+.install-close{background:transparent;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0}
+
+/* ── DORES/LIMITACOES FIELD ─────────────────────────────── */
+.alert-field{
+  background:rgba(255,107,107,.04);
+  border:1px solid rgba(255,107,107,.2);
+  border-radius:3px;
+  padding:14px 16px;
+}
+.alert-field .lbl{color:#ff8080}
+textarea.inp-ta{
+  background:var(--sf);
+  border:1px solid rgba(232,82,10,.25);
+  color:var(--tx);
+  padding:12px 14px;
+  font-family:var(--sa);
+  font-size:14px;
+  width:100%;
+  outline:none;
+  transition:all .2s;
+  border-radius:2px;
+  resize:vertical;
+  min-height:72px;
+  line-height:1.6;
+}
+textarea.inp-ta:focus{border-color:var(--ac);background:rgba(232,82,10,.06);box-shadow:0 0 0 1px rgba(232,82,10,.3)}
+textarea.inp-ta::placeholder{color:var(--mu)}
+.limitacoes-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.25);padding:3px 10px;border-radius:2px;font-size:11px;color:#ff8080;margin-top:8px}
+
+</style>
+</head>
+<body>
+<div class="scan"></div>
+<header>
+  <div><div class="logo-sub">Sistema de Periodização</div><div class="logo">TRAINING<span>OS</span></div></div>
+  <div class="hdr-r">
+    <div class="sync"><div class="sd" id="sd"></div><span id="sl">Não conectado</span></div>
+    <div class="navt">
+      <button class="nt on" onclick="switchView('a')">Meu Treino</button>
+      <button class="nt" onclick="switchView('t')">Painel 👁</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════ VIEW ATLETA ═══════════ -->
+<div id="va">
+
+  <!-- STEP 1 -->
+  <div id="s1" class="step active">
+    <div class="tt">PERFIL DO<br><span>ATLETA</span></div>
+    <p class="ts">Seus dados ficam salvos automaticamente</p>
+
+    <!-- BASE STATUS BAR -->
+    <div class="base-bar" id="base-bar">
+      <div class="sp" style="width:12px;height:12px;border-width:2px"></div>
+      <span id="base-msg">Aguardando configuração do Sheets...</span>
+    </div>
+
+    <div class="fg">
+      <div class="fi full"><span class="lb">Nome do Atleta</span><input type="text" id="inp-nome" placeholder="Ex: João Silva" maxlength="60"/></div>
+      <div class="fi full"><span class="lb">Sexo</span>
+        <div class="chs r1"><div class="ch" data-g="sexo" data-v="Masculino">Masculino</div><div class="ch" data-g="sexo" data-v="Feminino">Feminino</div></div>
+      </div>
+      <div class="fi"><span class="lb">Idade</span><input type="number" id="inp-idade" placeholder="30" min="14" max="80"/></div>
+      <div class="fi"><span class="lb">Peso (kg)</span><input type="number" id="inp-peso" placeholder="80" min="40" max="220"/></div>
+      <div class="fi"><span class="lb">Altura (cm)</span><input type="number" id="inp-altura" placeholder="175" min="140" max="220"/></div>
+      <div class="fi"><span class="lb">Dias por semana</span>
+        <div class="chs r1"><div class="ch" data-g="dias" data-v="2">2</div><div class="ch" data-g="dias" data-v="3">3</div><div class="ch" data-g="dias" data-v="4">4</div><div class="ch" data-g="dias" data-v="5">5</div><div class="ch" data-g="dias" data-v="6">6</div></div>
+      </div>
+      <div class="fi full"><span class="lb">Nível de Condicionamento</span>
+        <div class="chs col"><div class="ch" data-g="nivel" data-v="Iniciante (< 1 ano)">Iniciante — menos de 1 ano</div><div class="ch" data-g="nivel" data-v="Intermediário (1-3 anos)">Intermediário — 1 a 3 anos</div><div class="ch" data-g="nivel" data-v="Avançado (> 3 anos)">Avançado — mais de 3 anos</div></div>
+      </div>
+      <div class="fi full"><span class="lb">Objetivo Principal</span>
+        <div class="chs col"><div class="ch" data-g="objetivo" data-v="Hipertrofia (ganho de massa)">Hipertrofia — ganho de massa muscular</div><div class="ch" data-g="objetivo" data-v="Força máxima">Força Máxima</div><div class="ch" data-g="objetivo" data-v="Resistência muscular">Resistência Muscular</div><div class="ch" data-g="objetivo" data-v="Emagrecimento com preservação muscular">Emagrecimento com preservação muscular</div></div>
+      </div>
+      <div class="fi full"><span class="lb">Duração do Programa</span>
+        <div class="chs r1"><div class="ch on" data-g="semanas" data-v="4">4 semanas</div><div class="ch" data-g="semanas" data-v="8">8 semanas</div><div class="ch" data-g="semanas" data-v="12">12 semanas</div></div>
+      </div>
+    </div>
+    <div class="br">
+      <span style="font-size:12px;color:var(--mu)">Todos os campos são obrigatórios</span>
+      <button class="btn" id="btn-next" disabled onclick="goStep(2)">PRÓXIMO →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="s2" class="step">
+    <div class="tt">REVISÃO DO<br><span>PERFIL</span></div>
+    <p class="ts" id="rsub"></p>
+    <div class="card" style="margin-bottom:14px">
+      <div class="rg" id="rgd"></div>
+      <div style="border-top:1px solid var(--br);margin-top:12px;padding-top:12px">
+        <div class="rk">Objetivo</div><div id="robj" style="font-size:14px;font-weight:500;color:var(--ac)"></div>
+      </div>
+    </div>
+    <div class="card ca" style="margin-bottom:16px;padding:13px">
+      <div style="font-size:13px;color:var(--mu2);line-height:1.8">
+        Programa baseado em <strong style="color:var(--ac)">Sobrecarga Progressiva (Bompa)</strong>,
+        <strong style="color:var(--ac)">MEV/MAV/MRV (Israetel)</strong> e
+        <strong style="color:var(--ac)">Periodização Ondulatória (Verkhoshansky)</strong>.
+      </div>
+    </div>
+
+    <!-- BASE STATS -->
+    <div id="base-stats" style="display:none;margin-bottom:16px">
+      <div style="font-size:10px;letter-spacing:3px;color:var(--ok);text-transform:uppercase;margin-bottom:8px">✅ Base carregada do seu Sheets</div>
+      <div class="bs" id="bs-nums"></div>
+    </div>
+
+    <!-- PROMPT BOX -->
+    <div class="pb-box">
+      <div class="pb-t">⚡ Como gerar o treino</div>
+      <div class="pb-steps" id="pb-steps">
+        1. Clique em <strong>COPIAR PROMPT</strong> abaixo<br>
+        2. Abra o <a href="https://claude.ai" target="_blank">claude.ai</a> em outra aba<br>
+        3. Cole o prompt e envie<br>
+        4. Copie o JSON da resposta e cole no campo abaixo<br>
+        5. Clique em <strong>CARREGAR TREINO</strong>
+      </div>
+      <button class="btn2" id="btn-cp" onclick="copiarPrompt()">📋 COPIAR PROMPT</button>
+    </div>
+
+    <div style="margin-top:14px">
+      <span class="lb">Cole o JSON do treino aqui</span>
+      <textarea class="ji" id="ji" placeholder='{"programa":{...},"semanas":[...]}'></textarea>
+    </div>
+
+    <div id="eb" class="eb" style="display:none"><div class="et">⚠ JSON inválido</div><pre id="em"></pre></div>
+
+    <div class="br">
+      <button class="btn2" onclick="goStep(1)">← VOLTAR</button>
+      <button class="btn" onclick="carregarJSON()">✓ CARREGAR TREINO</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="s3" class="step">
+    <div class="rh">
+      <div>
+        <div style="font-size:10px;letter-spacing:3px;color:var(--ac);text-transform:uppercase;margin-bottom:4px">Programa Gerado</div>
+        <div class="rn" id="rn"></div>
+        <div class="rs" id="rsp"></div>
+        <div id="rbg"></div>
+      </div>
+      <div class="ra">
+        <button class="btn2" onclick="exportCSV()">↓ CSV p/ Sheets</button>
+        <button class="btn2" onclick="novoTreino()">Novo Treino</button>
+      </div>
+    </div>
+    <div class="tgs" id="tgs"></div>
+    <div class="card ca" style="margin-bottom:18px;padding:0;overflow:hidden">
+      <div style="padding:11px 20px;border-bottom:1px solid rgba(232,82,10,.15);font-size:10px;letter-spacing:3px;color:var(--ac);text-transform:uppercase">Orientações Gerais</div>
+      <div class="ot"><ul id="ol"></ul></div>
+    </div>
+    <div style="font-size:10px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;margin-bottom:8px">Semanas</div>
+    <div class="tw" id="stabs"></div>
+    <div id="sc2"></div>
+    <div class="si"><div class="sit" id="sit">Sincronização</div><div class="sis" id="sis">Configure no Painel do Treinador.</div></div>
+  </div>
+</div>
+
+<!-- ═══════════ VIEW TREINADOR ═══════════ -->
+<div id="vt" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div><div class="pt">PAINEL DO<br><span>TREINADOR</span></div><p style="font-size:13px;color:var(--mu);margin-top:4px">Acompanhe atletas e gerencie a base de conhecimento</p></div>
+    <button class="btn2" onclick="refreshPainel()">↻ Atualizar</button>
+  </div>
+
+  <div class="sb" id="sb">
+    <div class="sb-t">⚙ Configurar Google Sheets</div>
+    <div class="ss"><div class="sn">1</div><div class="st">Abra o arquivo <code>TrainingOS_Base.xlsx</code> no Google Drive → importe como Google Sheets</div></div>
+    <div class="ss"><div class="sn">2</div><div class="st">Clique em <strong>Extensões → Apps Script</strong> → cole o código do arquivo <code>Code.gs</code></div></div>
+    <div class="ss"><div class="sn">3</div><div class="st"><strong>Implantar → Nova implantação → App da Web</strong><br>Executar como: <strong>Eu</strong> · Acesso: <strong>Qualquer pessoa</strong></div></div>
+    <div class="ss"><div class="sn">4</div><div class="st">Cole a URL gerada abaixo — o site vai carregar sua base automaticamente</div></div>
+    <div class="ur"><input type="text" id="inp-url" placeholder="https://script.google.com/macros/s/..."/><button class="btn" onclick="salvarURL()" style="padding:11px 20px;font-size:16px">SALVAR</button></div>
+    <div id="us" class="us"></div>
+  </div>
+
+  <div id="pc"><div class="emp"><div class="ei">🔗</div><p>Configure a URL acima para ver os atletas e a base de conhecimento.</p></div></div>
+</div>
+
+
+<div class="install-banner" id="install-banner">
+  <div class="install-icon">⚡</div>
+  <div class="install-text">
+    <div class="install-title">TRAININGOS</div>
+    <div class="install-sub">Adicionar à tela inicial do celular</div>
+  </div>
+  <button class="install-btn" onclick="installPWA()">INSTALAR</button>
+  <button class="install-close" onclick="dismissInstall()">✕</button>
+</div>
+
+</main>
+
+<script>
+/* ══ STATE ══ */
+const S={nome:'',sexo:'',idade:'',peso:'',altura:'',nivel:'',dias:'',objetivo:'',semanas:'4',prog:null,semAti:0,sessAti:0,base:null};
+const LS={C:'tos_c',N:'tos_n',P:'tos_p',U:'tos_u',V:'tos_v',B:'tos_b'};
+const lg=k=>{try{return localStorage.getItem(k)}catch{return null}};
+const ls=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+const lgj=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}};
+const lsj=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const saveCarga=(k,v)=>{const a=lgj(LS.C)||{};a[k]=v;lsj(LS.C,a)};
+const loadCarga=k=>(lgj(LS.C)||{})[k]||'';
+
+/* ══ SYNC DOT ══ */
+const setSS=(st,msg)=>{document.getElementById('sd').className='sd '+st;document.getElementById('sl').textContent=msg};
+
+/* ══ BASE STATUS BAR ══ */
+function setBaseBar(state, msg){
+  const el=document.getElementById('base-bar');
+  el.className='base-bar '+state;
+  document.getElementById('base-msg').textContent=msg;
+  if(state==='loaded') el.innerHTML=`<span style="font-size:14px">✅</span><span>${msg}</span>`;
+  else if(state==='err') el.innerHTML=`<span style="font-size:14px">⚠️</span><span>${msg}</span>`;
+  else el.innerHTML=`<div class="sp" style="width:12px;height:12px;border-width:2px"></div><span>${msg}</span>`;
+}
+
+/* ══ CARREGAR BASE DO SHEETS ══ */
+async function carregarBase(){
+  const url=lg(LS.U)||'';
+  if(!url){setBaseBar('','Configure o Sheets no Painel do Treinador para carregar a base de exercícios');return;}
+  setBaseBar('loading','Carregando base de exercícios do Sheets...');
+  try{
+    const r=await fetch(url+'?action=get_base');
+    const d=await r.json();
+    if(d.ok){
+      S.base=d;
+      lsj(LS.B,d);
+      const ne=d.exercicios?.length||0, nm=d.metodos?.length||0, np=d.protocolos?.length||0;
+      setBaseBar('loaded',`${ne} exercícios · ${nm} métodos · ${np} protocolos carregados`);
+      setSS('ok','Sheets conectado');
+    } else {
+      setBaseBar('err','Erro ao carregar base: '+d.error);
+    }
+  }catch(e){
+    // Tenta usar cache
+    const cached=lgj(LS.B);
+    if(cached){S.base=cached;const ne=cached.exercicios?.length||0;setBaseBar('loaded',`Base em cache — ${ne} exercícios (offline)`);}
+    else setBaseBar('err','Sem conexão com Sheets e sem cache local');
+  }
+}
+
+/* ══ VIEW ══ */
+function switchView(v){
+  document.getElementById('va').style.display=v==='a'?'':'none';
+  document.getElementById('vt').style.display=v==='t'?'':'none';
+  document.querySelectorAll('.nt').forEach((t,i)=>t.classList.toggle('on',(i===0&&v==='a')||(i===1&&v==='t')));
+  ls(LS.V,v);if(v==='t')loadPainelURL();
+}
+
+/* ══ STEPS ══ */
+function goStep(n){
+  document.querySelectorAll('#va .step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  if(n===2){buildReview();mostrarBaseStats();}
+  if(n===3)renderPrograma();
+}
+
+function mostrarBaseStats(){
+  const b=S.base;
+  const el=document.getElementById('base-stats');
+  if(!b){el.style.display='none';return;}
+  el.style.display='block';
+  document.getElementById('bs-nums').innerHTML=[
+    [b.exercicios?.length||0,'Exercícios'],
+    [b.metodos?.length||0,'Métodos'],
+    [b.protocolos?.length||0,'Protocolos'],
+    [b.splits?.length||0,'Splits']
+  ].map(([n,l])=>`<div class="bsc"><div class="bsn">${n}</div><div class="bsl">${l}</div></div>`).join('');
+}
+
+/* ══ CHIPS ══ */
+document.querySelectorAll('.ch[data-g]').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll(`.ch[data-g="${c.dataset.g}"]`).forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');S[c.dataset.g]=c.dataset.v;validate();
+  });
+});
+['inp-nome','inp-idade','inp-peso','inp-altura'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){
+    S[id.replace('inp-','')]=this.value;
+    if(id==='inp-nome')ls(LS.N,this.value);
+    validate();
+  });
+});
+function validate(){
+  document.getElementById('btn-next').disabled=!(S.nome.trim()&&S.sexo&&S.idade&&S.peso&&S.altura&&S.nivel&&S.dias&&S.objetivo&&S.semanas);
+}
+
+/* ══ REVIEW ══ */
+function buildReview(){
+  document.getElementById('rsub').textContent='Atleta: '+S.nome;
+  const imc=(S.peso/((S.altura/100)**2)).toFixed(1);
+  document.getElementById('rgd').innerHTML=[['Sexo',S.sexo],['Idade',S.idade+' anos'],['Peso',S.peso+' kg'],['Altura',S.altura+' cm'],['IMC',imc],['Dias/sem',S.dias],['Nível',S.nivel.split('(')[0].trim()],['Duração',S.semanas+' sem']].map(([k,v])=>`<div><div class="rk">${k}</div><div class="rv">${v}</div></div>`).join('');
+  document.getElementById('robj').textContent=S.objetivo;
+  if(S.restricoes.trim()){
+    document.getElementById('rev-restricoes-wrap').style.display='block';
+    document.getElementById('rev-restricoes').textContent=S.restricoes;
+  }
+  if(S.obs.trim()){
+    document.getElementById('rev-obs-wrap').style.display='block';
+    document.getElementById('rev-obs').textContent=S.obs;
+  }
+}
+
+/* ══ BUILD PROMPT COM BASE ══ */
+function buildPrompt(){
+  const imc=(S.peso/((S.altura/100)**2)).toFixed(1);
+  const b=S.base;
+
+  // Filtra exercícios relevantes para o perfil
+  let exsFiltrados=[], metodosFiltrados=[], protocolo=null, split=null;
+
+  if(b){
+    // Filtra exercícios pelo nível
+    const nivelSimples = S.nivel.includes('Inici') ? 'Iniciante' : S.nivel.includes('Inter') ? 'Intermediário' : 'Avançado';
+    exsFiltrados = (b.exercicios||[]).filter(e => {
+      const n=(e.nivel||'').toLowerCase();
+      return n.includes(nivelSimples.toLowerCase()) || n.includes('iniciante');
+    }).slice(0,40);
+
+    // Filtra protocolos pelo perfil
+    protocolo = (b.protocolos||[]).find(p =>
+      p.objetivo?.toLowerCase().includes(S.objetivo.toLowerCase().split(' ')[0]) &&
+      p.nivel?.toLowerCase().includes(nivelSimples.toLowerCase()) &&
+      String(p.dias)===String(S.dias)
+    ) || (b.protocolos||[]).find(p =>
+      p.objetivo?.toLowerCase().includes(S.objetivo.toLowerCase().split(' ')[0]) &&
+      p.nivel?.toLowerCase().includes(nivelSimples.toLowerCase())
+    );
+
+    // Filtra split
+    split = (b.splits||[]).find(s => String(s.dias)===String(S.dias) && s.nivel?.toLowerCase().includes(nivelSimples.toLowerCase()));
+
+    // Filtra métodos
+    metodosFiltrados = (b.metodos||[]).filter(m => {
+      const q=m.quando?.toLowerCase()||'';
+      return q.includes(nivelSimples.toLowerCase()) || q.includes('iniciante');
+    }).slice(0,10);
+  }
+
+  const exStr = exsFiltrados.length > 0
+    ? `\nEXERCÍCIOS DISPONÍVEIS NA BASE (use prioritariamente estes):\n${exsFiltrados.map(e=>`- ${e.nome} | ${e.grupo} | Equip: ${e.equipamento} | Contrain: ${e.contraindicacoes||'Nenhuma'} | Obs: ${e.observacoes||''}`).join('\n')}`
+    : '\n(Use exercícios convencionais de musculação)';
+
+  const metStr = metodosFiltrados.length > 0
+    ? `\nMÉTODOS DISPONÍVEIS:\n${metodosFiltrados.map(m=>`- ${m.nome}: ${m.series} séries × ${m.reps} reps | Descanso: ${m.descanso} | Intensidade: ${m.intensidade}`).join('\n')}`
+    : '';
+
+  const protStr = protocolo
+    ? `\nPROTOCOLO RECOMENDADO PARA ESTE PERFIL:\n- Split: ${protocolo.split} | Volume: ${protocolo.volume} | Intensidade: ${protocolo.intensidade}\n- Métodos: ${protocolo.metodos} | Progressão: ${protocolo.progressao}`
+    : '';
+
+  const splitStr = split
+    ? `\nSPLIT RECOMENDADO:\n- ${split.nome}: ${split.diasTreino} | Grupos: ${split.grupos}`
+    : '';
+
+  return `Você é especialista em ciência do treinamento de força baseado em Bompa, Israetel e Verkhoshansky.
+
+PERFIL DO ATLETA:
+- Sexo: ${S.sexo} | Idade: ${S.idade} anos | Peso: ${S.peso}kg | Altura: ${S.altura}cm | IMC: ${imc}
+- Nível: ${S.nivel} | Dias/semana: ${S.dias} | Objetivo: ${S.objetivo} | Duração: ${S.semanas} semanas
+${exStr}${metStr}${protStr}${splitStr}
+
+INSTRUÇÕES:
+1. USE os exercícios da base listada acima — apenas substitua se necessário
+2. Respeite as contraindicações listadas para cada exercício
+3. Aplique o protocolo e split recomendados acima
+4. Monte um programa COMPLETO e PERIODIZADO para ${S.semanas} semanas
+5. Aplique sobrecarga progressiva, MEV/MAV/MRV (Israetel), fases de Bompa
+
+Retorne SOMENTE JSON válido — zero texto fora do JSON, zero markdown:
+{"programa":{"nome":"string","split":"string","duracao_semanas":${S.semanas},"principios_aplicados":["string"],"orientacoes_gerais":["string"]},"semanas":[{"semana":1,"fase":"string","foco":"string","sessoes":[{"dia":1,"nome_sessao":"string","musculos_foco":["string"],"aquecimento":"string","exercicios":[{"ordem":1,"nome":"string","series":3,"repeticoes":"8-12","carga_sugerida":"70% 1RM","descanso":"90s","observacao":"string"}]}]}]}`;
+}
+
+function copiarPrompt(){
+  navigator.clipboard.writeText(buildPrompt()).then(()=>{
+    const btn=document.getElementById('btn-cp');
+    const hasBase=!!S.base;
+    btn.textContent=hasBase?'✓ COPIADO! (com base do Sheets)':'✓ COPIADO!';
+    btn.style.borderColor='var(--ok)';btn.style.color='var(--ok)';
+    setTimeout(()=>{btn.textContent='📋 COPIAR PROMPT';btn.style.borderColor='';btn.style.color='';},3000);
+  });
+}
+
+/* ══ CARREGAR JSON ══ */
+function extrairJSON(raw){
+  // 1. Tenta direto
+  try{ return JSON.parse(raw); }catch(e){}
+  // 2. Remove blocos markdown ```json ... ```
+  const md=raw.replace(/^```json\s*/im,'').replace(/```\s*$/im,'').trim();
+  try{ return JSON.parse(md); }catch(e){}
+  // 3. Extrai o primeiro { ... } completo do texto
+  const start=raw.indexOf('{');
+  if(start===-1) throw new Error('Nenhum JSON encontrado na resposta');
+  let depth=0, end=-1;
+  for(let i=start;i<raw.length;i++){
+    if(raw[i]==='{') depth++;
+    else if(raw[i]==='}'){depth--;if(depth===0){end=i;break;}}
+  }
+  if(end===-1) throw new Error('JSON incompleto — copie a resposta completa do Claude');
+  return JSON.parse(raw.slice(start, end+1));
+}
+
+function carregarJSON(){
+  const raw=document.getElementById('ji').value.trim();
+  document.getElementById('eb').style.display='none';
+  if(!raw){document.getElementById('eb').style.display='block';document.getElementById('em').textContent='Cole o JSON antes de continuar.';return;}
+  try{
+    S.prog=extrairJSON(raw);
+    lsj(LS.P,S.prog);
+    syncPrograma();
+    goStep(3);
+  }catch(e){
+    document.getElementById('eb').style.display='block';
+    document.getElementById('em').textContent='Erro: '+e.message+'\n\nVerifique se copiou o JSON completo da resposta do Claude.';
+  }
+}
+
+/* ══ RENDER PROGRAMA ══ */
+function renderPrograma(){
+  const p=S.prog;if(!p)return;
+  document.getElementById('rn').textContent=p.programa?.nome||'PROGRAMA PERIODIZADO';
+  document.getElementById('rsp').textContent=`${p.programa?.split||''} · ${p.programa?.duracao_semanas||S.semanas} semanas`;
+  document.getElementById('rbg').innerHTML=S.nome?`<div class="bge">👤 ${S.nome}</div>`:'';
+  document.getElementById('tgs').innerHTML=(p.programa?.principios_aplicados||[]).map(t=>`<span class="tg ta">${t}</span>`).join('');
+  document.getElementById('ol').innerHTML=(p.programa?.orientacoes_gerais||[]).map(o=>`<li>${o}</li>`).join('');
+  document.getElementById('stabs').innerHTML=(p.semanas||[]).map((s,i)=>`<div class="tb${i===S.semAti?' on':''}" onclick="setSem(${i})">S${s.semana} · ${s.fase}</div>`).join('');
+  const url=lg(LS.U)||'';
+  document.getElementById('sis').innerHTML=url
+    ?`✅ Cargas sincronizadas automaticamente.<br><a href="${url}" target="_blank" style="color:var(--ac);font-size:12px">Abrir planilha →</a>`
+    :`Configure no <strong>Painel do Treinador</strong> para ativar sync.`;
+  renderSem();
+}
+
+function setSem(i){S.semAti=i;S.sessAti=0;renderPrograma();}
+function setSess(i){S.sessAti=i;renderSem();}
+
+function renderSem(){
+  const p=S.prog;if(!p)return;
+  const sem=p.semanas?.[S.semAti];if(!sem)return;
+  document.querySelectorAll('#stabs .tb').forEach((t,i)=>t.classList.toggle('on',i===S.semAti));
+  let h=`<div class="wm"><div class="mc"><div class="mk">Fase</div><div class="mv">${sem.fase}</div></div><div class="mc" style="flex:1"><div class="mk">Foco</div><div class="mvs">${sem.foco}</div></div></div>
+  <div style="font-size:10px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;margin-bottom:8px">Sessões</div>
+  <div class="tw">${(sem.sessoes||[]).map((s,i)=>`<div class="tb tb-s${i===S.sessAti?' on':''}" onclick="setSess(${i})">Dia ${s.dia} · ${s.nome_sessao}</div>`).join('')}</div>`;
+  const sess=sem.sessoes?.[S.sessAti];
+  if(sess){
+    const muscs=(sess.musculos_foco||[]).map(m=>`<span class="tg tm">${m}</span>`).join('');
+    const wu=sess.aquecimento?`<div class="wu"><span class="wl">Aquecimento</span>${sess.aquecimento}</div>`:'';
+    const exs=(sess.exercicios||[]).map(ex=>{
+      const k=`${S.semAti}_${S.sessAti}_${ex.ordem}`;const sv=loadCarga(k);
+      return `<div class="er"><div class="en">${ex.ordem}</div><div><div class="ex">${ex.nome}${videoBtn(ex.nome)}</div>${ex.observacao?`<div class="eo">${ex.observacao}</div>`:''}</div><div class="es">${ex.series}×</div><div class="ep">${ex.repeticoes}</div><div class="ec">${ex.carga_sugerida||''}</div><div class="ed">${ex.descanso}</div><div class="cw"><div class="cl">Minha carga</div><input class="ci${sv?' sv':''}" type="text" placeholder="60kg / RPE8" value="${sv}" data-ls="${k}" data-sem="${sem.semana}" data-fase="${sem.fase}" data-sessao="${sess.nome_sessao}" data-ordem="${ex.ordem}" data-ex="${ex.nome}" data-sug="${ex.carga_sugerida||''}" oninput="onCI(this)" onblur="onCB(this)"/><div class="cd${sv?' show':''}"></div></div></div>`;
+    }).join('');
+    h+=`<div class="sc"><div class="sh"><div><div class="sn">${sess.nome_sessao}</div><div class="tgs" style="margin-top:6px;margin-bottom:0">${muscs}</div></div>${wu}</div><div class="eh"><div>#</div><div>Exercício</div><div>Séries</div><div>Reps</div><div>Sugerido</div><div>Descanso</div><div>Minha carga 💾</div></div>${exs}</div>`;
+  }
+  document.getElementById('sc2').innerHTML=h;
+}
+
+/* ══ CARGA ══ */
+let ct=null;
+function onCI(el){clearTimeout(ct);ct=setTimeout(()=>saveCI(el),900);}
+function onCB(el){saveCI(el);}
+async function saveCI(el){
+  if(!el.value.trim())return;
+  saveCarga(el.dataset.ls,el.value.trim());
+  el.classList.add('sv');
+  const d=el.parentElement.querySelector('.cd');if(d)d.classList.add('show');
+  await syncCarga({semana:el.dataset.sem,fase:el.dataset.fase,sessao:el.dataset.sessao,ordem:el.dataset.ordem,exercicio:el.dataset.ex,carga_sugerida:el.dataset.sug,minha_carga:el.value.trim()});
+}
+
+/* ══ SHEETS SYNC ══ */
+const getURL=()=>lg(LS.U)||'';
+async function sheetsFetch(payload){
+  const url=getURL();if(!url)return;
+  setSS('sy','Sincronizando...');
+  try{
+    await fetch(url,{method:'POST',body:JSON.stringify(payload),mode:'no-cors'});
+    setSS('ok','Sheets conectado ✓');setTimeout(()=>setSS('ok','Sheets conectado'),2500);
+  }catch(e){setSS('er','Erro na sync');}
+}
+async function syncPrograma(){if(!S.prog||!S.nome)return;await sheetsFetch({action:'save_programa',atleta:S.nome,programa_nome:S.prog.programa?.nome||'',split:S.prog.programa?.split||'',semanas:S.semanas,objetivo:S.objetivo,nivel:S.nivel,dias:S.dias});}
+async function syncCarga(c){await sheetsFetch({action:'save_carga',atleta:S.nome,cargas:[c]});}
+
+/* ══ EXPORT CSV ══ */
+function exportCSV(){
+  const p=S.prog;if(!p)return;
+  const rows=[['Atleta','Semana','Fase','Foco','Dia','Sessão','Músculos','Ordem','Exercício','Séries','Reps','Sugerido','Minha Carga','Descanso','Obs']];
+  p.semanas?.forEach((sem,si)=>sem.sessoes?.forEach((sess,sei)=>sess.exercicios?.forEach(ex=>{rows.push([S.nome,sem.semana,sem.fase,sem.foco,sess.dia,sess.nome_sessao,(sess.musculos_foco||[]).join('+'),ex.ordem,ex.nome,ex.series,ex.repeticoes,ex.carga_sugerida||'',loadCarga(`${si}_${sei}_${ex.ordem}`),ex.descanso,ex.observacao||'']);})));
+  const csv=rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));a.download=`treino_${(S.nome||'atleta').replace(/\s+/g,'_').toLowerCase()}.csv`;a.click();
+}
+function novoTreino(){S.prog=null;S.semAti=0;S.sessAti=0;ls(LS.P,null);goStep(1);}
+
+/* ══ PAINEL ══ */
+function loadPainelURL(){
+  const url=getURL();
+  if(url){document.getElementById('inp-url').value=url;document.getElementById('sb').style.display='none';refreshPainel();}
+}
+function salvarURL(){
+  const url=document.getElementById('inp-url').value.trim();
+  if(!url){document.getElementById('us').textContent='Cole a URL';return;}
+  ls(LS.U,url);setSS('ok','Sheets conectado');
+  document.getElementById('us').textContent='✓ Salvo! Carregando base...';
+  document.getElementById('sb').style.display='none';
+  carregarBase();
+  refreshPainel();
+}
+async function refreshPainel(){
+  const url=getURL();if(!url)return;
+  const el=document.getElementById('pc');
+  el.innerHTML=`<div class="lp"><div class="sp" style="width:20px;height:20px;border-width:3px"></div><span>Carregando...</span></div>`;
+  try{
+    const r=await fetch(url+'?action=get_atletas');const d=await r.json();
+    if(d.ok)renderPainel(d);
+    else el.innerHTML=`<div class="emp"><div class="ei">⚠️</div><p>Erro: ${d.error}<br><a href="${url}" target="_blank" style="color:var(--ac)">Abrir planilha →</a></p></div>`;
+  }catch(e){
+    el.innerHTML=`<div class="emp"><div class="ei">🔒</div><p>Erro de CORS — verifique se o deploy foi feito com acesso <strong style="color:var(--tx)">Qualquer pessoa</strong>.<br><br><a href="${url}" target="_blank" style="color:var(--ac)">Abrir planilha →</a></p></div>`;
+  }
+}
+function renderPainel(data){
+  const ps=data.programas||[];const rs=data.resumo||{};const el=document.getElementById('pc');
+  if(!ps.length){el.innerHTML=`<div class="emp"><div class="ei">🏋️</div><p>Nenhum atleta ainda.</p></div>`;return;}
+  const cards=ps.map(a=>{const r=rs[a.atleta]||{};const hc=r.total>0;return `<div class="ac" onclick="verAtleta('${encodeURIComponent(a.atleta)}')"><div class="ab ${hc?'bok':'bno'}">${hc?'Ativo':'Sem cargas'}</div><div class="an">${a.atleta}</div><div class="am"><strong>${a.programa||'—'}</strong><br>${a.split||''} · ${a.semanas} sem<br>${(a.nivel||'').split('(')[0]}<br>Gerado: ${a.gerado||'—'}</div>${hc?`<div style="margin-top:7px;font-size:12px;color:var(--mu)">Cargas: <strong style="color:var(--ok);font-family:var(--mo)">${r.total}</strong></div>`:''}</div>`;}).join('');
+  el.innerHTML=`<div class="ag">${cards}</div><div id="det"></div>`;
+}
+async function verAtleta(ne){
+  const nome=decodeURIComponent(ne);const url=getURL();if(!url)return;
+  document.querySelectorAll('.ac').forEach(c=>c.classList.toggle('sel',c.querySelector('.an')?.textContent===nome));
+  const el=document.getElementById('det');
+  el.innerHTML=`<div class="lp"><div class="sp" style="width:18px;height:18px;border-width:2px"></div><span>Carregando ${nome}...</span></div>`;
+  try{
+    const r=await fetch(`${url}?action=get_cargas&atleta=${encodeURIComponent(nome)}`);const d=await r.json();renderDet(nome,d.cargas||[]);
+  }catch(e){el.innerHTML=`<div class="emp"><div class="ei">⚠️</div><p>Não carregou.<br><a href="${url}" target="_blank" style="color:var(--ac)">Ver na planilha →</a></p></div>`;}
+}
+function renderDet(nome,cargas){
+  const el=document.getElementById('det');
+  if(!cargas.length){el.innerHTML=`<div class="dp" style="margin-top:13px"><div class="dh"><div class="dt">${nome}</div></div><div class="emp" style="padding:26px"><div class="ei">📋</div><p>Nenhuma carga ainda.</p></div></div>`;return;}
+  const rows=cargas.map(c=>`<div class="cr"><div style="font-size:12px;color:var(--mu)">S${c.semana}</div><div style="font-size:13px">${c.exercicio}</div><div style="font-size:12px;color:var(--mu2)">${c.sessao}</div><div class="cv">${c.minha_carga}</div><div style="font-size:11px;color:var(--mu)">${c.atualizado}</div></div>`).join('');
+  el.innerHTML=`<div class="dp" style="margin-top:13px"><div class="dh"><div class="dt">👤 ${nome}</div><span style="font-size:12px;color:var(--mu)">${cargas.length} registros</span></div><div class="ch2"><div>Semana</div><div>Exercício</div><div>Sessão</div><div>Minha Carga</div><div>Atualizado</div></div>${rows}</div>`;
+}
+
+/* ══ INIT ══ */
+(function(){
+  const n=lg(LS.N)||'';if(n){document.getElementById('inp-nome').value=n;S.nome=n;}
+  const r=lg('tos_r')||'';if(r){const el=document.getElementById('inp-restricoes');if(el){el.value=r;S.restricoes=r;}}
+  const ob=lg('tos_ob')||'';if(ob){const el=document.getElementById('inp-obs');if(el){el.value=ob;S.obs=ob;}}
+  S.semanas='4';
+  const url=lg(LS.U)||'';if(url)setSS('ok','Sheets conectado');
+  // Carrega base do cache
+  const bc=lgj(LS.B);if(bc){S.base=bc;const ne=bc.exercicios?.length||0;setBaseBar('loaded',`Base em cache — ${ne} exercícios`);}
+  // Recarrega base do Sheets
+  carregarBase();
+  const p=lgj(LS.P);if(p){S.prog=p;goStep(3);renderPrograma();}
+  const v=lg(LS.V)||'a';if(v==='t')switchView('t');
+  validate();
+})();
+
+/* ── VIDEO MAP ───────────────────────────────────────────── */
+const VIDEO_MAP = {"Supino Reto com Barra": "https://youtu.be/4xohjvZHqcA", "Supino Inclinado com Halteres": "https://youtu.be/bQAuUOSlIUg", "Barra Fixa": "https://youtu.be/XDVgksCz6kM", "Desenvolvimento com Halteres": "https://youtu.be/9EYWAERnjss", "Elevação Lateral com Halteres": "https://youtu.be/mjw87ExmDSA", "Elevação Frontal": "https://youtu.be/Fk3Oqrmhwnw", "Crucifixo Invertido": "https://youtu.be/NiYRFf-bGo8", "Rosca Direta com Barra": "https://youtu.be/H0Bw3GInad0", "Rosca Alternada com Halteres": "https://youtu.be/u2TDxCjkzkA", "Tríceps Pulley": "https://youtu.be/nxxIDiEgSK8", "Tríceps Testa": "https://youtu.be/k6bkT6FqtZ0", "Mergulho no Banco": "https://www.youtube.com/watch?v=7FoLc8hsgeg", "Tríceps Coice": "https://youtu.be/sHTU-USEj_4", "Agachamento Livre": "https://youtu.be/CAUlm4zv-uQ", "Cadeira Extensora": "https://youtu.be/2-GevcuTq_0", "Avanço (Lunge)": "https://www.youtube.com/watch?v=vqgAEBslp2s", "Mesa Flexora": "https://youtu.be/TWGS-uAHZ9w", "Stiff com Barra": "https://youtu.be/GJ2OjScunsw", "Cadeira Flexora": "https://youtu.be/3tDv2DJRYtg", "Passada Lateral (Side Lunge)": "https://youtu.be/Y0QQibpqsog", "Prancha": "https://youtu.be/KvFeII_ZGeM", "Abdominal Infra": "https://youtu.be/TeL2qZRV4yo", "Agachamento Braços para o Alto": "https://youtu.be/_OVhDC-wta4", "Agachamento Sobe e Desce na Ponta dos Pés": "https://youtu.be/cA56-_Bi418", "Agachamento com Salto": "https://youtu.be/jx2Moqvr9a8", "Agachamento Isométrico": "https://youtu.be/GlGo22fwEP0", "Recuo": "https://www.youtube.com/watch?v=MwPayaU8wCU", "Afundo Livre": "https://www.youtube.com/watch?v=FfoT1cIujsA", "Agachamento com Abdução": "https://youtu.be/GOGZtKmO-s8", "Agachamento Afundo com Joelhadas": "https://youtu.be/5fgJMOxvqus", "Panturrilhas em Pé Unilateral": "https://youtu.be/IPkceAqpTHc", "Agachamento Senta e Levanta": "https://www.youtube.com/watch?v=BI32FaljnpA", "Agachamento Senta e Levanta Unilateral": "https://youtu.be/PfNm2eRDhZs", "Passada Caminhando": "https://youtu.be/Y0QQibpqsog", "Avanço Foco em Glúteos": "https://www.youtube.com/watch?v=vqgAEBslp2s", "Polisapato": "https://youtu.be/vUPwVwIPi80", "Polichinelo": "https://youtu.be/imYI2SX6HSk", "Burpees": "https://youtu.be/D0SyPGJHfqY", "Climber": "https://www.youtube.com/watch?v=HMeZXJH_KA0", "Corrida Lateral": "https://youtu.be/LLxo-Xy9qvM", "Corrida Estática": "https://www.youtube.com/watch?v=co6_rZUiahM", "Abdominal Supra Solo": "https://youtu.be/AvMMpDuN5YM", "Abdominal Infra Solo Pernas Flexionadas": "https://youtu.be/UZQYJwJ3EZ0", "Abdominal Canivete Pernas Flexionadas": "https://www.youtube.com/watch?v=cCqWWM0kCr8", "Abdominal Canivete": "https://youtu.be/EnrOyZPFWxc", "Abdominal Oblíquo Lateral": "https://youtu.be/WpJw_P08jXA", "Abdominal Levantamento Turco": "https://youtu.be/eLO5veFNOZ0", "Abdominal Infra Solo Unilateral": "https://youtu.be/lKeLT7oBmuo", "Abdominal Bicicleta": "https://youtu.be/hzuIKcagXwY", "Abdominal Infra Isométrico": "https://youtu.be/AUyx9SereLY", "Abdominal com Rodinha": "https://www.youtube.com/watch?v=jjsLDoknoAo", "Abdominal Remador": "https://youtu.be/xGep8lvf1Lg", "Prancha Alta": "https://youtu.be/km_tKDcaIkw", "Flexão Solo com Apoio dos Joelhos": "https://youtu.be/_xgWwyNfAKU", "Flexão Declinada": "https://youtu.be/gDFjqOBEkHI", "Flexão Inclinada": "https://youtu.be/qgF0B1YF4gA", "Flexão Diamante": "https://youtu.be/G8NDzMyb8VE", "Hindu Push Ups": "https://youtu.be/aGF-lbha_cU", "Pike Push Ups": "https://youtu.be/4jspTRCKhz4", "Sit Ups": "https://youtu.be/Ap7Ww52LXq4", "Mergulho": "https://www.youtube.com/watch?v=7FoLc8hsgeg", "Extensão de Tronco Unilateral Alternado": "https://youtu.be/sR6LZ-h2ZaE", "Mobilidade de Escápulas": "https://youtu.be/-apjgkAn5oE?si=hXZZJUyIQRekd9s7", "Agachamento Livre Frontal com Barra": "https://youtu.be/8PMbr2nPVg0", "Levantamento Terra com Barra": "https://youtu.be/d6mMsBYdq2o", "Levantamento Terra com Halteres": "https://youtu.be/_C2zYXCBa14", "Levantamento Terra Barra Hexagonal": "https://youtu.be/PtnYmsaG-pQ", "Levantamento Stiff com Barra": "https://youtu.be/GJ2OjScunsw", "Levantamento Stiff com Halteres": "https://youtu.be/lin6i03ENqU", "Agachamento Livre com Barra": "https://youtu.be/qIGVEdVe7y4", "Agachamento Livre com Halteres": "https://youtu.be/wZaZr6QYPrs", "Agachamento Livre Frontal com Halter": "https://youtu.be/v8FFFCaCgxQ", "Agachamento Livre Frontal com Halteres": "https://youtu.be/vScc444SV8s", "Afundo Livre com Barra": "https://youtu.be/asXqqQiYZ0Q", "Afundo Livre com Halteres": "https://youtu.be/L6xuwaI4RkQ", "Afundo Pé de Trás no Step": "https://youtu.be/cT1rdHnVems", "Afundo Pé da Frente no Step": "https://youtu.be/GZ7AGNZV90Y", "Agachamento Sumô com Barra": "https://youtu.be/vyMIwHdudSE", "Agachamento Sumô com Halteres": "https://youtu.be/oPZyxfQs_IE", "Agachamento no Smith": "https://youtu.be/Pw-zLHrUD3A", "Agachamento Sumô no Smith": "https://youtu.be/Am7V-43fZ04", "Agachamento Afundo no Smith": "https://youtu.be/aTsnUnGMeWI", "Flexora em Pé": "https://youtu.be/41YtCXqWJso", "Elevação de Quadril com Halter": "https://youtu.be/rvmXIkAMv8E", "Leg Horizontal": "https://youtu.be/79KpPUaCyOs", "Leg Horizontal Pés Juntos": "https://youtu.be/w9XxFEDWPq8", "Leg Horizontal Pés Abduzidos": "https://youtu.be/VtYlTs-hwcs", "Abdução Máquina": "https://youtu.be/OyCh73AQwvg", "Adução Máquina": "https://youtu.be/-W07jFGRF-s", "Extensão de Quadril Polia Baixa": "https://youtu.be/hglyyJDq9eo", "Abdução na Polia Baixa": "https://youtu.be/---ZGOxpFvw", "Panturrilhas em Pé na Máquina": "https://youtu.be/56yUizqkVkY", "Panturrilhas no Leg Horizontal": "https://youtu.be/cGDQOYPPX2o", "Agachamento Hack": "https://youtu.be/TH7lfQVpUFI", "Supino Reto com Halteres": "https://youtu.be/acr4IDfZyzs", "Crucifixo no Crossover Polia Média": "https://youtu.be/U5XGdyGOVas", "Crucifixo Reto com Halteres": "https://youtu.be/tz9PRbQeIqA", "Supino Inclinado com Barra": "https://youtu.be/6w81eEOsZQY", "Crucifixo no Crossover Polia Baixa": "https://youtu.be/20F_fAFGKzM", "Crucifixo Inclinado com Halteres": "https://youtu.be/fWvkKNmdJBs", "Crucifixo no Crossover Polia Alta": "https://youtu.be/SBB_WpGGXok", "Supino Reto Máquina": "https://youtu.be/RoPpfGmRI5c", "Supino Declinado com Barra": "https://youtu.be/RHGOg8_nMqQ", "Supino Declinado com Halteres": "https://youtu.be/2mj69fGNL2M", "Peitoral nas Paralelas Máquina": "https://youtu.be/iZ8Wz06Bu2k", "Crucifixo Máquina": "https://youtu.be/nshsGGvAXPs", "Remada Serrote Unilateral com Halter": "https://youtu.be/iwfvGcYt0Yg", "Pulldown Barra Reta Polia Alta": "https://youtu.be/Pzed3tL8uHs", "Puxada Neutra Barra Graviton": "https://youtu.be/hC0CRTSPUC4", "Puxada Aberta Graviton": "https://youtu.be/DTkVbvIEaYU", "Puxada Aberta Frente": "https://youtu.be/3VJl2PuVe-c", "Puxada Supinada Frente": "https://youtu.be/xhBlWeY_190", "Pullover com Halter": "https://youtu.be/cTdVB3WZ-N8", "Puxada Aberta nas Costas": "https://youtu.be/aIDAaECkYz4", "Remada Horizontal Pronada": "https://youtu.be/y-7cpvJMdKc", "Remada Horizontal Supinada": "https://youtu.be/t_E2OpMGc8o", "Remada Horizontal Romana": "https://youtu.be/rxIbcRIVS1w", "Remada Máquina Pegada Neutra": "https://youtu.be/g-OgiYkfSYU", "Remada Curvada Barra Supinada": "https://youtu.be/Nww71LZjeuk", "Remada Curvada Barra Pronada": "https://youtu.be/eplGSaMiz7o", "Remada Cavalinho": "https://youtu.be/C531lMRRwbY", "Elevação de Trapézio com Halteres": "https://youtu.be/Y0uRqeVPOQQ", "Crucifixo Invertido Máquina": "https://youtu.be/NiYRFf-bGo8", "Desenvolvimento Arnold com Halteres": "https://youtu.be/AZ69C15JZaU", "Desenvolvimento Neutro com Halteres": "https://youtu.be/F20MG055R-Y", "Desenvolvimento Livre com Barra": "https://youtu.be/he9rtDvGtdc", "Crucifixo Inverso Polia Média": "https://youtu.be/4pphnagSdKo", "Elevação Frontal Pegada Supinada": "https://youtu.be/Fk3Oqrmhwnw", "Elevação Frontal com Anilha": "https://youtu.be/sU5r9jMo4cs", "Tríceps Corda Polia Alta": "https://youtu.be/gfHFVsTSqMQ", "Tríceps Testa na Polia Alta": "https://youtu.be/k6bkT6FqtZ0", "Tríceps Inverso Polia Alta": "https://youtu.be/8jA9yBpLWoA", "Tríceps na Máquina de Paralelas": "https://youtu.be/qrwi0FgRO7A", "Tríceps Polia Alta Barra Reta": "https://youtu.be/DSK0ztQ1uIg", "Tríceps Testa Barra Reta": "https://youtu.be/VjX_6GU0B3s", "Tríceps Francês com Halter": "https://youtu.be/tCKQ4hBfjeA", "Tríceps Coice Polia Baixa": "https://youtu.be/sHTU-USEj_4", "Tríceps Unilateral Polia Alta": "https://youtu.be/fRIAhHEBDYI", "Rosca Direta nos Crossover Polia Baixa": "https://youtu.be/NI0zwl5OjxU", "Rosca Direta Barra H": "https://youtu.be/C7QMv88Mh34", "Rosca Alternada com Halter": "https://youtu.be/u2TDxCjkzkA", "Rosca Direta com Halteres": "https://youtu.be/2Wgty3XawQ8", "Rosca Inversa Barra": "https://youtu.be/mEUZ2IFhdyE", "Abdominal Suspenso": "https://youtu.be/m8fnveTBBqw", "Banco Romano": "https://youtu.be/Wg91dW3lJOA", "Abdominal Máquina": "https://youtu.be/LtTrpCMAVT0", "Desenvolvimento Máquina": "https://youtu.be/F6b8s_f7ERY", "Extensão de Quadril 4 Apoios": "https://youtu.be/ULXKXGcqfTE", "Abdução Deitado com Caneleira": "https://youtu.be/U7lGUhrWjm8", "Flexão de Quadril Solo Unilateral": "https://youtu.be/n6CemfPOCjc", "Flexão de Quadril em Pé com Caneleira": "https://youtu.be/3KJKqIpePKE", "Flexão de Coxa em Pé com Caneleira": "https://youtu.be/GNJdnEh4T3w", "Flexora de Coxa Deitado com Halter": "https://youtu.be/cOid5gcAmhQ", "Tríceps Coice com Elástico": "https://youtu.be/pBycEoCfx5w", "Tríceps com Elástico": "https://youtu.be/VCZxU6k5Va8", "Elevação Lateral com Elástico": "https://youtu.be/tnv8pzPacZQ", "Desenvolvimento com Elástico": "https://youtu.be/vRNdHiuDCME", "Elevação Frontal com Elástico": "https://youtu.be/blWTqdNrqcU", "Rosca Direta com Elástico": "https://youtu.be/OcAY-bcaaYM", "Crucifixo com Elástico": "https://youtu.be/-JhT_EOmOqo", "Supino Reto com Elástico": "https://youtu.be/e9OtK6j4kQg", "Supino em Pé com Elástico": "https://youtu.be/HfA0f_rw-eI", "Crucifixo Inverso com Elástico": "https://youtu.be/-1CwbtJCahI", "Remada Curvada com Elástico": "https://youtu.be/bQIL0lP0QFI", "Pullover Pegada Supinada com Elástico": "https://youtu.be/Lp_aDOb8btg", "Pullover Pegada Pronada com Elástico": "https://youtu.be/8Fo0dW_jzw4", "Remada Horizontal Pegada Neutra com Elástico": "https://youtu.be/Y59dPZ9YNbU", "Remada Horizontal Pegada Supinada com Elástico": "https://youtu.be/1uHUJGI_Fys", "Remada Horizontal Pegada Pronada com Elástico": "https://youtu.be/8hYknnBzo04", "Remada Serrote com Elástico": "https://youtu.be/LuKQikBGC_Y", "Extensão de Quadril em Pé com Elástico": "https://youtu.be/gtC-LLitM8c", "Extensão de Quadril 4 Apoios com Elástico": "https://youtu.be/eLgeItYCL8A", "Coice em Pé com Elástico": "https://youtu.be/LcRzWwQHiao", "Coice 4 Apoios com Elástico": "https://youtu.be/5GuRrnMET2o", "Abdução de Perna em Pé com Elástico": "https://youtu.be/Xi4BnQvho4M", "Abdução Deitado com Mini Band": "https://youtu.be/JcSzlPWE2FY", "Cadeira Flexora com Elástico": "https://youtu.be/-6QSjzC_MUs", "Agachamento Livre com Elástico": "https://youtu.be/gFueOUui3pQ", "Agachamento Sumô com Elástico": "https://youtu.be/kHhf3iD89Xw", "Levantamento Terra com Elástico": "https://youtu.be/pco3ZqclKFY", "Levantamento Stiff com Elástico": "https://youtu.be/oPW3l7_7f4M"};
+
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+function openVideo(name, url) {
+  const vid = getYouTubeId(url);
+  if (!vid) return;
+  // Remove existing modal
+  const old = document.getElementById('vm');
+  if (old) old.remove();
+  const m = document.createElement('div');
+  m.id = 'vm';
+  m.className = 'vm-overlay';
+  m.innerHTML = `
+    <div class="vm-box">
+      <div class="vm-head">
+        <div class="vm-title">${name}</div>
+        <div class="vm-close" onclick="closeVideo()">✕</div>
+      </div>
+      <div class="vm-frame">
+        <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&rel=0"
+          allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      <div class="vm-foot">▶ Vídeo de execução · Clique fora para fechar</div>
+    </div>`;
+  m.addEventListener('click', e => { if (e.target === m) closeVideo(); });
+  document.body.appendChild(m);
+}
+
+function closeVideo() {
+  const m = document.getElementById('vm');
+  if (m) { m.style.animation='vmIn .15s ease reverse'; setTimeout(()=>m.remove(),150); }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
+
+
+function getYTId(url){
+  if(!url)return null;
+  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))?([\w-]{11})/);
+  return m?m[1]:null;
+}
+
+function openVideo(name,url){
+  const vid=getYTId(url);if(!vid)return;
+  const old=document.getElementById('vm');if(old)old.remove();
+  const m=document.createElement('div');
+  m.id='vm';m.className='vm-overlay';
+  m.innerHTML='<div class="vm-box">'
+    +'<div class="vm-head"><div class="vm-title">'+name+'</div><div class="vm-close" onclick="closeVideo()">✕</div></div>'
+    +'<div class="vm-frame"><iframe src="https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0" allow="autoplay;encrypted-media" allowfullscreen></iframe></div>'
+    +'<div class="vm-foot">▶ Execução do exercício · ESC ou clique fora para fechar</div>'
+    +'</div>';
+  m.addEventListener('click',e=>{if(e.target===m)closeVideo();});
+  document.body.appendChild(m);
+}
+
+function closeVideo(){
+  const m=document.getElementById('vm');
+  if(m){m.style.opacity='0';m.style.transition='opacity .15s';setTimeout(()=>m.remove(),150);}
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeVideo();});
+
+function videoBtn(name){
+  let url=VIDEO_MAP[name];
+  if(!url){
+    const nl=name.toLowerCase();
+    for(const[k,v]of Object.entries(VIDEO_MAP)){
+      if(k.toLowerCase()===nl){url=v;break;}
+    }
+  }
+  if(!url)return '';
+  const ns=name.replace(/"/g,'&quot;');
+  const us=url.replace(/"/g,'&quot;');
+  return '<span class="vbtn" onclick="openVideo(\"'+ns+'\",\"'+us+'\")">'
+    +'<svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor"><path d="M1.5 1l6 3.5-6 3.5z"/></svg>'
+    +' vídeo</span>';
+}
+
+
+/* ── PWA ──────────────────────────────────────────────── */
+let deferredPrompt = null;
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js').then(r=>{
+      console.log('SW registered');
+    }).catch(e=>console.log('SW error:',e));
+  });
+}
+
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds
+  setTimeout(()=>{
+    if(!localStorage.getItem('pwa_dismissed')){
+      document.getElementById('install-banner').style.display='flex';
+    }
+  }, 3000);
+});
+
+function installPWA(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted') dismissInstall();
+    deferredPrompt = null;
+  });
+}
+
+function dismissInstall(){
+  document.getElementById('install-banner').style.display='none';
+  localStorage.setItem('pwa_dismissed','1');
+}
+
+window.addEventListener('appinstalled', ()=>{
+  dismissInstall();
+  console.log('PWA installed');
+});
+
+/* iOS install hint */
+function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function isStandalone(){ return window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone; }
+
+if(isIOS() && !isStandalone() && !localStorage.getItem('pwa_dismissed')){
+  setTimeout(()=>{
+    const b = document.getElementById('install-banner');
+    b.style.display='flex';
+    b.querySelector('.install-sub').textContent='Toque em Compartilhar → Adicionar à Tela de Início';
+    b.querySelector('.install-btn').style.display='none';
+  }, 3000);
+}
+
+</script>
+</body>
+</html>
