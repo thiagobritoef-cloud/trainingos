@@ -679,7 +679,9 @@ function buildPrompt(){
 - Dias: ${split.dias_treino||split.diasTreino||''} | Grupos: ${split.grupos||''}`
     : '';
 
-  return `Você é especialista em ciência do treinamento de força baseado em Bompa, Israetel e Verkhoshansky.
+  return `INSTRUÇÃO CRÍTICA: Retorne APENAS o JSON puro. Sem texto antes, sem texto depois, sem perguntas, sem explicações, sem markdown, sem blocos de código. Apenas o JSON começando com { e terminando com }.
+
+Você é especialista em ciência do treinamento de força baseado em Bompa, Israetel e Verkhoshansky.
 
 PERFIL DO ATLETA:
 - Sexo: ${S.sexo} | Idade: ${S.idade} anos | Peso: ${S.peso}kg | Altura: ${S.altura}cm | IMC: ${imc}
