@@ -679,9 +679,9 @@ function buildPrompt(){
 - Dias: ${split.dias_treino||split.diasTreino||''} | Grupos: ${split.grupos||''}`
     : '';
 
-  return `Gere um programa de treino de musculação periodizado em formato JSON para o atleta abaixo. Responda SOMENTE com o JSON, sem nenhum texto adicional.
+  return `Preencha o JSON abaixo com um programa de musculação periodizado. Retorne SOMENTE o JSON preenchido, sem nenhum texto antes ou depois.
 
-Baseie-se em: Bompa (periodização), Israetel (MEV/MAV/MRV), Verkhoshansky (sobrecarga ondulatória).
+Referências técnicas: Bompa (periodização por fases), Israetel (MEV/MAV/MRV), Verkhoshansky (sobrecarga ondulatória).
 
 PERFIL DO ATLETA:
 - Sexo: ${S.sexo} | Idade: ${S.idade} anos | Peso: ${S.peso}kg | Altura: ${S.altura}cm | IMC: ${imc}
@@ -972,7 +972,7 @@ let deferredPrompt = null;
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('/sw.js').then(r=>{
+    navigator.serviceWorker.register('./sw.js').then(r=>{
       console.log('SW registered');
     }).catch(e=>console.log('SW error:',e));
   });
@@ -1016,7 +1016,8 @@ if(isIOS() && !isStandalone() && !localStorage.getItem('pwa_dismissed')){
   setTimeout(()=>{
     const b = document.getElementById('install-banner');
     b.style.display='flex';
-    b.querySelector('.install-sub').textContent='Toque em Compartilhar → Adicionar à Tela de Início';
+    b.querySelector('.install-title').textContent='ADICIONAR AO IPHONE';
+    b.querySelector('.install-sub').innerHTML='Toque em <strong style="color:#fff">⎋ Compartilhar</strong> depois em <strong style="color:#fff">Adicionar à Tela de Início</strong>';
     b.querySelector('.install-btn').style.display='none';
   }, 3000);
 }
