@@ -222,6 +222,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
         </div>
       </div>
       <div class="fg">
+        <label>Materiais / Equipamentos</label>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elásticos, etc."></textarea>
+      </div>
+      <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
         <textarea id="p-rest" placeholder="Ex: dor no joelho, cirurgia lombar, etc."></textarea>
       </div>
@@ -410,16 +414,17 @@ async function loadProfile() {
 function fillProfileForm() {
   if (!profile) return;
   var p = profile;
-  setVal('p-name', p.name || '');
-  setVal('p-sex', p.sex || 'Masculino');
-  setVal('p-age', p.age || '');
-  setVal('p-weight', p.weight || '');
-  setVal('p-height', p.height || '');
-  setVal('p-days', p.days_per_week || 5);
-  setVal('p-level', p.level || 'Intermediario');
-  setVal('p-goal', p.goal || 'Hipertrofia');
-  setVal('p-dur', p.duration || 4);
-  setVal('p-rest', p.restrictions || '');
+  setVal('p-name', p.nome || '');
+  setVal('p-sex', p.sexo || 'Masculino');
+  setVal('p-age', p.idade || '');
+  setVal('p-weight', p.peso || '');
+  setVal('p-height', p.altura || '');
+  setVal('p-days', p.dias_semana || 5);
+  setVal('p-level', p.nivel || 'Intermediario');
+  setVal('p-goal', p.objetivo || 'Hipertrofia');
+  setVal('p-dur', p.duracao || 4);
+  setVal('p-mat', p.materiais || '');
+  setVal('p-rest', p.restricoes || '');
 }
 
 function setVal(id, val) {
@@ -435,16 +440,17 @@ async function saveProfile() {
 
   var data = {
     user_id: user.id,
-    name: document.getElementById('p-name').value.trim(),
-    sex: document.getElementById('p-sex').value,
-    age: parseInt(document.getElementById('p-age').value) || null,
-    weight: parseFloat(document.getElementById('p-weight').value) || null,
-    height: parseFloat(document.getElementById('p-height').value) || null,
-    days_per_week: parseInt(document.getElementById('p-days').value) || 5,
-    level: document.getElementById('p-level').value,
-    goal: document.getElementById('p-goal').value,
-    duration: parseInt(document.getElementById('p-dur').value) || 4,
-    restrictions: document.getElementById('p-rest').value.trim(),
+    nome: document.getElementById('p-name').value.trim(),
+    sexo: document.getElementById('p-sex').value,
+    idade: parseInt(document.getElementById('p-age').value) || null,
+    peso: parseFloat(document.getElementById('p-weight').value) || null,
+    altura: parseFloat(document.getElementById('p-height').value) || null,
+    dias_semana: parseInt(document.getElementById('p-days').value) || 5,
+    nivel: document.getElementById('p-level').value,
+    objetivo: document.getElementById('p-goal').value,
+    duracao: parseInt(document.getElementById('p-dur').value) || 4,
+    materiais: document.getElementById('p-mat').value.trim(),
+    restricoes: document.getElementById('p-rest').value.trim(),
     updated_at: new Date().toISOString()
   };
 
@@ -465,18 +471,21 @@ async function saveProfile() {
 function renderHomeProfile() {
   if (!profile) return;
   var p = profile;
-  var imc = (p.weight && p.height) ? (p.weight / Math.pow(p.height / 100, 2)).toFixed(1) : '-';
+  var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '-';
   var el = document.getElementById('home-profile');
   el.style.display = 'block';
   el.innerHTML =
-    '<div style="font-size:17px;font-weight:900;margin-bottom:8px">' + (p.name || 'Atleta') + '</div>' +
+    '<div style="font-size:17px;font-weight:900;margin-bottom:8px">' + (p.nome || 'Atleta') + '</div>' +
     '<div class="badges">' +
-    badge(p.sex) + badge(p.age + ' anos') + badge(p.weight + ' kg') +
-    badge('IMC ' + imc) + badge(p.days_per_week + 'x/sem') +
-    badge(p.level) + badge(p.goal) +
+    badge(p.sexo) + badge(p.idade + ' anos') + badge(p.peso + ' kg') +
+    badge('IMC ' + imc) + badge(p.dias_semana + 'x/sem') +
+    badge(p.nivel) + badge(p.objetivo) +
     '</div>';
-  if (p.restrictions) {
-    el.innerHTML += '<div style="margin-top:10px;font-size:12px;color:#ff8a65"><strong>Restricoes:</strong> ' + p.restrictions + '</div>';
+  if (p.restricoes) {
+    el.innerHTML += '<div style="margin-top:10px;font-size:12px;color:#ff8a65"><strong>Restricoes:</strong> ' + p.restricoes + '</div>';
+  }
+  if (p.materiais) {
+    el.innerHTML += '<div style="margin-top:6px;font-size:12px;color:#aaa"><strong>Materiais:</strong> ' + p.materiais + '</div>';
   }
 }
 
@@ -491,7 +500,7 @@ async function loadWorkouts() {
   el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
   var res = await sb.from('workouts')
-    .select('id,name,split,created_at')
+    .select('id,nome,dividir,created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -507,8 +516,8 @@ async function loadWorkouts() {
     var d = new Date(w.created_at).toLocaleDateString('pt-BR');
     html += '<div class="wi" data-id="' + w.id + '">' +
       '<div class="wi-num">Treino ' + num + '</div>' +
-      '<div class="wi-name">' + (w.name || 'Programa') + '</div>' +
-      '<div class="wi-meta">' + (w.split || '') + (w.split ? ' &bull; ' : '') + d + '</div>' +
+      '<div class="wi-name">' + (w.nome || 'Programa') + '</div>' +
+      '<div class="wi-meta">' + (w.dividir || '') + (w.dividir ? ' &bull; ' : '') + d + '</div>' +
       '</div>';
   });
   el.innerHTML = html;
@@ -533,17 +542,18 @@ async function generateWorkout() {
     var res = await sb.functions.invoke('generate-workout', {
       body: {
         profile: {
-          nome: p.name,
-          sexo: p.sex,
-          idade: p.age,
-          peso: p.weight,
-          altura: p.height,
+          nome: p.nome,
+          sexo: p.sexo,
+          idade: p.idade,
+          peso: p.peso,
+          altura: p.altura,
           imc: imc,
-          nivel: p.level,
-          dias_semana: p.days_per_week,
-          objetivo: p.goal,
-          duracao_semanas: p.duration || 4,
-          restricoes: p.restrictions || 'Nenhuma'
+          nivel: p.nivel,
+          dias_semana: p.dias_semana,
+          objetivo: p.objetivo,
+          duracao_semanas: p.duracao || 4,
+          materiais: p.materiais || 'Nenhum',
+          restricoes: p.restricoes || 'Nenhuma'
         }
       }
     });
@@ -562,9 +572,10 @@ async function generateWorkout() {
 
     var saved = await sb.from('workouts').insert({
       user_id: user.id,
-      name: workout.nome || 'Programa de Treino',
-      split: workout.split || '',
-      data: workout,
+      nome: workout.nome || 'Programa de Treino',
+      dividir: workout.split || workout.dividir || '',
+      duracao_semanas: workout.duracao_semanas || p.duracao || 4,
+      programa: workout,
       created_at: new Date().toISOString()
     }).select('id').single();
 
@@ -589,7 +600,7 @@ async function openWorkout(id) {
   var res = await sb.from('workouts').select('*').eq('id', id).single();
   if (res.error || !res.data) { alert('Erro ao carregar treino.'); return; }
   wkId = id;
-  var d = res.data.data || res.data.workout_data;
+  var d = res.data.programa || res.data.data || res.data.workout_data;
   if (typeof d === 'string') d = JSON.parse(d);
   wkData = d;
   renderWorkout(d);
