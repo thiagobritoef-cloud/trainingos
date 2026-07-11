@@ -400,15 +400,14 @@ async function doLogout() {
 // === PROFILE ===
 async function loadProfile() {
   if (!user) return;
-  var res = await sb.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+  var res = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
   if (res.data) {
-    // Mescla dados do banco com extras salvos localmente
     var extras = {};
     try {
       var raw = localStorage.getItem('prof_extras_' + user.id);
       if (raw) extras = JSON.parse(raw);
     } catch(e) {}
-    profile = Object.assign({}, res.data, extras);
+    profile = Object.assign({}, extras, res.data);
     renderHomeProfile();
     show('home');
     loadWorkouts();
@@ -444,17 +443,8 @@ async function saveProfile() {
   btn.disabled = true; btn.textContent = 'Salvando...';
   showMsg('p-msg', '');
 
-  // Campos extras (podem nao existir no banco ainda) — salvos em localStorage
-  var extras = {
-    duracao: parseInt(document.getElementById('p-dur').value) || 4,
-    materiais: document.getElementById('p-mat').value.trim(),
-    restricoes: document.getElementById('p-rest').value.trim()
-  };
-  localStorage.setItem('prof_extras_' + user.id, JSON.stringify(extras));
-
-  // Apenas colunas confirmadas no banco
   var data = {
-    user_id: user.id,
+    id: user.id,
     nome: document.getElementById('p-name').value.trim(),
     sexo: document.getElementById('p-sex').value,
     idade: parseInt(document.getElementById('p-age').value) || null,
@@ -463,19 +453,23 @@ async function saveProfile() {
     dias_semana: parseInt(document.getElementById('p-days').value) || 5,
     nivel: document.getElementById('p-level').value,
     objetivo: document.getElementById('p-goal').value,
+    duracao: parseInt(document.getElementById('p-dur').value) || 4,
+    materiais: document.getElementById('p-mat').value.trim(),
+    restricoes: document.getElementById('p-rest').value.trim(),
     updated_at: new Date().toISOString()
   };
 
-  var check = await sb.from('profiles').select('id').eq('user_id', user.id).maybeSingle();
-  var res = check.data
-    ? await sb.from('profiles').update(data).eq('user_id', user.id)
-    : await sb.from('profiles').insert(data);
+  localStorage.setItem('prof_extras_' + user.id, JSON.stringify({
+    duracao: data.duracao, materiais: data.materiais, restricoes: data.restricoes
+  }));
+
+  var res = await sb.from('profiles').upsert(data, { onConflict: 'id' });
 
   btn.disabled = false; btn.textContent = 'Salvar Perfil';
 
   if (res.error) { showMsg('p-msg', res.error.message); return; }
 
-  profile = Object.assign({}, data, extras);
+  profile = Object.assign({}, data);
   showMsg('p-msg', 'Perfil salvo!', 'ok');
   setTimeout(function() { renderHomeProfile(); goHome(); }, 900);
 }
@@ -548,7 +542,7 @@ async function generateWorkout() {
   showMsg('gen-err', '');
 
   var p = profile;
-  var imc = (p.weight && p.height) ? (p.weight / Math.pow(p.height / 100, 2)).toFixed(1) : '?';
+  var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '?';
 
   try {
     var res = await sb.functions.invoke('generate-workout', {
