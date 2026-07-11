@@ -402,7 +402,13 @@ async function loadProfile() {
   if (!user) return;
   var res = await sb.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
   if (res.data) {
-    profile = res.data;
+    // Mescla dados do banco com extras salvos localmente
+    var extras = {};
+    try {
+      var raw = localStorage.getItem('prof_extras_' + user.id);
+      if (raw) extras = JSON.parse(raw);
+    } catch(e) {}
+    profile = Object.assign({}, res.data, extras);
     renderHomeProfile();
     show('home');
     loadWorkouts();
@@ -438,6 +444,15 @@ async function saveProfile() {
   btn.disabled = true; btn.textContent = 'Salvando...';
   showMsg('p-msg', '');
 
+  // Campos extras (podem nao existir no banco ainda) — salvos em localStorage
+  var extras = {
+    duracao: parseInt(document.getElementById('p-dur').value) || 4,
+    materiais: document.getElementById('p-mat').value.trim(),
+    restricoes: document.getElementById('p-rest').value.trim()
+  };
+  localStorage.setItem('prof_extras_' + user.id, JSON.stringify(extras));
+
+  // Apenas colunas confirmadas no banco
   var data = {
     user_id: user.id,
     nome: document.getElementById('p-name').value.trim(),
@@ -448,9 +463,6 @@ async function saveProfile() {
     dias_semana: parseInt(document.getElementById('p-days').value) || 5,
     nivel: document.getElementById('p-level').value,
     objetivo: document.getElementById('p-goal').value,
-    duracao: parseInt(document.getElementById('p-dur').value) || 4,
-    materiais: document.getElementById('p-mat').value.trim(),
-    restricoes: document.getElementById('p-rest').value.trim(),
     updated_at: new Date().toISOString()
   };
 
@@ -463,7 +475,7 @@ async function saveProfile() {
 
   if (res.error) { showMsg('p-msg', res.error.message); return; }
 
-  profile = data;
+  profile = Object.assign({}, data, extras);
   showMsg('p-msg', 'Perfil salvo!', 'ok');
   setTimeout(function() { renderHomeProfile(); goHome(); }, 900);
 }
