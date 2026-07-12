@@ -547,6 +547,9 @@ async function generateWorkout() {
   var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '?';
 
   try {
+    var countRes = await sb.from('workouts').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
+    var seqAtual = (countRes.count || 0) + 1;
+
     var res = await sb.functions.invoke('generate-workout', {
       body: {
         profile: {
@@ -562,7 +565,8 @@ async function generateWorkout() {
           duracao_semanas: p.duracao || 4,
           materiais: p.materiais || 'Nenhum',
           restricoes: p.restricoes || 'Nenhuma'
-        }
+        },
+        sequencia_atual: seqAtual
       }
     });
 
@@ -576,6 +580,7 @@ async function generateWorkout() {
         else throw new Error('JSON invalido na resposta');
       }
     }
+    if (workout && workout.ok === false) throw new Error(workout.error || 'Erro ao gerar treino');
     if (workout && workout.programa) workout = workout.programa;
 
     var saved = await sb.from('workouts').insert({
@@ -583,6 +588,7 @@ async function generateWorkout() {
       nome: workout.nome || 'Programa de Treino',
       dividir: workout.split || workout.dividir || '',
       duracao_semanas: workout.duracao_semanas || p.duracao || 4,
+      sequencia: seqAtual,
       programa: workout,
       created_at: new Date().toISOString()
     }).select('id').single();
