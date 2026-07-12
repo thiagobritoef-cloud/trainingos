@@ -274,6 +274,15 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div id="w-header" class="card"></div>
     <div class="tabs-scroll"><div class="tabs" id="week-tabs"></div></div>
     <div id="day-area"></div>
+
+    <div class="card" style="margin-top:16px">
+      <div style="font-weight:900;font-size:14px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Quer alguma alteração nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra você.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que você quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+      <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div></div>
+      <div id="ajuste-err" style="display:none;margin-top:8px"></div>
+    </div>
   </div>
 </div>
 
@@ -307,6 +316,7 @@ var user = null;
 var profile = null;
 var wkId = null;
 var wkData = null;
+var wkSequencia = 1;
 var deferredInstall = null;
 var authMode = 'in';
 
@@ -600,6 +610,7 @@ async function generateWorkout() {
 
     wkId = saved.data.id;
     wkData = workout;
+    wkSequencia = seqAtual;
     renderWorkout(workout);
 
   } catch(e) {
@@ -614,6 +625,7 @@ async function openWorkout(id) {
   var res = await sb.from('workouts').select('*').eq('id', id).single();
   if (res.error || !res.data) { alert('Erro ao carregar treino.'); return; }
   wkId = id;
+  wkSequencia = res.data.sequencia || 1;
   var d = res.data.programa || res.data.data || res.data.workout_data;
   if (typeof d === 'string') d = JSON.parse(d);
   wkData = d;
@@ -758,6 +770,78 @@ function closeVid(e) {
   if (e && e.target !== document.getElementById('vid-overlay')) return;
   document.getElementById('vid-overlay').classList.remove('show');
   document.getElementById('vid-box').innerHTML = '';
+}
+
+// === AJUSTE COM O THIAGO ===
+async function pedirAjuste() {
+  var txt = document.getElementById('ajuste-txt').value.trim();
+  if (!txt) { alert('Escreva o que você quer ajustar.'); return; }
+  if (!wkId || !wkData || !profile) { alert('Nenhum treino aberto.'); return; }
+
+  var btn = document.getElementById('ajuste-btn');
+  btn.disabled = true;
+  document.getElementById('ajuste-loading').style.display = 'block';
+  showMsg('ajuste-err', '');
+
+  var p = profile;
+  var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '?';
+
+  try {
+    var res = await sb.functions.invoke('generate-workout', {
+      body: {
+        profile: {
+          nome: p.nome,
+          sexo: p.sexo,
+          idade: p.idade,
+          peso: p.peso,
+          altura: p.altura,
+          imc: imc,
+          nivel: p.nivel,
+          dias_semana: p.dias_semana,
+          objetivo: p.objetivo,
+          duracao_semanas: p.duracao || 4,
+          materiais: p.materiais || 'Nenhum',
+          restricoes: p.restricoes || 'Nenhuma'
+        },
+        sequencia_atual: wkSequencia,
+        ajuste: txt,
+        treino_atual: wkData
+      }
+    });
+
+    if (res.error) throw new Error(res.error.message || 'Erro na funcao');
+
+    var workout = res.data;
+    if (typeof workout === 'string') {
+      try { workout = JSON.parse(workout); } catch(e) {
+        var m = workout.match(/\{[\s\S]*\}/);
+        if (m) workout = JSON.parse(m[0]);
+        else throw new Error('JSON invalido na resposta');
+      }
+    }
+    if (workout && workout.ok === false) throw new Error(workout.error || 'Erro ao ajustar treino');
+    if (workout && workout.programa) workout = workout.programa;
+
+    var upd = await sb.from('workouts').update({
+      nome: workout.nome || 'Programa de Treino',
+      dividir: workout.split || workout.dividir || '',
+      duracao_semanas: workout.duracao_semanas || p.duracao || 4,
+      programa: workout
+    }).eq('id', wkId);
+
+    if (upd.error) throw new Error('Erro ao salvar ajuste: ' + upd.error.message);
+
+    wkData = workout;
+    document.getElementById('ajuste-txt').value = '';
+    renderWorkout(workout);
+    showMsg('ajuste-err', 'Treino ajustado pelo Thiago!', 'ok');
+
+  } catch(e) {
+    showMsg('ajuste-err', 'Erro: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    document.getElementById('ajuste-loading').style.display = 'none';
+  }
 }
 
 // === ACTIONS ===
