@@ -355,9 +355,11 @@ function authTab(mode) {
 }
 
 function showMsg(elId, text, type) {
-  document.getElementById(elId).innerHTML = text
+  var el = document.getElementById(elId);
+  el.innerHTML = text
     ? '<div class="alert al-' + (type || 'err') + '">' + text + '</div>'
     : '';
+  el.style.display = text ? 'block' : 'none';
 }
 
 async function doAuth() {
