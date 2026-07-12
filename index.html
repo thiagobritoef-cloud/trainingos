@@ -239,6 +239,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="hdr">
     <span class="logo" onclick="goHome()">TRAININGOS</span>
     <div class="hdr-btns">
+      <button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
       <button class="ibtn" onclick="showInstall()" title="Instalar no celular">&#128241;</button>
       <button class="ibtn" onclick="goProfile()" title="Editar perfil">&#9998;</button>
       <button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
@@ -265,6 +266,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="hdr">
     <span class="logo" onclick="goHome()">TRAININGOS</span>
     <div class="hdr-btns">
+      <button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
       <button class="ibtn" onclick="goHome()">&#8592;</button>
       <button class="ibtn" onclick="printPDF()" title="Exportar PDF">&#128438;</button>
       <button class="ibtn danger" onclick="delWorkout()" title="Apagar treino">&#128465;</button>
@@ -504,6 +506,19 @@ function renderHomeProfile() {
   }
   if (p.materiais) {
     el.innerHTML += '<div style="margin-top:6px;font-size:12px;color:#aaa"><strong>Materiais:</strong> ' + p.materiais + '</div>';
+  }
+  el.innerHTML += '<button class="ibtn" style="margin-top:12px;width:100%" onclick="goProfile()">&#9998; Editar dados do aluno</button>';
+}
+
+function recarregar() {
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      regs.forEach(function(r) { r.unregister(); });
+      if (window.caches) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
+      location.reload(true);
+    });
+  } else {
+    location.reload(true);
   }
 }
 
