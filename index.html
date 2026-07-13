@@ -253,7 +253,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div id="gen-loading" style="display:none" class="loading">
         <div class="spin"></div>
-        <div>Gerando treino com IA...<br><small style="color:#555">Aguarde 15 a 30 segundos</small></div>
+        <div>Gerando treino com IA...<br><small style="color:#555">Aguarde até 2 minutos</small></div>
       </div>
       <div id="gen-err" style="display:none"></div>
     </div>
@@ -282,7 +282,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Quer alguma alteração nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra você.</div>
       <textarea id="ajuste-txt" placeholder="Escreva aqui o que você quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:12px;color:#555">Thiago está reformulando... até 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
