@@ -8,7 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="TrainingOS">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>TrainingOS</title>
+<link rel="icon" type="image/png" href="./icon-192.png">
+<meta name="theme-color" content="#4CAF50">
+<title>TO BE FITNESS</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -275,9 +277,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div id="gen-loading" style="display:none" class="loading">
         <div class="spin"></div>
-        <div>Gerando treino com IA...<br><small style="color:#555">Aguarde até 2 minutos</small></div>
+        <div>Gerando treino com IA...<br><small style="color:#555">Aguarde cerca de 30 segundos</small></div>
       </div>
       <div id="gen-err" style="display:none"></div>
+      <div id="quota-info" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:none;justify-content:space-between"></div>
     </div>
     <div id="w-list"></div>
   </div>
@@ -341,6 +344,7 @@ var profile = null;
 var wkId = null;
 var wkData = null;
 var wkSequencia = 1;
+var autoGenChecked = false;
 var deferredInstall = null;
 var authMode = 'in';
 
@@ -554,8 +558,10 @@ async function loadWorkouts() {
   var el = document.getElementById('w-list');
   el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
+  updateQuotaInfo();
+
   var res = await sb.from('workouts')
-    .select('id,nome,dividir,created_at')
+    .select('id,nome,dividir,created_at,duracao_semanas')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -563,6 +569,8 @@ async function loadWorkouts() {
     el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:14px">Nenhum treino ainda.<br>Gere seu primeiro treino acima!</p></div>';
     return;
   }
+
+  checkAutoGenerate(res.data[0]);
 
   var total = res.data.length;
   var html = '<div style="font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Historico (' + total + ')</div>';
@@ -582,9 +590,35 @@ async function loadWorkouts() {
   });
 }
 
+async function updateQuotaInfo() {
+  if (!user) return;
+  try {
+    var since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    var wRes = await sb.from('workouts').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', since);
+    var aRes = await sb.from('ajustes').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', since);
+    var wCount = wRes.count || 0;
+    var aCount = aRes.count || 0;
+    var el = document.getElementById('quota-info');
+    if (!el) return;
+    el.style.display = 'flex';
+    el.innerHTML = '<span>Treinos gerados: ' + wCount + '/3 (30 dias)</span><span>Ajustes: ' + aCount + '/5 (30 dias)</span>';
+  } catch (e) {}
+}
+
+function checkAutoGenerate(latest) {
+  if (autoGenChecked || !latest || !latest.created_at) return;
+  autoGenChecked = true;
+  var dur = latest.duracao_semanas || (profile && profile.duracao) || 4;
+  var fim = new Date(latest.created_at);
+  fim.setDate(fim.getDate() + dur * 7);
+  if (new Date() >= fim) {
+    generateWorkout(true);
+  }
+}
+
 // === GENERATE ===
-async function generateWorkout() {
-  if (!profile) { alert('Configure seu perfil primeiro.'); goProfile(); return; }
+async function generateWorkout(isAuto) {
+  if (!profile) { if (!isAuto) { alert('Configure seu perfil primeiro.'); goProfile(); } return; }
 
   document.getElementById('gen-wrap').style.display = 'none';
   document.getElementById('gen-loading').style.display = 'block';
@@ -627,7 +661,14 @@ async function generateWorkout() {
         else throw new Error('JSON invalido na resposta');
       }
     }
-    if (workout && workout.ok === false) throw new Error(workout.error || 'Erro ao gerar treino');
+    if (workout && workout.ok === false) {
+      if (isAuto && workout.limite) {
+        document.getElementById('gen-loading').style.display = 'none';
+        document.getElementById('gen-wrap').style.display = 'block';
+        return;
+      }
+      throw new Error(workout.error || 'Erro ao gerar treino');
+    }
     if (workout && workout.programa) workout = workout.programa;
 
     var saved = await sb.from('workouts').insert({
@@ -649,11 +690,12 @@ async function generateWorkout() {
     wkData = workout;
     wkSequencia = seqAtual;
     renderWorkout(workout);
+    updateQuotaInfo();
 
   } catch(e) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
-    showMsg('gen-err', 'Erro: ' + e.message);
+    if (!isAuto) showMsg('gen-err', 'Erro: ' + e.message);
   }
 }
 
@@ -880,7 +922,8 @@ async function pedirAjuste() {
         },
         sequencia_atual: wkSequencia,
         ajuste: txt,
-        treino_atual: wkData
+        treino_atual: wkData,
+        workout_id: wkId
       }
     });
 
