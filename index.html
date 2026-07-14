@@ -110,6 +110,19 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .ex-load{width:65px;background:#111;border:1px solid var(--border);border-radius:6px;padding:5px 7px;color:var(--text);font-size:13px;font-weight:700;text-align:center}
 .ex-load:focus{outline:none;border-color:var(--g)}
 .vbtn{background:var(--g);color:#000;border:none;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:900;cursor:pointer;margin-top:4px;display:inline-block;text-transform:uppercase;letter-spacing:.5px}
+.warmup{background:#111;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.warmup-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--g);margin-bottom:8px}
+.warmup-list{list-style:none}
+.warmup-list li{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;gap:10px}
+.warmup-list li:last-child{border-bottom:none}
+.warmup-list li>div{display:flex;align-items:center;gap:8px}
+.w-name{font-weight:700}
+.w-dur{color:var(--muted);font-size:12px;white-space:nowrap}
+.vbtn-sm{padding:2px 6px;font-size:9px;margin-top:0}
+.ex-row-top td{border-bottom:none;padding-bottom:3px}
+.ex-row-partner td{padding-top:3px}
+.ex-row-partner td:first-child{position:relative;padding-left:14px}
+.ex-row-partner td:first-child:before{content:'';position:absolute;left:0;top:2px;bottom:8px;width:3px;background:var(--g);border-radius:2px}
 
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
@@ -714,9 +727,23 @@ function renderWeek(semanas, wi) {
 function renderDay(sessoes, di, wi) {
   var sess = sessoes[di] || {};
   var exs = sess.exercicios || [];
+  var aquecimento = sess.aquecimento || [];
   var foco = sess.foco || sess.nome || sess.dia || 'Sessao';
 
   var html = '<div class="card"><div class="ctitle">' + foco + '</div>';
+
+  if (aquecimento.length) {
+    html += '<div class="warmup"><div class="warmup-title">&#128293; Aquecimento &amp; Mobilidade</div><ul class="warmup-list">';
+    aquecimento.forEach(function(w) {
+      var wname = w.exercicio || w.nome || '-';
+      var wdur = w.duracao || w.reps || '';
+      var wvid = w.video_url || w.video || '';
+      html += '<li><div><span class="w-name">' + wname + '</span>' +
+        (wvid ? '<button class="vbtn vbtn-sm" data-url="' + wvid + '">&#9654;</button>' : '') +
+        '</div><span class="w-dur">' + wdur + '</span></li>';
+    });
+    html += '</ul></div>';
+  }
 
   if (!exs.length) {
     html += '<p style="color:var(--muted);font-size:13px">Descanso ou sem exercicios.</p>';
@@ -733,9 +760,8 @@ function renderDay(sessoes, di, wi) {
       var reps = ex.repeticoes || ex.reps || ex.repetitions || '-';
       var desc = ex.descanso || ex.intervalo || ex.rest || '-';
 
-      html += '<tr>' +
+      html += '<tr class="' + (parceiro ? 'ex-row-top' : '') + '">' +
         '<td><div class="ex-name">' + name + '</div>' +
-        (parceiro ? '<div class="ex-partner">+ ' + parceiro + '</div>' : '') +
         (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') +
         '</td>' +
         '<td><div class="ex-method">' + metodo + '</div></td>' +
@@ -744,6 +770,24 @@ function renderDay(sessoes, di, wi) {
         '<td>' + desc + '</td>' +
         '<td><input class="ex-load" type="text" placeholder="kg" value="' + saved + '" data-k="' + key + '"></td>' +
         '</tr>';
+
+      if (parceiro) {
+        var keyP = key + 'p';
+        var savedP = localStorage.getItem('ld_' + wkId + '_' + keyP) || '';
+        var vidP = ex.parceiro_video_url || ex.parceiro_video || '';
+        var seriesP = ex.parceiro_series || series;
+        var repsP = ex.parceiro_reps || reps;
+        html += '<tr class="ex-row-partner">' +
+          '<td><div class="ex-name">+ ' + parceiro + '</div>' +
+          (vidP ? '<button class="vbtn" data-url="' + vidP + '">&#9654; Video</button>' : '') +
+          '</td>' +
+          '<td><div class="ex-method">' + metodo + '</div></td>' +
+          '<td>' + seriesP + '</td>' +
+          '<td>' + repsP + '</td>' +
+          '<td>' + desc + '</td>' +
+          '<td><input class="ex-load" type="text" placeholder="kg" value="' + savedP + '" data-k="' + keyP + '"></td>' +
+          '</tr>';
+      }
     });
     html += '</tbody></table></div>';
   }
