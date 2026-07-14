@@ -675,10 +675,17 @@ function renderWorkout(wk) {
   hdr.innerHTML =
     '<div style="font-size:17px;font-weight:900;margin-bottom:6px">' + (wk.nome || 'Programa') + '</div>' +
     (wk.split ? '<div style="color:var(--g);font-size:13px;font-weight:800;margin-bottom:4px">' + wk.split + '</div>' : '') +
-    (wk.duracao_semanas ? '<div style="color:var(--muted);font-size:12px">' + wk.duracao_semanas + ' semanas</div>' : '');
+    (wk.duracao_semanas ? '<div style="color:var(--muted);font-size:12px">' + wk.duracao_semanas + ' semanas</div>' : '') +
+    (wk.progressao_semanal ? '<div style="color:var(--muted);font-size:12px;margin-top:8px;line-height:1.4;padding-top:8px;border-top:1px solid var(--border)"><b style="color:var(--g)">Progressao:</b> ' + wk.progressao_semanal + '</div>' : '');
 
   var semanas = wk.semanas || [];
-  if (!semanas.length && wk.sessoes) semanas = [{ semana: 1, sessoes: wk.sessoes }];
+  if (!semanas.length && wk.sessoes) {
+    var nSem = wk.duracao_semanas || 1;
+    semanas = [];
+    for (var wi2 = 0; wi2 < nSem; wi2++) {
+      semanas.push({ semana: wi2 + 1, sessoes: wk.sessoes });
+    }
+  }
 
   var tabHtml = '';
   semanas.forEach(function(s, i) {
