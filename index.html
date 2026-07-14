@@ -134,6 +134,31 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .vid-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;margin-top:8px}
 .vid-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
 
+
+/* ADMIN */
+.adm-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.adm-name{font-size:15px;font-weight:900;margin-bottom:2px}
+.adm-email{font-size:11px;color:var(--muted);margin-bottom:8px}
+.adm-stats{display:flex;gap:18px;margin-bottom:10px}
+.adm-stat{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.adm-stat b{color:var(--g);display:block;font-size:18px;font-weight:900}
+.adm-actions{display:flex;gap:6px;flex-wrap:wrap}
+.adm-actions button{flex:1;min-width:86px;background:#111;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 6px;font-size:10.5px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.3px}
+.adm-actions button.on{background:var(--g);color:#000;border-color:var(--g)}
+.adm-actions button.danger{color:#ff5252;border-color:#ff5252}
+.adm-actions button.danger.on{background:#ff5252;color:#fff;border-color:#ff5252}
+.badge-pro{background:var(--g);color:#000}
+.badge-block{background:#ff5252;color:#fff;border-color:#ff5252}
+
+/* MESSAGE BANNER (student side) */
+.msg-banner{background:rgba(76,175,80,.12);border:1px solid var(--g);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.msg-banner-title{font-weight:900;color:var(--g);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.msg-banner-txt{font-size:13px;line-height:1.5;margin-bottom:8px}
+.msg-banner button{background:var(--g);color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:900;cursor:pointer;text-transform:uppercase}
+
+/* BLOCKED SCREEN */
+#screen-blocked{align-items:center;justify-content:center;padding:24px;text-align:center}
+
 /* INSTALL BANNER */
 #install-banner{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:2px solid var(--g);padding:16px;z-index:999;display:none;animation:slideUp .3s ease}
 #install-banner.show{display:block}
@@ -255,6 +280,14 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <button class="btn btn-p" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
     </div>
+    <div class="card">
+      <div class="ctitle">Reportar um Problema</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Encontrou algum problema ou tem uma reclamacao? Conte pra gente.</div>
+      <div class="fg"><input type="text" id="rc-titulo" placeholder="Assunto"></div>
+      <div class="fg"><textarea id="rc-msg" placeholder="Descreva o problema..."></textarea></div>
+      <div id="rc-msg-out"></div>
+      <button class="btn btn-s" id="rc-btn" onclick="sendReclamacao()">Enviar</button>
+    </div>
   </div>
 </div>
 
@@ -266,10 +299,12 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
       <button class="ibtn" onclick="showInstall()" title="Instalar no celular">&#128241;</button>
       <button class="ibtn" onclick="goProfile()" title="Editar perfil">&#9998;</button>
+      <button class="ibtn" id="admin-btn" onclick="goAdmin()" title="Painel do treinador" style="display:none">&#128101;</button>
       <button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
     </div>
   </div>
   <div class="cnt">
+    <div id="msg-banner-area"></div>
     <div id="home-profile" class="card" style="display:none"></div>
     <div class="card">
       <div id="gen-wrap">
@@ -313,6 +348,46 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- ===== BLOCKED ===== -->
+<div id="screen-blocked" class="screen">
+  <div class="auth-logo"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
+  <div class="card" style="max-width:360px;margin-top:16px">
+    <div style="font-size:40px;margin-bottom:10px">&#128683;</div>
+    <div style="font-weight:900;font-size:16px;margin-bottom:8px">Conta bloqueada</div>
+    <div style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px">Seu acesso foi temporariamente bloqueado pelo treinador. Entre em contato com o Thiago para mais informacoes.</div>
+    <button class="btn btn-s" onclick="doLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div id="screen-admin" class="screen">
+  <div class="hdr">
+    <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+    <div class="hdr-btns">
+      <button class="ibtn" onclick="loadAdmin()" title="Recarregar">&#8635;</button>
+      <button class="ibtn" onclick="goHome()">&#8592;</button>
+    </div>
+  </div>
+  <div class="cnt">
+    <div class="card">
+      <div class="ctitle">Painel do Treinador</div>
+      <div id="adm-summary" style="font-size:12px;color:var(--muted)"></div>
+    </div>
+    <div id="adm-list"><div class="loading"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- MESSAGE MODAL (admin -> aluno) -->
+<div class="overlay" id="msg-overlay" onclick="closeMsgModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeMsgModal()">&#10005;</button>
+    <div class="ctitle" id="msg-modal-title">Mensagem para o aluno</div>
+    <textarea id="msg-txt" placeholder="Escreva a mensagem..." style="width:100%;min-height:90px;background:#111;color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+    <div id="msg-out"></div>
+    <button class="btn btn-p" style="margin-top:10px" onclick="sendAdminMsg()" id="msg-send-btn">Enviar mensagem</button>
+  </div>
+</div>
+
 <!-- VIDEO MODAL -->
 <div class="overlay" id="vid-overlay" onclick="closeVid(event)">
   <div class="modal">
@@ -347,6 +422,8 @@ var wkSequencia = 1;
 var autoGenChecked = false;
 var deferredInstall = null;
 var authMode = 'in';
+var isAdmin = false;
+var msgTargetId = null;
 
 // === PWA ===
 window.addEventListener('beforeinstallprompt', function(e) {
@@ -448,9 +525,20 @@ async function loadProfile() {
       if (raw) extras = JSON.parse(raw);
     } catch(e) {}
     profile = Object.assign({}, extras, res.data);
+
+    if (profile.bloqueado) {
+      show('blocked');
+      return;
+    }
+
+    isAdmin = !!profile.is_admin;
+    var adminBtn = document.getElementById('admin-btn');
+    if (adminBtn) adminBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
     renderHomeProfile();
     show('home');
     loadWorkouts();
+    loadAdminMessages();
   } else {
     show('profile');
   }
@@ -960,6 +1048,138 @@ async function pedirAjuste() {
     btn.disabled = false;
     document.getElementById('ajuste-loading').style.display = 'none';
   }
+}
+
+// === ADMIN PANEL ===
+async function goAdmin() {
+  if (!isAdmin) return;
+  show('admin');
+  loadAdmin();
+}
+
+async function loadAdmin() {
+  var listEl = document.getElementById('adm-list');
+  listEl.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+
+  var profRes = await sb.from('profiles').select('id,nome,email,plano,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
+  if (profRes.error) {
+    listEl.innerHTML = '<div class="alert al-err">Erro ao carregar alunos: ' + profRes.error.message + '</div>';
+    return;
+  }
+  var alunos = (profRes.data || []).filter(function(p) { return !p.is_admin; });
+
+  var wkRes = await sb.from('workouts').select('user_id');
+  var rcRes = await sb.from('reclamacoes').select('user_id');
+
+  var wkCount = {};
+  (wkRes.data || []).forEach(function(w) { wkCount[w.user_id] = (wkCount[w.user_id] || 0) + 1; });
+  var rcCount = {};
+  (rcRes.data || []).forEach(function(r) { rcCount[r.user_id] = (rcCount[r.user_id] || 0) + 1; });
+
+  document.getElementById('adm-summary').textContent = alunos.length + ' aluno(s) cadastrado(s)';
+
+  if (!alunos.length) {
+    listEl.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:14px">Nenhum aluno cadastrado ainda.</p></div>';
+    return;
+  }
+
+  var html = '';
+  alunos.forEach(function(a) {
+    var d = a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR') : '-';
+    var isPro = a.plano === 'pro';
+    var isBlocked = !!a.bloqueado;
+    html +=
+      '<div class="adm-card">' +
+      '<div class="adm-name">' + (a.nome || 'Sem nome') + '</div>' +
+      '<div class="adm-email">' + (a.email || '') + ' &bull; entrou em ' + d + '</div>' +
+      '<div class="adm-stats">' +
+      '<div class="adm-stat"><b>' + (wkCount[a.id] || 0) + '</b>Treinos</div>' +
+      '<div class="adm-stat"><b>' + (rcCount[a.id] || 0) + '</b>Reclamacoes</div>' +
+      '<div class="adm-stat"><b>' + (isPro ? 'PRO' : 'FREE') + '</b>Plano</div>' +
+      '</div>' +
+      '<div class="adm-actions">' +
+      '<button onclick="togglePlano(\'' + a.id + '\',\'' + a.plano + '\')" class="' + (isPro ? 'on' : '') + '">' + (isPro ? '&#9733; Pro' : 'Tornar Pro') + '</button>' +
+      '<button onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')" class="danger ' + (isBlocked ? 'on' : '') + '">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
+      '<button onclick="openMsgModal(\'' + a.id + '\',\'' + (a.nome || 'aluno').replace(/'/g, "") + '\')">&#128172; Mensagem</button>' +
+      '</div>' +
+      '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+async function togglePlano(id, current) {
+  var novo = current === 'pro' ? 'gratuito' : 'pro';
+  await sb.from('profiles').update({ plano: novo }).eq('id', id);
+  loadAdmin();
+}
+
+async function toggleBloqueado(id, current) {
+  await sb.from('profiles').update({ bloqueado: !current }).eq('id', id);
+  loadAdmin();
+}
+
+function openMsgModal(id, nome) {
+  msgTargetId = id;
+  document.getElementById('msg-modal-title').textContent = 'Mensagem para ' + nome;
+  document.getElementById('msg-txt').value = '';
+  showMsg('msg-out', '');
+  document.getElementById('msg-overlay').classList.add('show');
+}
+
+function closeMsgModal(e) {
+  if (e && e.target !== document.getElementById('msg-overlay')) return;
+  document.getElementById('msg-overlay').classList.remove('show');
+}
+
+async function sendAdminMsg() {
+  var txt = document.getElementById('msg-txt').value.trim();
+  if (!txt || !msgTargetId) return;
+  var btn = document.getElementById('msg-send-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  var res = await sb.from('mensagens_admin').insert({ user_id: msgTargetId, mensagem: txt });
+  btn.disabled = false; btn.textContent = 'Enviar mensagem';
+  if (res.error) { showMsg('msg-out', res.error.message); return; }
+  showMsg('msg-out', 'Mensagem enviada!', 'ok');
+  setTimeout(function() { closeMsgModal(); }, 800);
+}
+
+// === STUDENT: RECEIVE ADMIN MESSAGES ===
+async function loadAdminMessages() {
+  if (!user) return;
+  var el = document.getElementById('msg-banner-area');
+  if (!el) return;
+  var res = await sb.from('mensagens_admin').select('id,mensagem,created_at').eq('user_id', user.id).eq('lida', false).order('created_at', { ascending: false });
+  if (res.error || !res.data || !res.data.length) { el.innerHTML = ''; return; }
+  var html = '';
+  res.data.forEach(function(m) {
+    html += '<div class="msg-banner">' +
+      '<div class="msg-banner-title">&#128172; Mensagem do Thiago</div>' +
+      '<div class="msg-banner-txt">' + m.mensagem + '</div>' +
+      '<button onclick="markMsgRead(\'' + m.id + '\')">Ok, entendi</button>' +
+      '</div>';
+  });
+  el.innerHTML = html;
+}
+
+async function markMsgRead(id) {
+  await sb.from('mensagens_admin').update({ lida: true }).eq('id', id);
+  loadAdminMessages();
+}
+
+// === STUDENT: REPORT PROBLEM ===
+async function sendReclamacao() {
+  if (!user) return;
+  var titulo = document.getElementById('rc-titulo').value.trim();
+  var msg = document.getElementById('rc-msg').value.trim();
+  if (!msg) { showMsg('rc-msg-out', 'Escreva a mensagem.'); return; }
+  var btn = document.getElementById('rc-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  var res = await sb.from('reclamacoes').insert({ user_id: user.id, titulo: titulo, mensagem: msg });
+  btn.disabled = false; btn.textContent = 'Enviar';
+  if (res.error) { showMsg('rc-msg-out', res.error.message); return; }
+  document.getElementById('rc-titulo').value = '';
+  document.getElementById('rc-msg').value = '';
+  showMsg('rc-msg-out', 'Enviado! O Thiago vai analisar.', 'ok');
 }
 
 // === ACTIONS ===
