@@ -271,6 +271,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
         </div>
       </div>
       <div class="fg">
+        <label>Descreva seus objetivos</label>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braços e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+      </div>
+      <div class="fg">
         <label>Materiais / Equipamentos</label>
         <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elásticos, etc."></textarea>
       </div>
@@ -555,6 +559,7 @@ function fillProfileForm() {
   setVal('p-days', p.dias_semana || 5);
   setVal('p-level', p.nivel || 'Intermediario');
   setVal('p-goal', p.objetivo || 'Hipertrofia');
+  setVal('p-goal-desc', p.objetivo_detalhado || '');
   setVal('p-dur', p.duracao || 4);
   setVal('p-mat', p.materiais || '');
   setVal('p-rest', p.restricoes || '');
@@ -581,6 +586,7 @@ async function saveProfile() {
     dias_semana: parseInt(document.getElementById('p-days').value) || 5,
     nivel: document.getElementById('p-level').value,
     objetivo: document.getElementById('p-goal').value,
+    objetivo_detalhado: document.getElementById('p-goal-desc').value.trim(),
     duracao: parseInt(document.getElementById('p-dur').value) || 4,
     materiais: document.getElementById('p-mat').value.trim(),
     restricoes: document.getElementById('p-rest').value.trim(),
@@ -588,7 +594,7 @@ async function saveProfile() {
   };
 
   localStorage.setItem('prof_extras_' + user.id, JSON.stringify({
-    duracao: data.duracao, materiais: data.materiais, restricoes: data.restricoes
+    duracao: data.duracao, materiais: data.materiais, restricoes: data.restricoes, objetivo_detalhado: data.objetivo_detalhado
   }));
 
   var res = await sb.from('profiles').upsert(data, { onConflict: 'id' });
@@ -732,6 +738,7 @@ async function generateWorkout(isAuto) {
           nivel: p.nivel,
           dias_semana: p.dias_semana,
           objetivo: p.objetivo,
+          objetivo_detalhado: p.objetivo_detalhado || '',
           duracao_semanas: p.duracao || 4,
           materiais: p.materiais || 'Nenhum',
           restricoes: p.restricoes || 'Nenhuma'
@@ -1002,6 +1009,7 @@ async function pedirAjuste() {
           nivel: p.nivel,
           dias_semana: p.dias_semana,
           objetivo: p.objetivo,
+          objetivo_detalhado: p.objetivo_detalhado || '',
           duracao_semanas: p.duracao || 4,
           materiais: p.materiais || 'Nenhum',
           restricoes: p.restricoes || 'Nenhuma'
