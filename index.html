@@ -715,9 +715,10 @@ async function generateWorkout(isAuto) {
   var p = profile;
   var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '?';
 
+  var seqAtual = 0;
   try {
     var countRes = await sb.from('workouts').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
-    var seqAtual = (countRes.count || 0) + 1;
+    seqAtual = (countRes.count || 0) + 1;
 
     var res = await sb.functions.invoke('generate-workout', {
       body: {
@@ -757,33 +758,30 @@ async function generateWorkout(isAuto) {
       }
       throw new Error(workout.error || 'Erro ao gerar treino');
     }
+
+    // o proprio servidor ja salva o treino no banco; usamos o workout_id retornado
+    var newId = workout.workout_id;
     if (workout && workout.programa) workout = workout.programa;
-
-    var saved = await sb.from('workouts').insert({
-      user_id: user.id,
-      nome: workout.nome || 'Programa de Treino',
-      dividir: workout.split || workout.dividir || '',
-      duracao_semanas: workout.duracao_semanas || p.duracao || 4,
-      sequencia: seqAtual,
-      programa: workout,
-      created_at: new Date().toISOString()
-    }).select('id').single();
-
-    if (saved.error) throw new Error('Erro ao salvar: ' + saved.error.message);
 
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
 
-    wkId = saved.data.id;
-    wkData = workout;
-    wkSequencia = seqAtual;
-    renderWorkout(workout);
+    if (newId) {
+      wkId = newId;
+      wkData = workout;
+      wkSequencia = seqAtual;
+      renderWorkout(workout);
+    }
     updateQuotaInfo();
+    loadWorkouts();
 
   } catch(e) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
-    if (!isAuto) showMsg('gen-err', 'Erro: ' + e.message);
+    if (!isAuto) {
+      showMsg('gen-err', 'Erro: ' + e.message + ' — se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
+    }
   }
 }
 
@@ -1026,24 +1024,31 @@ async function pedirAjuste() {
       }
     }
     if (workout && workout.ok === false) throw new Error(workout.error || 'Erro ao ajustar treino');
+
+    // o proprio servidor ja salvou o ajuste no banco (workouts.id = wkId)
     if (workout && workout.programa) workout = workout.programa;
-
-    var upd = await sb.from('workouts').update({
-      nome: workout.nome || 'Programa de Treino',
-      dividir: workout.split || workout.dividir || '',
-      duracao_semanas: workout.duracao_semanas || p.duracao || 4,
-      programa: workout
-    }).eq('id', wkId);
-
-    if (upd.error) throw new Error('Erro ao salvar ajuste: ' + upd.error.message);
 
     wkData = workout;
     document.getElementById('ajuste-txt').value = '';
     renderWorkout(workout);
     showMsg('ajuste-err', 'Treino ajustado pelo Thiago!', 'ok');
+    updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message);
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' — se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    var savedWkId = wkId;
+    setTimeout(async function() {
+      try {
+        var check = await sb.from('workouts').select('*').eq('id', savedWkId).single();
+        if (check.data) {
+          var d = check.data.programa;
+          if (typeof d === 'string') d = JSON.parse(d);
+          wkData = d;
+          renderWorkout(d);
+        }
+      } catch(e2) {}
+      updateQuotaInfo();
+    }, 4000);
   } finally {
     btn.disabled = false;
     document.getElementById('ajuste-loading').style.display = 'none';
