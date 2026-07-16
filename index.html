@@ -126,6 +126,19 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .ex-row-partner td:first-child{position:relative;padding-left:14px}
 .ex-row-partner td:first-child:before{content:'';position:absolute;left:0;top:2px;bottom:8px;width:3px;background:var(--g);border-radius:2px}
 
+
+/* TOAST */
+#motiv-toast{position:fixed;left:16px;right:16px;top:16px;max-width:520px;margin:0 auto;background:linear-gradient(135deg,#1a2e1a,#111);border:1px solid var(--g);border-radius:12px;padding:14px 16px;z-index:800;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);transform:translateY(-120%);opacity:0;transition:transform .35s ease,opacity .35s ease}
+#motiv-toast.show{transform:translateY(0);opacity:1}
+#motiv-toast .mt-icon{font-size:20px;flex-shrink:0}
+#motiv-toast .mt-txt{font-size:13px;font-weight:700;line-height:1.4}
+
+/* ONBOARDING */
+.ob-step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
+.ob-num{background:var(--g);color:#000;font-weight:900;font-size:13px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ob-txt b{display:block;font-size:14px;margin-bottom:2px}
+.ob-txt span{font-size:12px;color:var(--muted);line-height:1.5}
+
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
@@ -392,6 +405,23 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- MOTIVATIONAL TOAST -->
+<div id="motiv-toast"><span class="mt-icon">&#128170;</span><span class="mt-txt" id="motiv-toast-txt"></span></div>
+
+<!-- ONBOARDING -->
+<div class="overlay" id="onboarding-overlay">
+  <div class="modal">
+    <div class="auth-logo" style="margin-bottom:18px"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
+    <div class="ctitle">Bem-vindo(a)!</div>
+    <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis — isso guia todo o seu treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Gere seu treino</b><span>Toque em "Gerar Novo Treino" na tela inicial. Em ~30 segundos seu programa fica pronto.</span></div></div>
+    <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e acompanhe</b><span>Abra o treino, assista aos videos de cada exercicio e registre a carga usada.</span></div></div>
+    <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Fale com o Thiago</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">5</div><div class="ob-txt"><b>Instale no celular</b><span>Toque no icone de celular no topo para adicionar o app na tela de inicio.</span></div></div>
+    <button class="btn btn-p" onclick="closeOnboarding()">Vamos Comecar!</button>
+  </div>
+</div>
+
 <!-- VIDEO MODAL -->
 <div class="overlay" id="vid-overlay" onclick="closeVid(event)">
   <div class="modal">
@@ -428,6 +458,61 @@ var deferredInstall = null;
 var authMode = 'in';
 var isAdmin = false;
 var msgTargetId = null;
+
+var MOTIV_GERADO = [
+  'Treino novo na area! Bora dar o seu melhor.',
+  'Programa pronto! O proximo passo e seu: comece hoje.',
+  'Treino gerado com tudo que voce precisa. Agora e suar a camisa!',
+  'Seu treino ta pronto. Consistencia e o que separa quem sonha de quem conquista.',
+  'Novo ciclo, nova energia. Vamos nessa!',
+  'Treino pronto! Todo grande resultado comeca com o primeiro treino da semana.',
+  'Seu programa foi montado pensando em voce. Agora e hora de executar.',
+  'Treino na mao! O corpo que voce quer se constroi um treino de cada vez.'
+];
+var MOTIV_ABRIR = [
+  'Bora treinar! Foco na execucao de hoje.',
+  'Hoje e dia de evoluir. Da o seu maximo!',
+  'Cada treino te aproxima do seu objetivo. Vamos nessa!',
+  'Respira, foca e treina com intencao hoje.',
+  'Voce ja deu o primeiro passo abrindo o app. Agora e so treinar!',
+  'Disciplina vence motivacao nos dias dificeis. Bora!',
+  'Hoje e mais um degrau na sua evolucao.',
+  'Sem desculpas, so execucao. Vamos com tudo!'
+];
+var MOTIV_VOLTA = [
+  'Sentimos sua falta por aqui! Bora retomar o treino?',
+  'Ja faz alguns dias que voce nao treina. Que tal comecar hoje?',
+  'Todo recomeco conta. Vamos voltar aos treinos?',
+  'Seu objetivo continua te esperando. Vamos retomar?',
+  'Um treino hoje ja e um passo a frente de ontem. Bora voltar?'
+];
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+var motivToastTimer = null;
+function showToast(msg, icon) {
+  var el = document.getElementById('motiv-toast');
+  if (!el) return;
+  document.getElementById('motiv-toast-txt').textContent = msg;
+  var iconEl = el.querySelector('.mt-icon');
+  if (iconEl) iconEl.innerHTML = icon || '&#128170;';
+  el.classList.add('show');
+  if (motivToastTimer) clearTimeout(motivToastTimer);
+  motivToastTimer = setTimeout(function() { el.classList.remove('show'); }, 6000);
+}
+
+function showOnboarding() {
+  document.getElementById('onboarding-overlay').classList.add('show');
+}
+
+async function closeOnboarding() {
+  document.getElementById('onboarding-overlay').classList.remove('show');
+  if (!user) return;
+  profile = profile || {};
+  profile.onboarding_visto = true;
+  try { await sb.from('profiles').update({ onboarding_visto: true }).eq('id', user.id); } catch(e) {}
+}
+
 
 // === PWA ===
 window.addEventListener('beforeinstallprompt', function(e) {
@@ -539,10 +624,23 @@ async function loadProfile() {
     var adminBtn = document.getElementById('admin-btn');
     if (adminBtn) adminBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
+    var prevSeen = profile.last_seen_at;
+    var needsOnboarding = !profile.onboarding_visto;
+    sb.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('id', user.id).then(function(){}).catch(function(){});
+
     renderHomeProfile();
     show('home');
     loadWorkouts();
     loadAdminMessages();
+
+    if (needsOnboarding) {
+      setTimeout(function() { showOnboarding(); }, 400);
+    } else if (prevSeen) {
+      var diffDays = (Date.now() - new Date(prevSeen).getTime()) / (24*60*60*1000);
+      if (diffDays >= 3) {
+        setTimeout(function() { showToast(pickRandom(MOTIV_VOLTA), '&#128075;'); }, 700);
+      }
+    }
   } else {
     show('profile');
   }
@@ -778,6 +876,7 @@ async function generateWorkout(isAuto) {
       wkData = workout;
       wkSequencia = seqAtual;
       renderWorkout(workout);
+      showToast(pickRandom(MOTIV_GERADO), '&#127881;');
     }
     updateQuotaInfo();
     loadWorkouts();
@@ -802,6 +901,7 @@ async function openWorkout(id) {
   if (typeof d === 'string') d = JSON.parse(d);
   wkData = d;
   renderWorkout(d);
+  showToast(pickRandom(MOTIV_ABRIR), '&#128293;');
 }
 
 // === RENDER ===
