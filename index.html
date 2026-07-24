@@ -143,6 +143,23 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .admin-view-banner{background:rgba(76,175,80,.12);border:1px solid var(--g);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-weight:800;color:var(--g);display:flex;justify-content:space-between;align-items:center;gap:10px}
 .admin-view-banner button{background:none;border:1px solid var(--g);color:var(--g);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;text-transform:uppercase;white-space:nowrap}
 
+/* GAMIFICACAO */
+.gami-stats{display:flex;gap:10px}
+.gami-stat{flex:1;background:#111;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.gami-num{font-size:26px;font-weight:900;color:var(--g)}
+.gami-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+
+/* EXECUCAO REAL */
+.exec-btn{background:#111;border:1px solid var(--g);color:var(--g);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:900;cursor:pointer;margin-top:5px;width:100%}
+.exec-btn.done{background:var(--g);color:#000}
+
+/* PROGRESSO */
+.prog-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:10px}
+.prog-item:last-child{border-bottom:none}
+
+/* PLANO */
+#plano-status{padding:10px 12px;background:#111;border:1px solid var(--border);border-radius:10px}
+
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
@@ -230,6 +247,12 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     </div>
   </div>
   <div class="cnt">
+    <div class="card" id="plano-card">
+      <div class="ctitle">Seu Plano</div>
+      <div id="plano-status" style="font-size:14px;font-weight:800;margin-bottom:10px">Plano Gratuito</div>
+      <div id="plano-out"></div>
+      <button class="btn btn-p" id="plano-upgrade-btn" onclick="virarPro()" style="display:none">&#128176; Virar PRO (Pix ou cartao)</button>
+    </div>
     <div class="card">
       <div class="ctitle">Perfil do Atleta</div>
       <div id="p-msg"></div>
@@ -289,17 +312,30 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braços e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elásticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
         <textarea id="p-rest" placeholder="Ex: dor no joelho, cirurgia lombar, etc."></textarea>
       </div>
       <button class="btn btn-p" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
+    </div>
+    <div class="card">
+      <div class="ctitle">Progresso: Peso e Fotos</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Registre seu peso e uma foto periodicamente para acompanhar sua evolucao.</div>
+      <div class="frow">
+        <div class="fg"><label>Peso (kg)</label><input type="number" id="prog-peso" step="0.1" placeholder="kg"></div>
+        <div class="fg"><label>Data</label><input type="date" id="prog-data"></div>
+      </div>
+      <div class="fg"><label>Foto (opcional)</label><input type="file" id="prog-foto" accept="image/*"></div>
+      <div id="prog-out"></div>
+      <button class="btn btn-p" id="prog-save-btn" onclick="salvarProgresso()">Salvar Registro</button>
+      <div id="prog-chart" style="margin-top:16px"></div>
+      <div id="prog-list" style="margin-top:12px"></div>
     </div>
     <div class="card">
       <div class="ctitle">Reportar um Problema</div>
@@ -327,6 +363,13 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="cnt">
     <div id="msg-banner-area"></div>
     <div id="home-profile" class="card" style="display:none"></div>
+    <div id="gami-card" class="card" style="display:none">
+      <div class="ctitle">Sua Consistencia</div>
+      <div class="gami-stats">
+        <div class="gami-stat"><div class="gami-num" id="gami-streak">0</div><div class="gami-lbl">&#128293; dias seguidos</div></div>
+        <div class="gami-stat"><div class="gami-num" id="gami-total">0</div><div class="gami-lbl">dias treinados</div></div>
+      </div>
+    </div>
     <div class="card">
       <div id="gen-wrap">
         <button class="btn btn-p" onclick="generateWorkout()" id="gen-btn">&#9889; Gerar Novo Treino</button>
@@ -364,11 +407,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:14px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Quer alguma alteração nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra você.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que você quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Quer alguma alteraÃ§Ã£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:12px;color:#555">Thiago está reformulando... até 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:12px;color:#555">Thiago estÃ¡ reformulando... atÃ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -414,6 +457,32 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- REGISTRAR EXECUCAO -->
+<div class="overlay" id="exec-overlay" onclick="closeExecModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeExecModal()">&#10005;</button>
+    <div class="ctitle">Registrar Execucao</div>
+    <div id="exec-ex-name" style="font-weight:800;font-size:14px;margin-bottom:14px"></div>
+    <div class="frow">
+      <div class="fg"><label>Carga (kg)</label><input type="number" id="exec-peso" step="0.5" placeholder="kg"></div>
+      <div class="fg"><label>Repeticoes</label><input type="number" id="exec-reps" placeholder="reps"></div>
+    </div>
+    <div class="fg">
+      <label>RPE (esforco percebido, 1-10)</label>
+      <select id="exec-rpe">
+        <option value="">-</option>
+        <option value="6">6 - Facil</option>
+        <option value="7">7</option>
+        <option value="8">8 - Moderado</option>
+        <option value="9">9</option>
+        <option value="10">10 - Maximo</option>
+      </select>
+    </div>
+    <div id="exec-out"></div>
+    <button class="btn btn-p" onclick="salvarExecucao()" id="exec-save-btn">Salvar</button>
+  </div>
+</div>
+
 <!-- MOTIVATIONAL TOAST -->
 <div id="motiv-toast"><span class="mt-icon">&#128170;</span><span class="mt-txt" id="motiv-toast-txt"></span></div>
 
@@ -422,7 +491,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="modal">
     <div class="auth-logo" style="margin-bottom:18px"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
     <div class="ctitle">Bem-vindo(a)!</div>
-    <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis — isso guia todo o seu treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis â isso guia todo o seu treino.</span></div></div>
     <div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Gere seu treino</b><span>Toque em "Gerar Novo Treino" na tela inicial. Em ~30 segundos seu programa fica pronto.</span></div></div>
     <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e acompanhe</b><span>Abra o treino, assista aos videos de cada exercicio e registre a carga usada.</span></div></div>
     <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Fale com o Thiago</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
@@ -556,10 +625,14 @@ function goHome() {
   adminViewMode = false; adminAlunoId = null; adminAlunoProfile = null;
   show('home');
   loadWorkouts();
+  refreshGamificacao();
 }
 
 function goProfile() {
   fillProfileForm();
+  renderPlanoCard();
+  initProgDate();
+  loadProgresso();
   show('profile');
 }
 
@@ -646,6 +719,7 @@ async function loadProfile() {
     show('home');
     loadWorkouts();
     loadAdminMessages();
+    refreshGamificacao();
 
     if (needsOnboarding) {
       setTimeout(function() { showOnboarding(); }, 400);
@@ -900,7 +974,7 @@ async function generateWorkout(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' — se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' â se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -1035,7 +1109,9 @@ function renderDay(sessoes, di, wi) {
         '<td>' + series + '</td>' +
         '<td>' + reps + '</td>' +
         '<td>' + desc + '</td>' +
-        '<td><input class="ex-load" type="text" placeholder="kg" value="' + saved + '" data-k="' + key + '"></td>' +
+        '<td><input class="ex-load" type="text" placeholder="kg" value="' + saved + '" data-k="' + key + '">' +
+        '<button class="exec-btn" data-k="' + key + '" data-ex="' + encodeURIComponent(name) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">&#10003; Registrar</button>' +
+        '</td>' +
         '</tr>';
 
       if (parceiro) {
@@ -1052,7 +1128,9 @@ function renderDay(sessoes, di, wi) {
           '<td>' + seriesP + '</td>' +
           '<td>' + repsP + '</td>' +
           '<td>' + desc + '</td>' +
-          '<td><input class="ex-load" type="text" placeholder="kg" value="' + savedP + '" data-k="' + keyP + '"></td>' +
+          '<td><input class="ex-load" type="text" placeholder="kg" value="' + savedP + '" data-k="' + keyP + '">' +
+          '<button class="exec-btn" data-k="' + keyP + '" data-ex="' + encodeURIComponent(parceiro) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">&#10003; Registrar</button>' +
+          '</td>' +
           '</tr>';
       }
     });
@@ -1072,6 +1150,212 @@ function renderDay(sessoes, di, wi) {
   exArea.querySelectorAll('.vbtn').forEach(function(btn) {
     btn.addEventListener('click', function() { openVideo(this.dataset.url); });
   });
+
+  exArea.querySelectorAll('.exec-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      abrirExecModal(decodeURIComponent(this.dataset.ex), this.dataset.k, parseInt(this.dataset.wi), parseInt(this.dataset.di), decodeURIComponent(this.dataset.foco));
+    });
+  });
+}
+
+// === EXECUCAO REAL (carga/reps/RPE) ===
+var execTarget = null;
+
+function abrirExecModal(exName, key, wi, di, foco) {
+  var kgVal = '';
+  var inp = document.querySelector('.ex-load[data-k="' + key + '"]');
+  if (inp) kgVal = inp.value;
+  execTarget = { exercicio_nome: exName, semana: (isNaN(wi) ? 0 : wi) + 1, dia_nome: foco || '' };
+  document.getElementById('exec-ex-name').textContent = exName;
+  document.getElementById('exec-peso').value = kgVal;
+  document.getElementById('exec-reps').value = '';
+  document.getElementById('exec-rpe').value = '';
+  showMsg('exec-out', '');
+  document.getElementById('exec-overlay').classList.add('show');
+}
+
+function closeExecModal(e) {
+  if (e && e.target !== document.getElementById('exec-overlay')) return;
+  document.getElementById('exec-overlay').classList.remove('show');
+}
+
+async function salvarExecucao() {
+  if (!user || !execTarget || !wkId) { showMsg('exec-out', 'Abra um treino salvo antes de registrar.'); return; }
+  var peso = parseFloat(document.getElementById('exec-peso').value);
+  var reps = parseInt(document.getElementById('exec-reps').value);
+  var rpe = parseInt(document.getElementById('exec-rpe').value);
+  var btn = document.getElementById('exec-save-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  showMsg('exec-out', '');
+
+  var row = {
+    user_id: user.id,
+    workout_id: wkId,
+    semana: execTarget.semana,
+    dia_nome: execTarget.dia_nome,
+    exercicio_nome: execTarget.exercicio_nome,
+    peso: isNaN(peso) ? null : peso,
+    reps: isNaN(reps) ? null : reps,
+    rpe: isNaN(rpe) ? null : rpe
+  };
+
+  var res = await sb.from('logs_execucao').insert(row);
+  btn.disabled = false; btn.textContent = 'Salvar';
+
+  if (res.error) { showMsg('exec-out', res.error.message); return; }
+
+  showMsg('exec-out', 'Execucao registrada!', 'ok');
+  refreshGamificacao();
+  setTimeout(function() { closeExecModal(); }, 700);
+}
+
+// === GAMIFICACAO LEVE ===
+async function refreshGamificacao() {
+  if (!user) return;
+  var card = document.getElementById('gami-card');
+  try {
+    var res = await sb.from('logs_execucao').select('data').eq('user_id', user.id).order('data', { ascending: false });
+    if (res.error || !res.data || !res.data.length) { if (card) card.style.display = 'none'; return; }
+
+    var diasSet = {};
+    res.data.forEach(function(r) { diasSet[r.data] = true; });
+    var total = Object.keys(diasSet).length;
+
+    var cursor = new Date();
+    cursor.setHours(0, 0, 0, 0);
+    var todayStr = cursor.toISOString().slice(0, 10);
+    if (!diasSet[todayStr]) cursor.setDate(cursor.getDate() - 1);
+    var streak = 0;
+    while (diasSet[cursor.toISOString().slice(0, 10)]) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    if (card) card.style.display = 'block';
+    document.getElementById('gami-streak').textContent = streak;
+    document.getElementById('gami-total').textContent = total;
+  } catch (e) {}
+}
+
+// === PROGRESSO: PESO E FOTOS ===
+function initProgDate() {
+  var el = document.getElementById('prog-data');
+  if (el && !el.value) el.value = new Date().toISOString().slice(0, 10);
+}
+
+async function salvarProgresso() {
+  if (!user) return;
+  var pesoVal = parseFloat(document.getElementById('prog-peso').value);
+  var peso = isNaN(pesoVal) ? null : pesoVal;
+  var data = document.getElementById('prog-data').value || new Date().toISOString().slice(0, 10);
+  var fileInput = document.getElementById('prog-foto');
+  var file = fileInput.files && fileInput.files[0];
+  if (!peso && !file) { showMsg('prog-out', 'Informe ao menos o peso ou uma foto.'); return; }
+
+  var btn = document.getElementById('prog-save-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  showMsg('prog-out', '');
+
+  try {
+    var fotoPath = null;
+    if (file) {
+      var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      fotoPath = user.id + '/' + Date.now() + '.' + ext;
+      var upRes = await sb.storage.from('progresso-fotos').upload(fotoPath, file, { upsert: false });
+      if (upRes.error) throw upRes.error;
+    }
+    var res = await sb.from('progresso_medidas').insert({ user_id: user.id, data: data, peso: peso, foto_path: fotoPath });
+    if (res.error) throw res.error;
+    showMsg('prog-out', 'Registro salvo!', 'ok');
+    document.getElementById('prog-peso').value = '';
+    fileInput.value = '';
+    loadProgresso();
+  } catch (e) {
+    showMsg('prog-out', e.message || 'Erro ao salvar.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar Registro';
+  }
+}
+
+async function loadProgresso() {
+  if (!user) return;
+  var listEl = document.getElementById('prog-list');
+  var chartEl = document.getElementById('prog-chart');
+  if (!listEl) return;
+
+  var res = await sb.from('progresso_medidas').select('*').eq('user_id', user.id).order('data', { ascending: true });
+  if (res.error || !res.data || !res.data.length) {
+    listEl.innerHTML = '<p style="color:var(--muted);font-size:12px">Nenhum registro ainda.</p>';
+    if (chartEl) chartEl.innerHTML = '';
+    return;
+  }
+
+  var pontos = res.data.filter(function(r) { return r.peso; });
+  if (chartEl) chartEl.innerHTML = pontos.length > 1 ? svgSparkline(pontos) : '';
+
+  var rows = res.data.slice().reverse();
+  var html = '<div style="font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Historico</div>';
+  rows.forEach(function(r) {
+    var d = new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR');
+    html += '<div class="prog-item"><div><b>' + d + '</b>' + (r.peso ? ' &bull; ' + r.peso + ' kg' : '') + '</div>' +
+      (r.foto_path ? '<button class="ibtn" data-path="' + r.foto_path + '" style="padding:4px 9px;font-size:12px">Ver foto</button>' : '') +
+      '</div>';
+  });
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('button[data-path]').forEach(function(b) {
+    b.addEventListener('click', async function() {
+      var res2 = await sb.storage.from('progresso-fotos').createSignedUrl(this.dataset.path, 3600);
+      if (res2.data && res2.data.signedUrl) window.open(res2.data.signedUrl, '_blank');
+    });
+  });
+}
+
+function svgSparkline(pontos) {
+  var w = 280, h = 70, pad = 6;
+  var pesos = pontos.map(function(p) { return p.peso; });
+  var min = Math.min.apply(null, pesos), max = Math.max.apply(null, pesos);
+  if (min === max) { min -= 1; max += 1; }
+  var stepX = (w - pad * 2) / Math.max(1, pontos.length - 1);
+  var pts = pontos.map(function(p, i) {
+    var x = pad + i * stepX;
+    var y = h - pad - ((p.peso - min) / (max - min)) * (h - pad * 2);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  var first = pontos[0].peso, last = pontos[pontos.length - 1].peso;
+  var delta = (last - first).toFixed(1);
+  var deltaTxt = (delta > 0 ? '+' : '') + delta + ' kg desde o primeiro registro';
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:70px"><polyline fill="none" stroke="#4CAF50" stroke-width="2" points="' + pts + '"/></svg>' +
+    '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + deltaTxt + '</div>';
+}
+
+// === PLANO / COBRANCA PIX ===
+function renderPlanoCard() {
+  var el = document.getElementById('plano-status');
+  var btn = document.getElementById('plano-upgrade-btn');
+  if (!el || !profile) return;
+  var isPro = profile.plano === 'pro';
+  el.innerHTML = isPro ? '&#11088; Plano PRO ativo' : 'Plano Gratuito';
+  if (btn) btn.style.display = isPro ? 'none' : 'block';
+}
+
+async function virarPro() {
+  if (!user) return;
+  var btn = document.getElementById('plano-upgrade-btn');
+  btn.disabled = true; btn.textContent = 'Gerando link de pagamento...';
+  showMsg('plano-out', '');
+  try {
+    var res = await sb.functions.invoke('stripe-checkout', { body: { user_id: user.id, email: user.email } });
+    if (res.error) throw new Error(res.error.message || 'Erro ao gerar cobranca');
+    var data = res.data;
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch (e) {} }
+    if (!data || !data.url) throw new Error((data && data.error) || 'Nao foi possivel gerar o link de pagamento.');
+    window.open(data.url, '_blank');
+  } catch (e) {
+    showMsg('plano-out', e.message || 'Erro ao iniciar pagamento.');
+  } finally {
+    btn.disabled = false; btn.textContent = '\uD83D\uDCB0 Virar PRO (Pix ou cartao)';
+  }
 }
 
 // === VIDEO ===
@@ -1224,7 +1508,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que você quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -1284,7 +1568,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' — se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' â se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
