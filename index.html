@@ -160,6 +160,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 /* PLANO */
 #plano-status{padding:10px 12px;background:#111;border:1px solid var(--border);border-radius:10px}
 
+/* DICAS */
+.dica-item{background:#111;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:13px;line-height:1.5}
+.dica-item b{color:var(--text)}
+
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
@@ -355,6 +359,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div class="hdr-btns">
       <button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
       <button class="ibtn" onclick="showInstall()" title="Instalar no celular">&#128241;</button>
+      <button class="ibtn" onclick="goDicas()" title="Dicas">&#128161;</button>
       <button class="ibtn" onclick="goProfile()" title="Editar perfil">&#9998;</button>
       <button class="ibtn" id="admin-btn" onclick="goAdmin()" title="Painel do treinador" style="display:none">&#128101;</button>
       <button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
@@ -391,6 +396,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
     <div class="hdr-btns">
       <button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
+      <button class="ibtn" onclick="goDicas()" title="Dicas">&#128161;</button>
       <button class="ibtn" onclick="workoutBack()">&#8592;</button>
       <button class="ibtn" onclick="printPDF()" title="Exportar PDF">&#128438;</button>
       <button class="ibtn danger" id="del-workout-btn" onclick="delWorkout()" title="Apagar treino">&#128465;</button>
@@ -446,6 +452,36 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- ===== DICAS ===== -->
+<div id="screen-dicas" class="screen">
+  <div class="hdr">
+    <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+    <div class="hdr-btns">
+      <button class="ibtn" onclick="goHome()" title="Voltar">&#8592;</button>
+    </div>
+  </div>
+  <div class="cnt">
+    <div class="card">
+      <div class="ctitle">Como Usar o App</div>
+      <div id="dicas-uso"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Tipos de Split</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">A divisao de treino (split) usada no seu programa.</div>
+      <div id="dicas-splits"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Glossario dos Metodos</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">O nome que aparece em cada exercicio do seu treino. Toque numa categoria para filtrar.</div>
+      <div class="tabs-scroll"><div class="tabs" id="dicas-metodo-tabs"></div></div>
+      <div id="dicas-metodos"></div>
+    </div>
+    <div class="card">
+      <button class="btn btn-s" onclick="showOnboarding()">&#128218; Rever tutorial de boas-vindas</button>
+    </div>
+  </div>
+</div>
+
 <!-- MESSAGE MODAL (admin -> aluno) -->
 <div class="overlay" id="msg-overlay" onclick="closeMsgModal(event)">
   <div class="modal">
@@ -491,11 +527,13 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="modal">
     <div class="auth-logo" style="margin-bottom:18px"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
     <div class="ctitle">Bem-vindo(a)!</div>
-    <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis â isso guia todo o seu treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis - isso guia todo o seu treino.</span></div></div>
     <div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Gere seu treino</b><span>Toque em "Gerar Novo Treino" na tela inicial. Em ~30 segundos seu programa fica pronto.</span></div></div>
-    <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e acompanhe</b><span>Abra o treino, assista aos videos de cada exercicio e registre a carga usada.</span></div></div>
-    <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Fale com o Thiago</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
-    <div class="ob-step"><div class="ob-num">5</div><div class="ob-txt"><b>Instale no celular</b><span>Toque no icone de celular no topo para adicionar o app na tela de inicio.</span></div></div>
+    <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e registre</b><span>Abra o treino, assista aos videos e toque em "Registrar" em cada exercicio para salvar carga, reps e RPE.</span></div></div>
+    <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Acompanhe seu progresso</b><span>Na tela de Perfil, registre peso e fotos. Na tela inicial, veja sua sequencia de dias treinados.</span></div></div>
+    <div class="ob-step"><div class="ob-num">5</div><div class="ob-txt"><b>Consulte a aba Dicas</b><span>O icone de lampada explica como usar o app e o significado de cada metodo de treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">6</div><div class="ob-txt"><b>Fale com o Thiago</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">7</div><div class="ob-txt"><b>Instale no celular</b><span>Toque no icone de celular no topo para adicionar o app na tela de inicio.</span></div></div>
     <button class="btn btn-p" onclick="closeOnboarding()">Vamos Comecar!</button>
   </div>
 </div>
@@ -592,6 +630,136 @@ async function closeOnboarding() {
   profile = profile || {};
   profile.onboarding_visto = true;
   try { await sb.from('profiles').update({ onboarding_visto: true }).eq('id', user.id); } catch(e) {}
+}
+
+// === DICAS ===
+var METODOS_INFO = [
+  {n:'Bi Set',sr:'2 ex x series',rest:'30-40s',niv:'Iniciante+',cat:'Combinacao',obj:'Hipertrofia mesmo grupo',desc:'Dois exercicios para o MESMO grupo muscular sem descanso.',obs:'Foco na fadiga do musculo alvo.'},
+  {n:'Super Set',sr:'2 ex x series',rest:'30-40s',niv:'Iniciante+',cat:'Combinacao',obj:'Hipertrofia grupos diferentes',desc:'Dois exercicios para grupos musculares DIFERENTES sem descanso.',obs:'Otimiza o tempo de treino.'},
+  {n:'Super Set Agonista-Antagonista',sr:'2 ex x series',rest:'30-40s',niv:'Iniciante+',cat:'Combinacao',obj:'Forca + hipertrofia',desc:'Dois exercicios para grupos sinergicos (ex: costas + biceps).',obs:'Permite manter a qualidade do movimento.'},
+  {n:'Tri Set',sr:'3 ex x series',rest:'40s',niv:'Intermediario+',cat:'Combinacao',obj:'Hipertrofia mesmo grupo',desc:'Tres exercicios para o mesmo grupo em sequencia.',obs:'Alta densidade de treino.'},
+  {n:'Set Gigante',sr:'4 ex x series',rest:'40-60s',niv:'Intermediario+',cat:'Combinacao',obj:'Hipertrofia/Volume',desc:'Quatro exercicios para o mesmo grupo em sequencia.',obs:'Exige boa capacidade aerobia.'},
+  {n:'Circuito',sr:'Varios ex sequencia',rest:'15-30s',niv:'Sedentario/Iniciante',cat:'Volume',obj:'Condicionamento/Emagrecimento',desc:'Varios exercicios para grupos diferentes em sequencia.',obs:'Alta demanda metabolica. Ideal para inicio de programa.'},
+  {n:'Rest Pause',sr:'10r + 10s + 10r',rest:'Min.',niv:'Iniciante+',cat:'Intensidade',obj:'Hipertrofia',desc:'Realiza 10 reps, descansa 10 segundos, faz mais 10 reps. Mesma carga.',obs:'Mantem a carga elevada mesmo com fadiga.'},
+  {n:'Rest Pause 2',sr:'10r + 5s + 10r',rest:'Min.',niv:'Iniciante+',cat:'Intensidade',obj:'Hipertrofia',desc:'Realiza 10 reps, descansa 5 segundos, faz mais 10 reps. Mesma carga.',obs:'Intervalo mais curto = maior intensidade.'},
+  {n:'Rest Pause 3',sr:'Carga p/10 -> 20 c/ pausas 5s',rest:'Min.',niv:'Intermediario',cat:'Intensidade',obj:'Hipertrofia maxima',desc:'Utilize carga para 10 reps, faca pausas de 5s ate completar 20 reps.',obs:'Um dos melhores estimulos para hipertrofia. Progrida cargas.'},
+  {n:'Rest Pause 4',sr:'8r+10s+8r+10s+8r ou max',rest:'10s clusters',niv:'Avancado',cat:'Intensidade',obj:'Forca + hipertrofia',desc:'8 reps, 10s, 8 reps, 10s, 8 reps ou maximo. Mesma carga.',obs:'Alta exigencia neuromuscular.'},
+  {n:'Drop Set',sr:'10 -> drop~20% -> 10',rest:'Min.',niv:'Iniciante+',cat:'Intensidade',obj:'Hipertrofia',desc:'Realiza 10 reps, diminui ~20% da carga, faz mais 10 reps.',obs:'Chega a fadiga muscular profunda.'},
+  {n:'Drop Set 2',sr:'10 -> drop -> 10 -> drop -> 10',rest:'Min.',niv:'Intermediario',cat:'Intensidade',obj:'Hipertrofia maxima',desc:'10 reps, drop ~20%, 10 reps, drop ~20%, 10 reps.',obs:'Diminua ~20% a cada queda.'},
+  {n:'Drop Set 3',sr:'10 -> drop -> 15 -> drop -> 12',rest:'Min.',niv:'Intermediario',cat:'Intensidade',obj:'Hipertrofia maxima',desc:'10 reps, drop carga, 15 reps, drop carga, 12 reps. ~20% a cada queda.',obs:'Melhor metodo para hipertrofia. Mantenha as cargas altas.'},
+  {n:'Isometria 1',sr:'10r + 10s hold + 10r',rest:'90s',niv:'Iniciante+',cat:'Intensidade',obj:'Forca + preservacao articular',desc:'10 reps, segura 10s em contracao, faz mais 10 reps. Mesma carga.',obs:'Alem de fortalecer, preserva ligamentos e articulacoes.'},
+  {n:'Isometria 2',sr:'10r+10s+10r+10s+max',rest:'90s',niv:'Iniciante+',cat:'Intensidade',obj:'Forca + hipertrofia',desc:'10 reps, segura 10s, 10 reps, segura 10s, maximo. Mesma carga.',obs:'Versao com hold duplo e serie final ao maximo.'},
+  {n:'Isometria (intermediaria)',sr:'10r+5s+10r+5s+max',rest:'75s',niv:'Intermediario',cat:'Intensidade',obj:'Resistencia + forca',desc:'10 reps, segura 5s, 10 reps, segura 5s, maximo. Mesma carga.',obs:'Hold de 5s - versao mais dinamica.'},
+  {n:'Isometria 3',sr:'10s hold+10r+10s+10r',rest:'90s',niv:'Intermediario',cat:'Intensidade',obj:'Forca maxima',desc:'Segura 10s, faz 10 reps, segura 10s, faz mais 10 ou maximo.',obs:'Pode reduzir ate 40% da carga em relacao ao normal.'},
+  {n:'Isometria 4',sr:'10r+10s+10r+10s+max',rest:'90s',niv:'Avancado',cat:'Intensidade',obj:'Forca maxima',desc:'10 reps, segura 10s, 10 reps, segura 10s, maximo.',obs:'A variacao que mais exige forca e resistencia.'},
+  {n:'Piramide Crescente',sr:'10->12->15->20 (carga desce)',rest:'40-60s',niv:'Iniciante+',cat:'Volume',obj:'Resistencia muscular',desc:'10, 12, 15, 20 reps. Diminui a carga a cada serie.',obs:'Trabalha fibras de resistencia. Recruta novas fibras.'},
+  {n:'Piramide Crescente 2',sr:'8->10->12->15 (carga desce)',rest:'40-60s',niv:'Iniciante+',cat:'Volume',obj:'Resistencia + hipertrofia',desc:'8, 10, 12, 15 reps. Diminui carga a cada serie.',obs:'Versao mais intensa - comeca mais pesado.'},
+  {n:'Piramide Decrescente',sr:'20->15->10 (carga sobe)',rest:'40-60s',niv:'Iniciante+',cat:'Forca',obj:'Forca + hipertrofia',desc:'20, 15, 10 reps. Aumenta carga a cada serie.',obs:'Progressao de carga classica.'},
+  {n:'Piramide Decrescente 2',sr:'20->15->12->10 (carga sobe)',rest:'40-60s',niv:'Intermediario',cat:'Forca',obj:'Forca progressiva',desc:'20, 15, 12, 10 reps sempre aumentando carga.',obs:'Respeite o intervalo - faca render cada serie.'},
+  {n:'Piramide Decrescente 3',sr:'15->12->10->8->6 (carga sobe)',rest:'40-60s',niv:'Intermediario',cat:'Forca',obj:'Forca maxima',desc:'15, 12, 10, 8, 6 reps sempre aumentando carga.',obs:'Se nao cumprir as reps = normal, voce ganhara forca.'},
+  {n:'Piramide Sobrecarga Dupla',sr:'20->15->10->10->15->20',rest:'50-60s',niv:'Intermediario+',cat:'Volume',obj:'Forca + resistencia',desc:'Sobe a carga ate minimo de reps, depois volta diminuindo.',obs:'Trabalha forca e resistencia no mesmo set.'},
+  {n:'Metodo 8/20',sr:'8 pesado -> drop -> 20',rest:'45-60s',niv:'Intermediario+',cat:'Intensidade',obj:'Forca + resistencia',desc:'8 reps carga pesada, diminui ~50%, faz 20 reps.',obs:'Um dos melhores para forca e resistencia.'},
+  {n:'Metodo 8/20/8',sr:'8 -> drop -> 20 -> volta -> 8',rest:'45-60s',niv:'Intermediario+',cat:'Intensidade',obj:'Forca + fibras profundas',desc:'8 pesado, drop 20, volta carga, 8 reps. Sem descanso entre partes.',obs:'Ativa fibras musculares mais profundas.'},
+  {n:'Metodo 8/20/8/20',sr:'8->20->8->20 variando carga',rest:'45-60s',niv:'Avancado',cat:'Intensidade',obj:'Hipertrofia avancada',desc:'8 pesado, drop 20, volta pesado 8, drop 20.',obs:'Alta intensidade - apenas avancados.'},
+  {n:'Metodo 6/15',sr:'6 pesado -> drop -> 15',rest:'45-60s',niv:'Intermediario+',cat:'Intensidade',obj:'Forca + resistencia',desc:'6 reps carga pesada, diminui, faz 15 reps.',obs:'Versao mais intensa do 8/20.'},
+  {n:'Metodo 6/15/6',sr:'6 -> drop -> 15 -> volta -> 6',rest:'45-60s',niv:'Avancado',cat:'Intensidade',obj:'Forca maxima',desc:'6 pesado, drop 15, volta carga, 6 reps.',obs:'Sem descanso entre as partes.'},
+  {n:'0505 (TUT)',sr:'5s excentrico + 5s concentrico',rest:'90s',niv:'Intermediario+',cat:'TUT',obj:'Hipertrofia',desc:'5 segundos descendo e 5 segundos subindo. Sem pausas.',obs:'Maximiza o tempo sob tensao muscular.'},
+  {n:'15+15',sr:'15 lentas + 15 rapidas',rest:'60s',niv:'Intermediario',cat:'Velocidade',obj:'Hipertrofia + resistencia',desc:'15 reps lentas seguidas de 15 reps rapidas. Mesma carga.',obs:'Musculo sob tensao com maior carga - trabalha resistencia.'},
+  {n:'10+10',sr:'10 lentas + 10 rapidas',rest:'60s',niv:'Intermediario',cat:'Velocidade',obj:'Hipertrofia + potencia',desc:'10 reps lentas seguidas de 10 reps rapidas. Mesma carga.',obs:'Versao mais intensa do 15+15.'},
+  {n:'Potencia',sr:'7-14 reps explosivas (baixa/mod)',rest:'90s',niv:'Intermediario+',cat:'Potencia',obj:'Potencia + forca',desc:'7 a 14 reps com carga baixa/moderada o mais rapido possivel sem perder o padrao.',obs:'Acima de 14 reps = carga baixa. Aumenta forca e resposta muscular.'},
+  {n:'Potencia 2',sr:'Ate 14 reps explosivas (media)',rest:'90s',niv:'Intermediario+',cat:'Potencia',obj:'Potencia muscular',desc:'Ate 14 reps com carga media o mais rapido possivel. Acima de 14 = carga baixa.',obs:'Foco em resposta contratil.'},
+  {n:'Potencia 3',sr:'7-9 reps explosivas (alta)',rest:'2-3min',niv:'Avancado',cat:'Potencia',obj:'Forca explosiva',desc:'7 a 9 reps com carga alta o mais rapido possivel. Acima de 9 = carga baixa.',obs:'Alta exigencia neuromuscular.'},
+  {n:'Cluster Set',sr:'8r+10s+8r+10s+8r',rest:'10s clusters',niv:'Avancado',cat:'Intensidade',obj:'Forca + hipertrofia avancada',desc:'8 reps, 10s, 8 reps, 10s, 8 reps. Mantem a mesma carga.',obs:'Maior tensao sobre o musculo = maior hipertrofia.'},
+  {n:'Ondulatorio',sr:'10->20->8->15',rest:'60s',niv:'Avancado',cat:'Volume',obj:'Resistencia + hipertrofia',desc:'10, 20, 8, 15 reps. Maior reps = menor carga.',obs:'Periodizacao ondulatoria intra-sessao.'},
+  {n:'Pico de Contracao',sr:'10 comp+10 curtas+10 comp',rest:'75s',niv:'Avancado',cat:'TUT',obj:'Hipertrofia maxima',desc:'10 reps completas, 10 curtas no ponto de maior contracao, 10 completas.',obs:'Maximiza o tempo no ponto de maior ativacao muscular.'},
+  {n:'1+1/2',sr:'1 rep completa + 1/2 no ponto max',rest:'75s',niv:'Intermediario+',cat:'TUT',obj:'Hipertrofia',desc:'Uma repeticao completa mais uma no ponto maximo de contracao.',obs:'Dobra o tempo sob tensao no ponto critico.'},
+  {n:'Pre-Exaustao',sr:'Isolamento -> Composto',rest:'45s',niv:'Intermediario+',cat:'Intensidade',obj:'Hipertrofia musculo-especifica',desc:'Exercicio isolado antes do composto para garantir a fadiga do musculo alvo.',obs:'Prepara o musculo principal para o proximo exercicio.'},
+  {n:'Intervalo Decrescente',sr:'30s(1a->2a) / 15s(2a->3a)',rest:'Decrescente',niv:'Intermediario+',cat:'Intensidade',obj:'Resistencia vascular',desc:'Da 1a para 2a serie: 30s. Da 2a para 3a: 15s.',obs:'O estresse metabolico aumenta a cada serie.'},
+  {n:'Indicador 10-12',sr:'Meta: 10-12 reps',rest:'-',niv:'Todos',cat:'Referencia',obj:'Calibracao de carga',desc:'12+ reps = carga leve. Menos de 10 = carga pesada. Ajuste.',obs:'Auto-regulacao de carga.'},
+  {n:'Indicador 8-10',sr:'Meta: 8-10 reps',rest:'-',niv:'Todos',cat:'Referencia',obj:'Calibracao de carga',desc:'10+ reps = carga leve. Menos de 8 = carga pesada.',obs:'Versao mais intensa do indicador.'}
+];
+
+var SPLITS_INFO = [
+  {n:'Full Body',dias:'2',dt:'Seg + Qui',g:'Corpo todo',niv:'Iniciante',obs:'Ideal para quem tem pouco tempo. Alta frequencia por musculo.'},
+  {n:'Full Body A/B',dias:'3',dt:'Seg/Qua/Sex',g:'A: Padroes Empurrar | B: Puxar + Membros',niv:'Iniciante',obs:'Alternancia de estimulo. Boa recuperacao.'},
+  {n:'Upper / Lower',dias:'4',dt:'Seg+Qui=Upper | Ter+Sex=Lower',g:'Upper: Peito+Costas+Ombros+Bracos | Lower: Quad+Post+Gluteo',niv:'Iniciante/Intermediario',obs:'Frequencia 2x por musculo. Boa para hipertrofia.'},
+  {n:'PPL - Push Pull Legs',dias:'3',dt:'Seg=Push|Qua=Pull|Sex=Legs',g:'Push: Peito+Ombro+Triceps | Pull: Costas+Biceps | Legs: Membros',niv:'Intermediario',obs:'Classico para hipertrofia. Equilibrado.'},
+  {n:'PPL Duplo',dias:'6',dt:'Seg-Sab (1 dia off)',g:'Push/Pull/Legs repetido 2x',niv:'Avancado',obs:'Alta frequencia. Requer boa recuperacao.'},
+  {n:'Torso / Membros',dias:'4',dt:'Seg+Qui=Torso | Ter+Sex=Membros',g:'Torso: Peito+Costas+Ombros | Membros: Quad+Post+Bracos',niv:'Intermediario',obs:'Variacao do Upper/Lower. Bom volume por sessao.'},
+  {n:'ABC (3 dias)',dias:'3',dt:'Seg/Qua/Sex',g:'A: Peito+Biceps | B: Costas+Triceps | C: Ombros+Pernas',niv:'Iniciante/Intermediario',obs:'Frequencia 1x por semana. Suficiente para iniciantes.'},
+  {n:'ABCD (4 dias)',dias:'4',dt:'Seg/Ter/Qui/Sex',g:'A: Peito+Triceps | B: Costas+Biceps | C: Ombros | D: Pernas',niv:'Intermediario',obs:'Classico bodybuilding. Bom isolamento.'},
+  {n:'Full Body Funcional',dias:'2-3',dt:'Flexivel',g:'Padroes de movimento: Empurrar/Puxar/Agachar/Dobrar/Core',niv:'Iniciante',obs:'Foco em padroes funcionais. Otimo para reabilitacao.'},
+  {n:'Lower Focus (Reabilitacao)',dias:'3',dt:'Seg/Qua/Sex',g:'Seg: Lower pesado | Qua: Upper + Core | Sex: Lower leve',niv:'Iniciante/Intermediario',obs:'Para pos-reabilitacao pelvica. Progressao segura.'}
+];
+
+var DICAS_USO = [
+  {ic:'&#9889;', t:'Gerar seu treino', d:'Toque em "Gerar Novo Treino" na tela inicial. A IA monta um programa completo baseado no seu perfil em cerca de 30 segundos.'},
+  {ic:'&#127909;', t:'Assistir aos videos', d:'Cada exercicio tem um video demonstrativo. Assista antes de executar o movimento pela primeira vez.'},
+  {ic:'&#9997;', t:'Registrar carga, reps e RPE', d:'Toque no botao "Registrar" em cada exercicio para salvar o que voce realmente fez. RPE e o esforco percebido de 1 a 10 (10 = falha total) e ajuda o Thiago a acompanhar sua evolucao.'},
+  {ic:'&#128200;', t:'Acompanhar seu progresso', d:'Na tela de Perfil, registre seu peso e uma foto periodicamente. Um grafico mostra sua evolucao ao longo do tempo.'},
+  {ic:'&#128293;', t:'Sua consistencia', d:'A tela inicial mostra sua sequencia de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
+  {ic:'&#128172;', t:'Pedir ajuste ao Thiago', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
+  {ic:'&#128241;', t:'Instalar no celular', d:'Toque no icone de celular no topo da tela inicial para adicionar o TO BE FITNESS na tela de inicio, como um aplicativo.'},
+  {ic:'&#128276;', t:'Mensagens do treinador', d:'Avisos e recados do Thiago aparecem automaticamente no topo da tela inicial.'}
+];
+
+function renderDicasUso() {
+  var el = document.getElementById('dicas-uso');
+  if (!el) return;
+  var html = '';
+  DICAS_USO.forEach(function(x) {
+    html += '<div class="dica-item"><b>' + x.ic + ' ' + x.t + '</b><br>' + x.d + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderDicasSplits() {
+  var el = document.getElementById('dicas-splits');
+  if (!el) return;
+  var html = '';
+  SPLITS_INFO.forEach(function(s) {
+    html += '<div class="dica-item"><b>' + s.n + '</b> &bull; ' + s.dias + ' dias/sem<br>' +
+      '<span style="color:var(--muted)">' + s.g + '</span><br>' + s.obs + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+var dicasMetodoCat = 'Todos';
+function renderDicasMetodoTabs() {
+  var cats = ['Todos'];
+  METODOS_INFO.forEach(function(m) { if (cats.indexOf(m.cat) === -1) cats.push(m.cat); });
+  var el = document.getElementById('dicas-metodo-tabs');
+  if (!el) return;
+  el.innerHTML = cats.map(function(c) {
+    return '<div class="tab' + (c === dicasMetodoCat ? ' active' : '') + '" data-cat="' + c + '">' + c + '</div>';
+  }).join('');
+  el.querySelectorAll('.tab').forEach(function(t) {
+    t.addEventListener('click', function() {
+      dicasMetodoCat = this.dataset.cat;
+      renderDicasMetodoTabs();
+      renderDicasMetodos();
+    });
+  });
+}
+
+function renderDicasMetodos() {
+  var el = document.getElementById('dicas-metodos');
+  if (!el) return;
+  var list = dicasMetodoCat === 'Todos' ? METODOS_INFO : METODOS_INFO.filter(function(m) { return m.cat === dicasMetodoCat; });
+  var html = '';
+  list.forEach(function(m) {
+    html += '<div class="dica-item"><b>' + m.n + '</b> <span style="color:var(--muted);font-size:11px">(' + m.niv + ')</span><br>' +
+      m.desc + '<br><span style="color:var(--g);font-size:12px">' + m.obs + '</span></div>';
+  });
+  el.innerHTML = html;
+}
+
+function goDicas() {
+  show('dicas');
+  renderDicasUso();
+  renderDicasSplits();
+  renderDicasMetodoTabs();
+  renderDicasMetodos();
 }
 
 
