@@ -109,7 +109,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .ex-name{font-weight:800;line-height:1.3}
 .ex-partner{font-size:11px;color:var(--muted);margin-top:2px}
 .ex-method{font-size:11px;color:var(--g);font-weight:700}
-.ex-load{width:65px;background:#111;border:1px solid var(--border);border-radius:6px;padding:5px 7px;color:var(--text);font-size:13px;font-weight:700;text-align:center}
+.ex-load{display:block;width:65px;background:#111;border:1px solid var(--border);border-radius:6px;padding:5px 7px;color:var(--text);font-size:13px;font-weight:700;text-align:center}
 .ex-load:focus{outline:none;border-color:var(--g)}
 .vbtn{background:var(--g);color:#000;border:none;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:900;cursor:pointer;margin-top:4px;display:inline-block;text-transform:uppercase;letter-spacing:.5px}
 .warmup{background:#111;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px}
@@ -150,8 +150,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .gami-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
 
 /* EXECUCAO REAL */
-.exec-btn{background:#111;border:1px solid var(--g);color:var(--g);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:900;cursor:pointer;margin-top:5px;width:100%}
-.exec-btn.done{background:var(--g);color:#000}
+.ex-mini{display:block;width:48px;background:#111;border:1px solid var(--border);border-radius:6px;padding:5px 4px;color:var(--text);font-size:11px;font-weight:700;text-align:center;margin-top:3px}
+.ex-mini:focus{outline:none;border-color:var(--g)}
+.reg-treino-btn{background:var(--g);color:#000;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:900;width:100%;margin-top:16px;cursor:pointer}
+.reg-treino-btn:disabled{opacity:.6}
 
 /* PROGRESSO */
 .prog-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:10px}
@@ -206,10 +208,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 /* PRINT */
 @media print{
-  .hdr,.hdr-btns,.ibtn,.btn,#install-banner,.overlay{display:none!important}
+  .hdr,.hdr-btns,.ibtn,.btn,#install-banner,.overlay,.reg-treino-btn{display:none!important}
   body{background:#fff;color:#000}
   .card{border:1px solid #ddd;break-inside:avoid}
-  .ex-load{border:1px solid #ccc}
+  .ex-load,.ex-mini{border:1px solid #ccc}
   #screen-home,#screen-auth,#screen-profile{display:none!important}
   #screen-workout{display:block!important}
   .screen.active{display:block}
@@ -316,11 +318,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃ¡sticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -413,11 +415,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:14px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Quer alguma alteraÃ§Ã£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃª.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Quer alguma alteraÃÂ§ÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:12px;color:#555">Thiago estÃ¡ reformulando... atÃ© 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:12px;color:#555">Thiago estÃÂ¡ reformulando... atÃÂ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -493,32 +495,6 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
-<!-- REGISTRAR EXECUCAO -->
-<div class="overlay" id="exec-overlay" onclick="closeExecModal(event)">
-  <div class="modal">
-    <button class="modal-close" onclick="closeExecModal()">&#10005;</button>
-    <div class="ctitle">Registrar Execucao</div>
-    <div id="exec-ex-name" style="font-weight:800;font-size:14px;margin-bottom:14px"></div>
-    <div class="frow">
-      <div class="fg"><label>Carga (kg)</label><input type="number" id="exec-peso" step="0.5" placeholder="kg"></div>
-      <div class="fg"><label>Repeticoes</label><input type="number" id="exec-reps" placeholder="reps"></div>
-    </div>
-    <div class="fg">
-      <label>RPE (esforco percebido, 1-10)</label>
-      <select id="exec-rpe">
-        <option value="">-</option>
-        <option value="6">6 - Facil</option>
-        <option value="7">7</option>
-        <option value="8">8 - Moderado</option>
-        <option value="9">9</option>
-        <option value="10">10 - Maximo</option>
-      </select>
-    </div>
-    <div id="exec-out"></div>
-    <button class="btn btn-p" onclick="salvarExecucao()" id="exec-save-btn">Salvar</button>
-  </div>
-</div>
-
 <!-- MOTIVATIONAL TOAST -->
 <div id="motiv-toast"><span class="mt-icon">&#128170;</span><span class="mt-txt" id="motiv-toast-txt"></span></div>
 
@@ -529,7 +505,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div class="ctitle">Bem-vindo(a)!</div>
     <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis - isso guia todo o seu treino.</span></div></div>
     <div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Gere seu treino</b><span>Toque em "Gerar Novo Treino" na tela inicial. Em ~30 segundos seu programa fica pronto.</span></div></div>
-    <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e registre</b><span>Abra o treino, assista aos videos e toque em "Registrar" em cada exercicio para salvar carga, reps e RPE.</span></div></div>
+    <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e registre</b><span>Abra o treino, assista aos videos e preencha carga, reps e RPE de cada exercicio. No final da tela, toque em "Registrar Treino" para salvar tudo de uma vez.</span></div></div>
     <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Acompanhe seu progresso</b><span>Na tela de Perfil, registre peso e fotos. Na tela inicial, veja sua sequencia de dias treinados.</span></div></div>
     <div class="ob-step"><div class="ob-num">5</div><div class="ob-txt"><b>Consulte a aba Dicas</b><span>O icone de lampada explica como usar o app e o significado de cada metodo de treino.</span></div></div>
     <div class="ob-step"><div class="ob-num">6</div><div class="ob-txt"><b>Fale com o Thiago</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
@@ -695,7 +671,7 @@ var SPLITS_INFO = [
 var DICAS_USO = [
   {ic:'&#9889;', t:'Gerar seu treino', d:'Toque em "Gerar Novo Treino" na tela inicial. A IA monta um programa completo baseado no seu perfil em cerca de 30 segundos.'},
   {ic:'&#127909;', t:'Assistir aos videos', d:'Cada exercicio tem um video demonstrativo. Assista antes de executar o movimento pela primeira vez.'},
-  {ic:'&#9997;', t:'Registrar carga, reps e RPE', d:'Toque no botao "Registrar" em cada exercicio para salvar o que voce realmente fez. RPE e o esforco percebido de 1 a 10 (10 = falha total) e ajuda o Thiago a acompanhar sua evolucao.'},
+  {ic:'&#9997;', t:'Registrar carga, reps e RPE', d:'Preencha carga, reps e RPE de cada exercicio e toque no botao "Registrar Treino" no final da tela para salvar tudo de uma vez. RPE e o esforco percebido de 1 a 10 (10 = falha total) e ajuda o Thiago a acompanhar sua evolucao.'},
   {ic:'&#128200;', t:'Acompanhar seu progresso', d:'Na tela de Perfil, registre seu peso e uma foto periodicamente. Um grafico mostra sua evolucao ao longo do tempo.'},
   {ic:'&#128293;', t:'Sua consistencia', d:'A tela inicial mostra sua sequencia de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
   {ic:'&#128172;', t:'Pedir ajuste ao Thiago', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
@@ -1142,7 +1118,7 @@ async function generateWorkout(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' â se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' Ã¢ÂÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -1261,6 +1237,8 @@ function renderDay(sessoes, di, wi) {
     exs.forEach(function(ex, ei) {
       var key = 'w' + wi + 'd' + di + 'e' + ei;
       var saved = localStorage.getItem('ld_' + wkId + '_' + key) || '';
+      var savedReps = localStorage.getItem('ldreps_' + wkId + '_' + key) || '';
+      var savedRpe = localStorage.getItem('ldrpe_' + wkId + '_' + key) || '';
       var vid = ex.video_url || ex.video || '';
       var name = ex.nome || ex.exercicio || ex.name || '-';
       var parceiro = ex.parceiro || ex.partner || '';
@@ -1277,14 +1255,17 @@ function renderDay(sessoes, di, wi) {
         '<td>' + series + '</td>' +
         '<td>' + reps + '</td>' +
         '<td>' + desc + '</td>' +
-        '<td><input class="ex-load" type="text" placeholder="kg" value="' + saved + '" data-k="' + key + '">' +
-        '<button class="exec-btn" data-k="' + key + '" data-ex="' + encodeURIComponent(name) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">&#10003; Registrar</button>' +
+        '<td><input class="ex-load" type="text" inputmode="decimal" placeholder="kg" value="' + saved + '" data-k="' + key + '" data-ex="' + encodeURIComponent(name) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">' +
+        '<input class="ex-mini" type="text" inputmode="numeric" placeholder="reps" value="' + savedReps + '" data-k="' + key + '" data-field="reps">' +
+        '<input class="ex-mini" type="text" inputmode="numeric" placeholder="RPE" value="' + savedRpe + '" data-k="' + key + '" data-field="rpe">' +
         '</td>' +
         '</tr>';
 
       if (parceiro) {
         var keyP = key + 'p';
         var savedP = localStorage.getItem('ld_' + wkId + '_' + keyP) || '';
+        var savedPReps = localStorage.getItem('ldreps_' + wkId + '_' + keyP) || '';
+        var savedPRpe = localStorage.getItem('ldrpe_' + wkId + '_' + keyP) || '';
         var vidP = ex.parceiro_video_url || ex.parceiro_video || '';
         var seriesP = ex.parceiro_series || series;
         var repsP = ex.parceiro_reps || reps;
@@ -1296,13 +1277,15 @@ function renderDay(sessoes, di, wi) {
           '<td>' + seriesP + '</td>' +
           '<td>' + repsP + '</td>' +
           '<td>' + desc + '</td>' +
-          '<td><input class="ex-load" type="text" placeholder="kg" value="' + savedP + '" data-k="' + keyP + '">' +
-          '<button class="exec-btn" data-k="' + keyP + '" data-ex="' + encodeURIComponent(parceiro) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">&#10003; Registrar</button>' +
+          '<td><input class="ex-load" type="text" inputmode="decimal" placeholder="kg" value="' + savedP + '" data-k="' + keyP + '" data-ex="' + encodeURIComponent(parceiro) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">' +
+          '<input class="ex-mini" type="text" inputmode="numeric" placeholder="reps" value="' + savedPReps + '" data-k="' + keyP + '" data-field="reps">' +
+          '<input class="ex-mini" type="text" inputmode="numeric" placeholder="RPE" value="' + savedPRpe + '" data-k="' + keyP + '" data-field="rpe">' +
           '</td>' +
           '</tr>';
       }
     });
     html += '</tbody></table></div>';
+    html += '<button class="reg-treino-btn" id="reg-treino-btn">&#10003; Registrar Treino</button><div class="msg" id="reg-treino-out"></div>';
   }
   html += '</div>';
 
@@ -1315,66 +1298,64 @@ function renderDay(sessoes, di, wi) {
     });
   });
 
+  exArea.querySelectorAll('.ex-mini').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var prefix = this.dataset.field === 'rpe' ? 'ldrpe_' : 'ldreps_';
+      localStorage.setItem(prefix + wkId + '_' + this.dataset.k, this.value);
+    });
+  });
+
   exArea.querySelectorAll('.vbtn').forEach(function(btn) {
     btn.addEventListener('click', function() { openVideo(this.dataset.url); });
   });
 
-  exArea.querySelectorAll('.exec-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      abrirExecModal(decodeURIComponent(this.dataset.ex), this.dataset.k, parseInt(this.dataset.wi), parseInt(this.dataset.di), decodeURIComponent(this.dataset.foco));
+  var regBtn = document.getElementById('reg-treino-btn');
+  if (regBtn) regBtn.addEventListener('click', registrarTreinoCompleto);
+}
+
+// === EXECUCAO REAL (carga/reps/RPE) - registro unico por treino ===
+async function registrarTreinoCompleto() {
+  if (!user || !wkId) { showMsg('reg-treino-out', 'Abra um treino salvo antes de registrar.'); return; }
+  var btn = document.getElementById('reg-treino-btn');
+  var loads = exArea.querySelectorAll('.ex-load');
+  var rows = [];
+  var repsMap = {}, rpeMap = {};
+  exArea.querySelectorAll('.ex-mini').forEach(function(inp) {
+    if (!inp.value) return;
+    if (inp.dataset.field === 'reps') repsMap[inp.dataset.k] = inp.value;
+    if (inp.dataset.field === 'rpe') rpeMap[inp.dataset.k] = inp.value;
+  });
+  loads.forEach(function(inp) {
+    var k = inp.dataset.k;
+    if (!k || !inp.dataset.ex) return;
+    var peso = parseFloat(inp.value);
+    var reps = parseInt(repsMap[k]);
+    var rpe = parseInt(rpeMap[k]);
+    if (isNaN(peso) && isNaN(reps) && isNaN(rpe)) return;
+    rows.push({
+      user_id: user.id,
+      workout_id: wkId,
+      semana: (isNaN(parseInt(inp.dataset.wi)) ? 0 : parseInt(inp.dataset.wi)) + 1,
+      dia_nome: decodeURIComponent(inp.dataset.foco || ''),
+      exercicio_nome: decodeURIComponent(inp.dataset.ex),
+      peso: isNaN(peso) ? null : peso,
+      reps: isNaN(reps) ? null : reps,
+      rpe: isNaN(rpe) ? null : rpe
     });
   });
-}
 
-// === EXECUCAO REAL (carga/reps/RPE) ===
-var execTarget = null;
+  if (!rows.length) { showMsg('reg-treino-out', 'Preencha ao menos um exercicio (kg, reps ou RPE) antes de registrar.'); return; }
 
-function abrirExecModal(exName, key, wi, di, foco) {
-  var kgVal = '';
-  var inp = document.querySelector('.ex-load[data-k="' + key + '"]');
-  if (inp) kgVal = inp.value;
-  execTarget = { exercicio_nome: exName, semana: (isNaN(wi) ? 0 : wi) + 1, dia_nome: foco || '' };
-  document.getElementById('exec-ex-name').textContent = exName;
-  document.getElementById('exec-peso').value = kgVal;
-  document.getElementById('exec-reps').value = '';
-  document.getElementById('exec-rpe').value = '';
-  showMsg('exec-out', '');
-  document.getElementById('exec-overlay').classList.add('show');
-}
-
-function closeExecModal(e) {
-  if (e && e.target !== document.getElementById('exec-overlay')) return;
-  document.getElementById('exec-overlay').classList.remove('show');
-}
-
-async function salvarExecucao() {
-  if (!user || !execTarget || !wkId) { showMsg('exec-out', 'Abra um treino salvo antes de registrar.'); return; }
-  var peso = parseFloat(document.getElementById('exec-peso').value);
-  var reps = parseInt(document.getElementById('exec-reps').value);
-  var rpe = parseInt(document.getElementById('exec-rpe').value);
-  var btn = document.getElementById('exec-save-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
-  showMsg('exec-out', '');
+  showMsg('reg-treino-out', '');
 
-  var row = {
-    user_id: user.id,
-    workout_id: wkId,
-    semana: execTarget.semana,
-    dia_nome: execTarget.dia_nome,
-    exercicio_nome: execTarget.exercicio_nome,
-    peso: isNaN(peso) ? null : peso,
-    reps: isNaN(reps) ? null : reps,
-    rpe: isNaN(rpe) ? null : rpe
-  };
+  var res = await sb.from('logs_execucao').insert(rows);
+  btn.disabled = false; btn.textContent = '\u2713 Registrar Treino';
 
-  var res = await sb.from('logs_execucao').insert(row);
-  btn.disabled = false; btn.textContent = 'Salvar';
+  if (res.error) { showMsg('reg-treino-out', res.error.message); return; }
 
-  if (res.error) { showMsg('exec-out', res.error.message); return; }
-
-  showMsg('exec-out', 'Execucao registrada!', 'ok');
+  showMsg('reg-treino-out', 'Treino registrado! (' + rows.length + ' exercicio' + (rows.length > 1 ? 's' : '') + ')', 'ok');
   refreshGamificacao();
-  setTimeout(function() { closeExecModal(); }, 700);
 }
 
 // === GAMIFICACAO LEVE ===
@@ -1676,7 +1657,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que vocÃª quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃÂª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -1736,7 +1717,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' â se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' Ã¢ÂÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
