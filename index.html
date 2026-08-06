@@ -1709,7 +1709,14 @@ async function pedirAjuste() {
     };
     if (adminViewMode && adminAlunoId) body.admin_target_user_id = adminAlunoId;
 
-    var res = await sb.functions.invoke('generate-workout', { body: body });
+    var __timedOut = false;
+    var res = await Promise.race([
+      sb.functions.invoke('generate-workout', { body: body }),
+      new Promise(function(resolve) { setTimeout(function() { __timedOut = true; resolve({ __timeout: true }); }, 75000); })
+    ]);
+    if (__timedOut) {
+      throw new Error('Isso esta demorando mais que o normal. O ajuste pode estar sendo processado em segundo plano pelo servidor; aguarde um pouco e reabra o treino para verificar antes de tentar de novo.');
+    }
 
     if (res.error) throw new Error(res.error.message || 'Erro na funcao');
 
