@@ -1333,6 +1333,7 @@ function renderDay(sessoes, di, wi) {
 async function registrarTreinoCompleto() {
   if (!user || !wkId) { showMsg('reg-treino-out', 'Abra um treino salvo antes de registrar.'); return; }
   var btn = document.getElementById('reg-treino-btn');
+  var exArea = document.getElementById('ex-area');
   var loads = exArea.querySelectorAll('.ex-load');
   var rows = [];
   var repsMap = {}, rpeMap = {};
