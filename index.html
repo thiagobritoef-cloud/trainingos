@@ -1827,8 +1827,16 @@ function _escHtml(t) {
 }
 
 function gerarTokenConvite() {
-  if (window.crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g, "");
-  return Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  var out = '';
+  var arr = new Uint32Array(8);
+  if (window.crypto && crypto.getRandomValues) {
+    crypto.getRandomValues(arr);
+  } else {
+    for (var j = 0; j < 8; j++) arr[j] = Math.floor(Math.random() * 4294967296);
+  }
+  for (var i = 0; i < 8; i++) out += chars[arr[i] % chars.length];
+  return out;
 }
 
 async function gerarConvite() {
@@ -1838,7 +1846,7 @@ async function gerarConvite() {
   var token = gerarTokenConvite();
   var res = await sb.from('convites').insert({ nome: nome, token: token, created_by: user.id }).select().single();
   if (res.error) { alert('Erro ao gerar convite: ' + res.error.message); return; }
-  var link = location.origin + location.pathname + '?convite=' + token;
+  var link = location.origin + location.pathname + '?c=' + token;
   var box = document.getElementById('conv-link-box');
   var txt = document.getElementById('conv-link-txt');
   txt.textContent = link;
@@ -1967,7 +1975,7 @@ function printPDF() { window.print(); }
 // === INIT ===
 async function init() {
   var __cp = new URLSearchParams(location.search);
-  if (__cp.get('convite')) window.__conviteToken = __cp.get('convite');
+  if (__cp.get('c') || __cp.get('convite')) window.__conviteToken = __cp.get('c') || __cp.get('convite');
   try {
     var res = await sb.auth.getSession();
     if (res.data && res.data.session) {
