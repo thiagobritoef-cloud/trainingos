@@ -344,10 +344,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div id="prog-list" style="margin-top:12px"></div>
     </div>
     <div class="card">
-      <div class="ctitle">Reportar um Problema</div>
-      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Encontrou algum problema ou tem uma reclamacao? Conte pra gente.</div>
+      <div class="ctitle">Sugestao e Feedback</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Tem uma sugestao, feedback ou encontrou algum problema? Conte pra gente.</div>
       <div class="fg"><input type="text" id="rc-titulo" placeholder="Assunto"></div>
-      <div class="fg"><textarea id="rc-msg" placeholder="Descreva o problema..."></textarea></div>
+      <div class="fg"><textarea id="rc-msg" placeholder="Escreva sua sugestao ou feedback..."></textarea></div>
       <div id="rc-msg-out"></div>
       <button class="btn btn-s" id="rc-btn" onclick="sendReclamacao()">Enviar</button>
     </div>
@@ -454,6 +454,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div class="ctitle">Convidar aluno</div>
       <div class="fg"><label>Nome do aluno</label><input type="text" id="conv-nome" placeholder="Nome do aluno"></div>
       <button class="btn btn-p" onclick="gerarConvite()">Gerar link de convite</button>
+      <button class="btn btn-s" onclick="openMsgModalAll()" style="margin-top:8px">Mensagem para todos os alunos</button>
       <div id="conv-link-box" style="display:none;margin-top:10px;font-size:13px">
         <div id="conv-link-txt" style="word-break:break-all;padding:8px;border:1px solid #ddd;border-radius:8px"></div>
         <button class="btn" style="margin-top:6px" onclick="copiarConvite()">Copiar link</button>
@@ -549,6 +550,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 var SB_URL = 'https://uvqtiikeleadvecnuven.supabase.co';
 var SB_KEY = 'sb_publishable_oaYWMsc31CNGEb_HHo09_A_pYkEqk4w';
 var sb = supabase.createClient(SB_URL, SB_KEY);
+var VAPID_PUBLIC_KEY = 'BHdWMR2RjPGRI72pc8HYBaGkKKGvyHiRnLxC94CvGqEG5V_00vbA1mPgv8QDWlwT31RdvKpjGtO4UFS1DZR1gds';
 
 var user = null;
 var profile = null;
@@ -833,6 +835,7 @@ async function doAuth() {
       } catch (e) {}
     }
     await loadProfile();
+    subscribePush();
   } catch (e) {
     var m = e.message || 'Erro desconhecido';
     if (m.indexOf('Invalid login') >= 0) m = 'Email ou senha incorretos.';
@@ -1737,6 +1740,7 @@ async function pedirAjuste() {
     wkData = workout;
     document.getElementById('ajuste-txt').value = '';
     renderWorkout(workout);
+    sb.functions.invoke('send-push', { body: { target: 'user', user_id: (adminViewMode ? adminAlunoId : user.id), title: 'Treino atualizado', body: 'Seu treino foi ajustado pelo Thiago. Toque para ver.' } }).catch(function(){});
     showMsg('ajuste-err', adminViewMode ? 'Ajuste aplicado! (nao contou nos creditos do aluno)' : 'Treino ajustado pelo Thiago!', 'ok');
     if (!adminViewMode) updateQuotaInfo();
 
@@ -1806,7 +1810,7 @@ async function loadAdmin() {
       '<div class="adm-email">' + (a.email || '') + ' &bull; entrou em ' + d + '</div>' +
       '<div class="adm-stats">' +
       '<div class="adm-stat"><b>' + (wkCount[a.id] || 0) + '</b>Treinos</div>' +
-      '<div class="adm-stat"><b>' + (rcCount[a.id] || 0) + '</b>Reclamacoes</div>' +
+      '<div class="adm-stat"><b>' + (rcCount[a.id] || 0) + '</b>Sugestoes</div>' +
       '<div class="adm-stat"><b>' + (isPro ? 'PRO' : 'FREE') + '</b>Plano</div>' +
       '</div>' +
       '<div class="adm-actions">' +
@@ -1911,14 +1915,35 @@ function closeMsgModal(e) {
   document.getElementById('msg-overlay').classList.remove('show');
 }
 
+function openMsgModalAll() {
+  msgTargetId = '__ALL__';
+  document.getElementById('msg-modal-title').textContent = 'Mensagem para todos os alunos';
+  document.getElementById('msg-txt').value = '';
+  showMsg('msg-out', '');
+  document.getElementById('msg-overlay').classList.add('show');
+}
+
 async function sendAdminMsg() {
   var txt = document.getElementById('msg-txt').value.trim();
   if (!txt || !msgTargetId) return;
   var btn = document.getElementById('msg-send-btn');
   btn.disabled = true; btn.textContent = 'Enviando...';
+  if (msgTargetId === '__ALL__') {
+    var allRes = await sb.from('profiles').select('id,is_admin');
+    var ids = (allRes.data || []).filter(function(p) { return !p.is_admin; }).map(function(p) { return p.id; });
+    var rows = ids.map(function(id) { return { user_id: id, mensagem: txt }; });
+    var res = rows.length ? await sb.from('mensagens_admin').insert(rows) : { error: null };
+    btn.disabled = false; btn.textContent = 'Enviar mensagem';
+    if (res.error) { showMsg('msg-out', res.error.message); return; }
+    sb.functions.invoke('send-push', { body: { target: 'all', title: 'Mensagem do Thiago', body: txt } }).catch(function(){});
+    showMsg('msg-out', 'Mensagem enviada a ' + ids.length + ' aluno(s)!', 'ok');
+    setTimeout(function() { closeMsgModal(); }, 800);
+    return;
+  }
   var res = await sb.from('mensagens_admin').insert({ user_id: msgTargetId, mensagem: txt });
   btn.disabled = false; btn.textContent = 'Enviar mensagem';
   if (res.error) { showMsg('msg-out', res.error.message); return; }
+  sb.functions.invoke('send-push', { body: { target: 'user', user_id: msgTargetId, title: 'Mensagem do Thiago', body: txt } }).catch(function(){});
   showMsg('msg-out', 'Mensagem enviada!', 'ok');
   setTimeout(function() { closeMsgModal(); }, 800);
 }
@@ -1959,6 +1984,7 @@ async function sendReclamacao() {
   if (res.error) { showMsg('rc-msg-out', res.error.message); return; }
   document.getElementById('rc-titulo').value = '';
   document.getElementById('rc-msg').value = '';
+  sb.functions.invoke('send-push', { body: { target: 'admin', title: 'Nova sugestao/feedback', body: (profile && profile.nome ? profile.nome + ': ' : '') + (titulo || msg) } }).catch(function(){});
   showMsg('rc-msg-out', 'Enviado! O Thiago vai analisar.', 'ok');
 }
 
@@ -1972,6 +1998,44 @@ async function delWorkout() {
 
 function printPDF() { window.print(); }
 
+// === PUSH NOTIFICATIONS ===
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+  for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+async function subscribePush() {
+  try {
+    if (!user) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!VAPID_PUBLIC_KEY) return;
+    if (Notification.permission === 'denied') return;
+    var perm = Notification.permission;
+    if (perm === 'default') { perm = await Notification.requestPermission(); }
+    if (perm !== 'granted') return;
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    var raw = sub.toJSON();
+    await sb.from('push_subscriptions').upsert({
+      user_id: user.id,
+      endpoint: raw.endpoint,
+      p256dh: raw.keys.p256dh,
+      auth: raw.keys.auth
+    }, { onConflict: 'endpoint' });
+  } catch (e) {
+    console.warn('subscribePush', e);
+  }
+}
+
 // === INIT ===
 async function init() {
   var __cp = new URLSearchParams(location.search);
@@ -1981,6 +2045,7 @@ async function init() {
     if (res.data && res.data.session) {
       user = res.data.session.user;
       await loadProfile();
+    subscribePush();
     } else {
       show('auth');
     }
