@@ -931,7 +931,12 @@ async function saveProfile() {
     sexo: document.getElementById('p-sex').value,
     idade: parseInt(document.getElementById('p-age').value) || null,
     peso: parseFloat(document.getElementById('p-weight').value) || null,
-    altura: parseFloat(document.getElementById('p-height').value) || null,
+    altura: (function() {
+      var v = parseFloat(document.getElementById('p-height').value);
+      if (!v) return null;
+      if (v < 10) v = v * 100;
+      return Math.round(v);
+    })(),
     dias_semana: parseInt(document.getElementById('p-days').value) || 5,
     nivel: document.getElementById('p-level').value,
     objetivo: document.getElementById('p-goal').value,
