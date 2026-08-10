@@ -1128,6 +1128,7 @@ async function generateWorkout(isAuto) {
       wkData = workout;
       wkSequencia = seqAtual;
       renderWorkout(workout);
+      sb.functions.invoke('send-push', { body: { target: 'user', user_id: user.id, title: 'Treino novo pronto', body: 'Seu novo treino ja esta disponivel. Toque para ver.' } }).catch(function(){});
       showToast(pickRandom(MOTIV_GERADO), '&#127881;');
     }
     updateQuotaInfo();
