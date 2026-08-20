@@ -733,12 +733,23 @@ function renderDicasMetodoTabs() {
 function renderDicasMetodos() {
   var el = document.getElementById('dicas-metodos');
   if (!el) return;
-  var list = dicasMetodoCat === 'Todos' ? METODOS_INFO : METODOS_INFO.filter(function(m) { return m.cat === dicasMetodoCat; });
-  var html = '';
-  list.forEach(function(m) {
-    html += '<div class="dica-item"><b>' + m.n + '</b> <span style="color:var(--muted);font-size:16px">(' + m.niv + ')</span><br>' +
+  var CAT_ORDER = ['Combinacao','Volume','Intensidade','Forca','TUT','Velocidade','Potencia','Referencia'];
+  var CAT_LABEL = {Combinacao:'Combinacao de Exercicios',Volume:'Volume e Densidade',Intensidade:'Tecnicas de Intensificacao',Forca:'Forca',TUT:'Tempo Sob Tensao',Velocidade:'Velocidade de Execucao',Potencia:'Potencia',Referencia:'Indicadores de Referencia'};
+  function card(m) {
+    return '<div class="dica-item"><b>' + m.n + '</b> <span style="color:var(--muted);font-size:16px">(' + m.niv + ')</span><br>' +
       m.desc + '<br><span style="color:var(--g);font-size:16px">' + m.obs + '</span></div>';
-  });
+  }
+  var html = '';
+  if (dicasMetodoCat === 'Todos') {
+    CAT_ORDER.forEach(function(cat, ci) {
+      var items = METODOS_INFO.filter(function(m) { return m.cat === cat; });
+      if (!items.length) return;
+      html += '<div style="color:var(--g);font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin:' + (ci === 0 ? '0' : '20px') + ' 0 8px;padding-top:' + (ci === 0 ? '0' : '14px') + ';border-top:' + (ci === 0 ? 'none' : '1px solid var(--border)') + '">' + (CAT_LABEL[cat] || cat) + '</div>';
+      items.forEach(function(m) { html += card(m); });
+    });
+  } else {
+    METODOS_INFO.filter(function(m) { return m.cat === dicasMetodoCat; }).forEach(function(m) { html += card(m); });
+  }
   el.innerHTML = html;
 }
 
