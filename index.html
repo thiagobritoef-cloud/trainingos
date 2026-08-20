@@ -1264,7 +1264,7 @@ function renderDay(sessoes, di, wi) {
   if (!exs.length) {
     html += '<p style="color:var(--muted);font-size:16px">Descanso ou sem exercicios.</p>';
   } else {
-    html += '<div class="ex-wrap"><table><thead><tr><th>Exercicio</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Metodo</th><th onclick="alert('SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
+    html += '<div class="ex-wrap"><table><thead><tr><th>Exercicio</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Metodo</th><th onclick="alert(\'SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.\')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
     exs.forEach(function(ex, ei) {
       var key = 'w' + wi + 'd' + di + 'e' + ei;
       var saved = localStorage.getItem('ld_' + wkId + '_' + key) || '';
