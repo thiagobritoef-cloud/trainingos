@@ -1966,7 +1966,7 @@ function copiarConvite() {
 async function loadConvites() {
   var listEl = document.getElementById('conv-list');
   if (!listEl) return;
-  var res = await sb.from('convites').select('id,name,status,created_at,accepted_at,user_id').order('created_at', { ascending: false });
+  var res = await sb.from('convites').select('id,nome,status,created_at,accepted_at,user_id').order('created_at', { ascending: false });
   if (res.error || !res.data) { listEl.innerHTML = ''; return; }
   var ids = res.data.map(function(c) { return c.user_id; }).filter(function(v, i, a) { return v && a.indexOf(v) === i; });
   var profMap = {};
@@ -1988,10 +1988,10 @@ async function loadConvites() {
       statusColor = '#b26a00';
     }
     var p = c.user_id ? profMap[c.user_id] : null;
-    var mismatch = !!(p && p.nome && c.name && p.nome.trim().toLowerCase() !== c.name.trim().toLowerCase());
+    var mismatch = !!(p && p.nome && c.nome && p.nome.trim().toLowerCase() !== c.nome.trim().toLowerCase());
     html += '<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:16px">' +
       '<div style="display:flex;justify-content:space-between;align-items:center">' +
-      '<span>' + _escHtml(c.name) + '</span>' +
+      '<span>' + _escHtml(c.nome) + '</span>' +
       '<span style="color:' + statusColor + '">' + statusTxt + '</span>' +
       '</div>' +
       (p ? '<div style="font-size:13px;color:' + (mismatch ? '#e55' : 'var(--muted)') + ';margin-top:2px">' + (mismatch ? '&#9888; Cadastrado como: ' : 'Cadastrado como: ') + _escHtml(p.nome || p.email || '') + '</div>' : '') +
