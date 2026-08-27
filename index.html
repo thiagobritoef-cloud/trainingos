@@ -450,6 +450,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div class="ctitle">Painel do Treinador</div>
       <div id="adm-summary" style="font-size:16px;color:var(--muted)"></div>
     </div>
+    <div class="tabs-scroll"><div class="tabs" id="admin-main-tabs"></div></div>
     <div class="card">
       <div class="ctitle">Convidar aluno</div>
       <div class="fg"><label>Nome do aluno</label><input type="text" id="conv-nome" placeholder="Nome do aluno"></div>
@@ -462,6 +463,9 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div id="conv-list" style="margin-top:14px"></div>
     </div>
     <div id="adm-list"><div class="loading"><div class="spin"></div></div></div>
+    <div id="chat-view" style="display:none">
+      <div id="chat-list"><div class="loading"><div class="spin"></div></div></div>
+    </div>
   </div>
 </div>
 
@@ -1789,6 +1793,70 @@ async function pedirAjuste() {
 }
 
 // === ADMIN PANEL ===
+var adminTab = 'alunos';
+
+function escChat(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderAdminTabs() {
+  var el = document.getElementById('admin-main-tabs');
+  if (!el) return;
+  var tabs = [{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'}];
+  el.innerHTML = tabs.map(function(t) {
+    return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + '</div>';
+  }).join('');
+  el.querySelectorAll('.tab').forEach(function(t) {
+    t.addEventListener('click', function() {
+      adminTab = this.dataset.atab;
+      renderAdminTabs();
+      switchAdminView(adminTab);
+    });
+  });
+}
+
+function switchAdminView(t) {
+  var card = document.querySelector('#screen-admin .card');
+  var list = document.getElementById('adm-list');
+  var chat = document.getElementById('chat-view');
+  if (t === 'chat') {
+    if (card) card.style.display = 'none';
+    if (list) list.style.display = 'none';
+    if (chat) chat.style.display = '';
+    loadChat();
+  } else {
+    if (card) card.style.display = '';
+    if (list) list.style.display = '';
+    if (chat) chat.style.display = 'none';
+  }
+}
+
+async function loadChat() {
+  var el = document.getElementById('chat-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  var rcRes = await sb.from('reclamacoes').select('*').order('created_at', { ascending: false });
+  if (rcRes.error) { el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#e55;font-size:16px">' + escChat(rcRes.error.message) + '</p></div>'; return; }
+  var items = rcRes.data || [];
+  if (!items.length) { el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:16px">Nenhuma mensagem recebida ainda.</p></div>'; return; }
+  var ids = items.map(function(m) { return m.user_id; }).filter(function(v, i, a) { return v && a.indexOf(v) === i; });
+  var profRes = ids.length ? await sb.from('profiles').select('id,nome,email').in('id', ids) : { data: [] };
+  var names = {};
+  (profRes.data || []).forEach(function(p) { names[p.id] = p; });
+  el.innerHTML = items.map(function(m) {
+    var p = names[m.user_id] || {};
+    var nome = p.nome || p.email || 'Aluno';
+    var d = m.created_at ? new Date(m.created_at).toLocaleDateString('pt-BR') : '';
+    return '<div class="card" style="margin-bottom:10px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+      '<b style="font-size:16px">' + escChat(nome) + '</b><span style="font-size:13px;color:var(--muted)">' + d + '</span></div>' +
+      (m.titulo ? '<div style="font-weight:800;font-size:16px;margin-bottom:4px">' + escChat(m.titulo) + '</div>' : '') +
+      '<div style="font-size:16px;color:var(--text)">' + escChat(m.mensagem) + '</div>' +
+      '<button class="btn btn-s" style="margin-top:10px" onclick="openMsgModal(&quot;' + m.user_id + '&quot;, decodeURIComponent(&quot;' + encodeURIComponent(nome) + '&quot;))">Responder</button>' +
+      '</div>';
+  }).join('');
+}
+
 async function goAdmin() {
   if (!isAdmin) return;
   show('admin');
@@ -1797,6 +1865,7 @@ async function goAdmin() {
 
 async function loadAdmin() {
   loadConvites();
+  renderAdminTabs();
   var listEl = document.getElementById('adm-list');
   listEl.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
