@@ -1966,21 +1966,46 @@ function copiarConvite() {
 async function loadConvites() {
   var listEl = document.getElementById('conv-list');
   if (!listEl) return;
-  var res = await sb.from('convites').select('id,nome,status,created_at,accepted_at').order('created_at', { ascending: false });
+  var res = await sb.from('convites').select('id,name,status,created_at,accepted_at,user_id').order('created_at', { ascending: false });
   if (res.error || !res.data) { listEl.innerHTML = ''; return; }
-  if (!res.data.length) { listEl.innerHTML = '<div style="font-size:16px;color:#888">Nenhum convite enviado ainda.</div>'; return; }
+  var ids = res.data.map(function(c) { return c.user_id; }).filter(function(v, i, a) { return v && a.indexOf(v) === i; });
+  var profMap = {};
+  if (ids.length) {
+    var profRes = await sb.from('profiles').select('id,nome,email').in('id', ids);
+    (profRes.data || []).forEach(function(p) { profMap[p.id] = p; });
+  }
   var html = '<div style="font-size:16px;color:#888;margin-bottom:6px">Convites enviados</div>';
   res.data.forEach(function(c) {
-    var statusTxt = c.status === 'aceito'
-      ? ('Aceito em ' + new Date(c.accepted_at).toLocaleDateString('pt-BR'))
-      : 'Pendente';
-    var statusColor = c.status === 'aceito' ? '#2e7d32' : '#b26a00';
-    html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:16px">' +
-      '<span>' + _escHtml(c.nome) + '</span>' +
+    var statusTxt, statusColor;
+    if (c.status === 'aceito') {
+      statusTxt = 'Aceito em ' + new Date(c.accepted_at).toLocaleDateString('pt-BR');
+      statusColor = '#3ab26a';
+    } else if (c.status === 'cancelado') {
+      statusTxt = 'Cancelado';
+      statusColor = '#999';
+    } else {
+      statusTxt = 'Pendente';
+      statusColor = '#b26a00';
+    }
+    var p = c.user_id ? profMap[c.user_id] : null;
+    var mismatch = !!(p && p.nome && c.name && p.nome.trim().toLowerCase() !== c.name.trim().toLowerCase());
+    html += '<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:16px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<span>' + _escHtml(c.name) + '</span>' +
       '<span style="color:' + statusColor + '">' + statusTxt + '</span>' +
+      '</div>' +
+      (p ? '<div style="font-size:13px;color:' + (mismatch ? '#e55' : 'var(--muted)') + ';margin-top:2px">' + (mismatch ? '&#9888; Cadastrado como: ' : 'Cadastrado como: ') + _escHtml(p.nome || p.email || '') + '</div>' : '') +
+      (c.status === 'pendente' ? '<button class="btn btn-s" style="margin-top:6px;padding:4px 10px;font-size:13px" onclick="cancelarConvite(\'' + c.id + '\')">Cancelar convite</button>' : '') +
       '</div>';
   });
   listEl.innerHTML = html;
+}
+
+async function cancelarConvite(id) {
+  if (!confirm('Cancelar este convite? O link deixara de funcionar.')) return;
+  var res = await sb.from('convites').update({ status: 'cancelado' }).eq('id', id).eq('status', 'pendente');
+  if (res.error) { alert('Erro ao cancelar: ' + res.error.message); return; }
+  loadConvites();
 }
 
 async function togglePlano(id, current) {
