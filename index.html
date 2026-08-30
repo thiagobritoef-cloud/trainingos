@@ -466,6 +466,9 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div id="chat-view" style="display:none">
       <div id="chat-list"><div class="loading"><div class="spin"></div></div></div>
     </div>
+    <div id="planos-view" style="display:none">
+      <div id="planos-list"><div class="loading"><div class="spin"></div></div></div>
+    </div>
   </div>
 </div>
 
@@ -1858,7 +1861,7 @@ function escChat(s) {
 function renderAdminTabs() {
   var el = document.getElementById('admin-main-tabs');
   if (!el) return;
-  var tabs = [{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'}];
+  var tabs = [{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'}];
   el.innerHTML = tabs.map(function(t) {
     return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + '</div>';
   }).join('');
@@ -1875,15 +1878,24 @@ function switchAdminView(t) {
   var card = document.querySelector('#screen-admin .card');
   var list = document.getElementById('adm-list');
   var chat = document.getElementById('chat-view');
+  var planos = document.getElementById('planos-view');
   if (t === 'chat') {
     if (card) card.style.display = 'none';
     if (list) list.style.display = 'none';
     if (chat) chat.style.display = '';
+    if (planos) planos.style.display = 'none';
     loadChat();
+  } else if (t === 'planos') {
+    if (card) card.style.display = 'none';
+    if (list) list.style.display = 'none';
+    if (chat) chat.style.display = 'none';
+    if (planos) planos.style.display = '';
+    loadPlanos();
   } else {
     if (card) card.style.display = '';
     if (list) list.style.display = '';
     if (chat) chat.style.display = 'none';
+    if (planos) planos.style.display = 'none';
   }
 }
 
@@ -1919,13 +1931,35 @@ async function goAdmin() {
   loadAdmin();
 }
 
+async function loadPlanos() {
+  var el = document.getElementById('planos-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  var res = await sb.from('planos').select('*').order('preco', { ascending: true });
+  if (res.error) { el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#e55;font-size:16px">' + escChat(res.error.message) + '</p></div>'; return; }
+  var items = res.data || [];
+  if (!items.length) { el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:16px">Nenhum plano cadastrado.</p></div>'; return; }
+  var html = items.map(function(p) {
+    var precoTxt = Number(p.preco) > 0 ? ('R$ ' + Number(p.preco).toFixed(2).replace('.', ',') + ' / mes') : 'Gratuito';
+    return '<div class="adm-card">' +
+      '<div class="adm-name">' + escChat(p.nome) + '</div>' +
+      '<div class="adm-email">' + precoTxt + '</div>' +
+      '<div class="adm-stats">' +
+      '<div class="adm-stat"><b>' + p.treinos_max + '</b>Treinos / ' + p.treinos_periodo_dias + 'd</div>' +
+      '<div class="adm-stat"><b>' + p.alteracoes_max + '</b>Alteracoes / ' + p.alteracoes_periodo_dias + 'd</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  el.innerHTML = html;
+}
+
 async function loadAdmin() {
   loadConvites();
   renderAdminTabs();
   var listEl = document.getElementById('adm-list');
   listEl.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
-  var profRes = await sb.from('profiles').select('id,nome,email,plano,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
+  var profRes = await sb.from('profiles').select('id,nome,email,plano,plano_treino,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
   if (profRes.error) {
     listEl.innerHTML = '<div class="alert al-err">Erro ao carregar alunos: ' + profRes.error.message + '</div>';
     return;
@@ -1961,7 +1995,13 @@ async function loadAdmin() {
       '<div class="adm-stat"><b>' + (rcCount[a.id] || 0) + '</b>Sugestoes</div>' +
       '<div class="adm-stat"><b>' + (isPro ? 'PRO' : 'FREE') + '</b>Plano</div>' +
       '</div>' +
-      '<div class="adm-actions">' +
+      '<div class="adm-email">Plano de treino: <select onchange="setPlanoTreino(\'' + a.id + '\', this.value)">' +
+'<option value=""' + (!a.plano_treino ? ' selected' : '') + '>Sem plano</option>' +
+'<option value="free"' + (a.plano_treino === 'free' ? ' selected' : '') + '>Free</option>' +
+'<option value="fit"' + (a.plano_treino === 'fit' ? ' selected' : '') + '>Fit</option>' +
+'<option value="vip"' + (a.plano_treino === 'vip' ? ' selected' : '') + '>VIP</option>' +
+'</select></div>' +
+'<div class="adm-actions">' +
       '<button onclick="togglePlano(\'' + a.id + '\',\'' + a.plano + '\')" class="' + (isPro ? 'on' : '') + '">' + (isPro ? '&#9733; Pro' : 'Tornar Pro') + '</button>' +
       '<button onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')" class="danger ' + (isBlocked ? 'on' : '') + '">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
       '<button onclick="openMsgModal(\'' + a.id + '\',\'' + (a.nome || 'aluno').replace(/'/g, "") + '\')">&#128172; Mensagem</button>' +
@@ -2072,6 +2112,11 @@ async function togglePlano(id, current) {
 
 async function toggleBloqueado(id, current) {
   await sb.from('profiles').update({ bloqueado: !current }).eq('id', id);
+  loadAdmin();
+}
+
+async function setPlanoTreino(id, value) {
+  await sb.from('profiles').update({ plano_treino: value || null }).eq('id', id);
   loadAdmin();
 }
 
