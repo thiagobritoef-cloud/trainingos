@@ -510,6 +510,19 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- CONFIRM ANTES DE GERAR TREINO -->
+<div class="overlay" id="confirm-treino-overlay" onclick="closeConfirmTreinoModal(event)">
+<div class="modal">
+<button class="modal-close" onclick="closeConfirmTreinoModal()">&#10005;</button>
+<div class="ctitle">Confirmar antes de gerar</div>
+<div id="ctreino-body" style="font-size:16px;line-height:1.5"></div>
+<div style="display:flex;gap:10px;margin-top:16px">
+<button class="btn btn-p" onclick="confirmTreinoAnswer(true)" style="flex:1">Sim, continua</button>
+<button class="btn btn-s" onclick="confirmTreinoAnswer(false)" style="flex:1">Nao, preciso atualizar</button>
+</div>
+</div>
+</div>
+
 <!-- MOTIVATIONAL TOAST -->
 <div id="motiv-toast"><span class="mt-icon">&#128170;</span><span class="mt-txt" id="motiv-toast-txt"></span></div>
 
@@ -1080,7 +1093,50 @@ function checkAutoGenerate(latest) {
 }
 
 // === GENERATE ===
-async function generateWorkout(isAuto) {
+var ctreinoStep = 0;
+function generateWorkout(isAuto) {
+  if (!profile) { if (!isAuto) { alert('Configure seu perfil primeiro.'); goProfile(); } return; }
+  if (isAuto) { generateWorkoutRun(true); return; }
+  ctreinoStep = 0;
+  showConfirmTreinoStep();
+}
+
+function showConfirmTreinoStep() {
+  var p = profile;
+  var body = document.getElementById('ctreino-body');
+  if (ctreinoStep === 0) {
+    var obj = p.objetivo || '(nao definido)';
+    var det = (p.objetivo_detalhado || '').trim();
+    body.innerHTML = 'Seu objetivo cadastrado e <b>' + _escHtml(obj) + '</b>' + (det ? ' (' + _escHtml(det) + ')' : '') + '.<br><br>Continua o mesmo?';
+  } else {
+    var mat = (p.materiais || '').trim() || 'nenhum equipamento informado';
+    body.innerHTML = 'Seus materiais, aparelhos e equipamentos cadastrados: <b>' + _escHtml(mat) + '</b>.<br><br>Continuam os mesmos?';
+  }
+  document.getElementById('confirm-treino-overlay').classList.add('show');
+}
+
+function closeConfirmTreinoModal(e) {
+  if (e && e.target !== document.getElementById('confirm-treino-overlay')) return;
+  document.getElementById('confirm-treino-overlay').classList.remove('show');
+}
+
+function confirmTreinoAnswer(yes) {
+  if (!yes) {
+    document.getElementById('confirm-treino-overlay').classList.remove('show');
+    alert('Atualize seu cadastro antes de gerar o treino.');
+    goProfile();
+    return;
+  }
+  if (ctreinoStep === 0) {
+    ctreinoStep = 1;
+    showConfirmTreinoStep();
+  } else {
+    document.getElementById('confirm-treino-overlay').classList.remove('show');
+    generateWorkoutRun(false);
+  }
+}
+
+async function generateWorkoutRun(isAuto) {
   if (!profile) { if (!isAuto) { alert('Configure seu perfil primeiro.'); goProfile(); } return; }
 
   document.getElementById('gen-wrap').style.display = 'none';
