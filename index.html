@@ -133,6 +133,13 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 #motiv-toast .mt-icon{font-size:20px;flex-shrink:0}
 #motiv-toast .mt-txt{font-size:16px;font-weight:700;line-height:1.4}
 
+#push-toast-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;opacity:0;pointer-events:none;transition:opacity .25s}
+#push-toast-overlay.show{opacity:1;pointer-events:auto}
+#push-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:340px;width:88%;box-shadow:0 20px 60px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+#push-toast.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+#push-toast .pt-title{font-weight:800;font-size:16px;margin-bottom:6px;color:var(--text)}
+#push-toast .pt-body{font-size:14px;opacity:.85;margin-bottom:14px;color:var(--text)}
+#push-toast .pt-actions{display:flex;gap:8px;justify-content:flex-end}
 /* ONBOARDING */
 .ob-step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
 .ob-num{background:var(--g);color:#000;font-weight:900;font-size:16px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -255,9 +262,9 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="cnt">
     <div class="card" id="plano-card">
       <div class="ctitle">Seu Plano</div>
-      <div id="plano-status" style="font-size:16px;font-weight:800;margin-bottom:10px">Plano Gratuito</div>
+      <div id="plano-status" style="font-size:16px;font-weight:800;margin-bottom:10px">Carregando...</div>
       <div id="plano-out"></div>
-      <button class="btn btn-p" id="plano-upgrade-btn" onclick="virarPro()" style="display:none">&#128176; Virar PRO (Pix ou cartao)</button>
+      <div id="plano-msg" style="display:none"></div>
     </div>
     <div class="card">
       <div class="ctitle">Perfil do Atleta</div><div style="margin:-4px 0 12px"><a href="javascript:void(0)" onclick="goDicas()" style="color:var(--accent, #6BA83A);font-size:15px;text-decoration:underline;cursor:pointer">Duvidas? Toque aqui para ver explicacoes</a></div>
@@ -528,6 +535,15 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 <!-- MOTIVATIONAL TOAST -->
 <div id="motiv-toast"><span class="mt-icon">&#128170;</span><span class="mt-txt" id="motiv-toast-txt"></span></div>
+    <div id="push-toast-overlay" onclick="closePushToast()"></div>
+    <div id="push-toast">
+      <div class="pt-title" id="push-toast-title"></div>
+      <div class="pt-body" id="push-toast-body"></div>
+      <div class="pt-actions">
+        <button class="btn" onclick="closePushToast()">Fechar</button>
+        <button class="btn btn-p" onclick="pushToastClick()">Ver</button>
+      </div>
+    </div>
 
 <!-- ONBOARDING -->
 <div class="overlay" id="onboarding-overlay">
@@ -617,6 +633,29 @@ var MOTIV_VOLTA = [
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 var motivToastTimer = null;
+var __pushToastUrl = './';
+function showPushToast(title, body, url) {
+  var t = document.getElementById('push-toast');
+  var ov = document.getElementById('push-toast-overlay');
+  if (!t || !ov) return;
+  __pushToastUrl = url || './';
+  var tt = document.getElementById('push-toast-title');
+  var tb = document.getElementById('push-toast-body');
+  if (tt) tt.textContent = title || 'TO BE FITNESS';
+  if (tb) tb.textContent = body || '';
+  t.classList.add('show'); ov.classList.add('show');
+}
+function closePushToast() {
+  var t = document.getElementById('push-toast');
+  var ov = document.getElementById('push-toast-overlay');
+  if (t) t.classList.remove('show');
+  if (ov) ov.classList.remove('show');
+}
+function pushToastClick() {
+  closePushToast();
+  if (__pushToastUrl) location.href = __pushToastUrl;
+}
+
 function showToast(msg, icon) {
   var el = document.getElementById('motiv-toast');
   if (!el) return;
@@ -1587,29 +1626,32 @@ function svgSparkline(pontos) {
 // === PLANO / COBRANCA PIX ===
 function renderPlanoCard() {
   var el = document.getElementById('plano-status');
-  var btn = document.getElementById('plano-upgrade-btn');
+  var out = document.getElementById('plano-out');
   if (!el || !profile) return;
-  var isPro = profile.plano === 'pro';
-  el.innerHTML = isPro ? '&#11088; Plano PRO ativo' : 'Plano Gratuito';
-  if (btn) btn.style.display = isPro ? 'none' : 'block';
+  var pid = profile.plano_treino;
+  var nomes = { free: 'Free', fit: 'Fit', vip: 'VIP' };
+  el.innerHTML = pid ? ('Plano ' + (nomes[pid] || pid) + ' ativo') : 'Sem plano de assinatura';
+  if (out) out.innerHTML =
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">' +
+    '<button class="btn ' + (pid === 'fit' ? 'btn-p' : '') + '" onclick="assinarPlano(\'fit\')" ' + (pid === 'fit' ? 'disabled' : '') + '>Assinar Fit - R$22,90/mes</button>' +
+    '<button class="btn ' + (pid === 'vip' ? 'btn-p' : '') + '" onclick="assinarPlano(\'vip\')" ' + (pid === 'vip' ? 'disabled' : '') + '>Assinar VIP - R$29,90/mes</button>' +
+    '</div>';
 }
 
-async function virarPro() {
+async function assinarPlano(planoId) {
   if (!user) return;
-  var btn = document.getElementById('plano-upgrade-btn');
-  btn.disabled = true; btn.textContent = 'Gerando link de pagamento...';
-  showMsg('plano-out', '');
+  showMsg('plano-msg', 'Gerando link de pagamento...', 'ok');
   try {
-    var res = await sb.functions.invoke('stripe-checkout', { body: { user_id: user.id, email: user.email } });
+    var res = await sb.functions.invoke('stripe-checkout', { body: { plano: planoId, user_id: user.id, email: user.email } });
     if (res.error) throw new Error(res.error.message || 'Erro ao gerar cobranca');
     var data = res.data;
     if (typeof data === 'string') { try { data = JSON.parse(data); } catch (e) {} }
-    if (!data || !data.url) throw new Error((data && data.error) || 'Nao foi possivel gerar o link de pagamento.');
-    window.open(data.url, '_blank');
+    if (!data || !data.ok) throw new Error((data && data.error) || 'Nao foi possivel gerar o link de pagamento');
+    if (!data.url) throw new Error('Link de pagamento nao retornado');
+    showMsg('plano-msg', '', 'ok');
+    location.href = data.url;
   } catch (e) {
-    showMsg('plano-out', e.message || 'Erro ao iniciar pagamento.');
-  } finally {
-    btn.disabled = false; btn.textContent = '\uD83D\uDCB0 Virar PRO (Pix ou cartao)';
+    showMsg('plano-msg', e.message || 'Erro ao iniciar pagamento', 'err');
   }
 }
 
@@ -1959,7 +2001,7 @@ async function loadAdmin() {
   var listEl = document.getElementById('adm-list');
   listEl.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
-  var profRes = await sb.from('profiles').select('id,nome,email,plano,plano_treino,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
+  var profRes = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
   if (profRes.error) {
     listEl.innerHTML = '<div class="alert al-err">Erro ao carregar alunos: ' + profRes.error.message + '</div>';
     return;
@@ -1984,7 +2026,6 @@ async function loadAdmin() {
   var html = '';
   alunos.forEach(function(a) {
     var d = a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR') : '-';
-    var isPro = a.plano === 'pro';
     var isBlocked = !!a.bloqueado;
     html +=
       '<div class="adm-card">' +
@@ -1993,8 +2034,6 @@ async function loadAdmin() {
       '<div class="adm-stats">' +
       '<div class="adm-stat"><b>' + (wkCount[a.id] || 0) + '</b>Treinos</div>' +
       '<div class="adm-stat"><b>' + (rcCount[a.id] || 0) + '</b>Sugestoes</div>' +
-      '<div class="adm-stat"><b>' + (isPro ? 'PRO' : 'FREE') + '</b>Plano</div>' +
-      '</div>' +
       '<div class="adm-email">Plano de treino: <select onchange="setPlanoTreino(\'' + a.id + '\', this.value)">' +
 '<option value=""' + (!a.plano_treino ? ' selected' : '') + '>Sem plano</option>' +
 '<option value="free"' + (a.plano_treino === 'free' ? ' selected' : '') + '>Free</option>' +
@@ -2002,7 +2041,6 @@ async function loadAdmin() {
 '<option value="vip"' + (a.plano_treino === 'vip' ? ' selected' : '') + '>VIP</option>' +
 '</select></div>' +
 '<div class="adm-actions">' +
-      '<button onclick="togglePlano(\'' + a.id + '\',\'' + a.plano + '\')" class="' + (isPro ? 'on' : '') + '">' + (isPro ? '&#9733; Pro' : 'Tornar Pro') + '</button>' +
       '<button onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')" class="danger ' + (isBlocked ? 'on' : '') + '">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
       '<button onclick="openMsgModal(\'' + a.id + '\',\'' + (a.nome || 'aluno').replace(/'/g, "") + '\')">&#128172; Mensagem</button>' +
       '<button onclick="verTreinoAluno(\'' + a.id + '\')">&#128203; Ver treino</button>' +
@@ -2102,12 +2140,6 @@ async function cancelarConvite(id) {
   var res = await sb.from('convites').update({ status: 'cancelado' }).eq('id', id).eq('status', 'pendente');
   if (res.error) { alert('Erro ao cancelar: ' + res.error.message); return; }
   loadConvites();
-}
-
-async function togglePlano(id, current) {
-  var novo = current === 'pro' ? 'gratuito' : 'pro';
-  await sb.from('profiles').update({ plano: novo }).eq('id', id);
-  loadAdmin();
 }
 
 async function toggleBloqueado(id, current) {
@@ -2281,6 +2313,9 @@ init();
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(function(){});
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if (e.data && e.data.type === 'push-toast') { showPushToast(e.data.title, e.data.body, e.data.url); }
+  });
 }
 </script>
 </body>
