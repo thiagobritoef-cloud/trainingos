@@ -140,6 +140,19 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 #push-toast .pt-title{font-weight:800;font-size:16px;margin-bottom:6px;color:var(--text)}
 #push-toast .pt-body{font-size:14px;opacity:.85;margin-bottom:14px;color:var(--text)}
 #push-toast .pt-actions{display:flex;gap:8px;justify-content:flex-end}
+.planos-carousel{width:100%}
+.planos-track{display:flex;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding:4px 4px 14px}
+.plano-card-entrada{scroll-snap-align:center;flex:0 0 78%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;position:relative}
+.plano-card-entrada.destaque{border-color:var(--g);box-shadow:0 0 0 2px var(--g)}
+.plano-badge{background:var(--g);color:#fff;font-size:12px;font-weight:800;border-radius:20px;padding:4px 10px;display:inline-block;margin-bottom:10px}
+.plano-nome{font-size:18px;font-weight:900;margin-bottom:6px}
+.plano-preco{font-size:24px;font-weight:900;color:var(--g);margin-bottom:16px}
+.plano-preco small{font-size:13px;font-weight:600;color:var(--muted)}
+@media (min-width:641px){
+  .planos-track{flex-wrap:nowrap;overflow-x:visible;scroll-snap-type:none}
+  .plano-card-entrada{flex:1 1 0}
+}
+@media (max-width:420px){.tab-auth button{font-size:13px;padding:10px 4px}}
 /* ONBOARDING */
 .ob-step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
 .ob-num{background:var(--g);color:#000;font-weight:900;font-size:16px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -243,11 +256,17 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div class="tab-auth">
       <button id="tab-in" class="active" onclick="authTab('in')">Entrar</button>
       <button id="tab-up" onclick="authTab('up')">Cadastrar</button>
+      <button id="tab-planos" onclick="authTab('planos')">Planos</button>
     </div>
+    <div id="auth-form-fields">
     <div id="auth-msg"></div>
     <div class="fg"><label>Email</label><input type="email" id="a-email" placeholder="seu@email.com"></div>
     <div class="fg"><label>Senha</label><input type="password" id="a-pass" placeholder="Minimo 6 caracteres" onkeydown="if(event.key==='Enter')doAuth()"></div>
     <button class="btn btn-p" id="auth-btn" onclick="doAuth()">Entrar</button>
+    </div>
+    <div id="auth-planos-content" style="display:none">
+      <div class="planos-carousel"><div class="planos-track" id="planos-track"><p style="color:var(--muted);font-size:15px;text-align:center;padding:20px 0">Carregando planos...</p></div></div>
+    </div>
   </div>
 </div>
 
@@ -569,6 +588,15 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- PLANO DETALHE MODAL -->
+<div class="overlay" id="plano-detalhe-overlay" onclick="closePlanoDetalhe(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closePlanoDetalhe()">&#10005;</button>
+    <div id="plano-detalhe-body"></div>
+    <button class="btn btn-p" style="margin-top:10px;width:100%" onclick="quererPlano()">Quero esse plano</button>
+  </div>
+</div>
+
 <!-- INSTALL BANNER -->
 <div id="install-banner">
   <div class="ib-title">&#128241; Adicionar ao iPhone</div>
@@ -598,6 +626,7 @@ var deferredInstall = null;
 var authMode = 'in';
 var isAdmin = false;
 var msgTargetId = null;
+var ultimasCargas = {};
 var adminViewMode = false;
 var adminAlunoId = null;
 var adminAlunoProfile = null;
@@ -863,11 +892,66 @@ function goProfile() {
 }
 
 // === AUTH ===
+var __planosCache = null;
+async function renderPlanosEntrada() {
+  var track = document.getElementById('planos-track');
+  if (!track) return;
+  if (!__planosCache) {
+    var res = await sb.from('planos').select('*').order('preco', { ascending: true });
+    if (res.error || !res.data) { track.innerHTML = '<p style="color:var(--muted);font-size:15px;text-align:center;padding:20px 0">Nao foi possivel carregar os planos.</p>'; return; }
+    __planosCache = res.data;
+  }
+  track.innerHTML = __planosCache.map(function(p) {
+    var destaque = p.id === 'fit';
+    var precoNum = Number(p.preco || 0);
+    var precoTxt = 'R$ ' + precoNum.toFixed(2).replace('.', ',') + (precoNum > 0 ? '<small>/mes</small>' : '');
+    return '<div class="plano-card-entrada' + (destaque ? ' destaque' : '') + '">' +
+      (destaque ? '<div class="plano-badge">&#11088; Mais procurado pelos atletas</div>' : '') +
+      '<div class="plano-nome">' + p.nome + '</div>' +
+      '<div class="plano-preco">' + precoTxt + '</div>' +
+      '<button class="btn ' + (destaque ? 'btn-p' : '') + '" onclick="verDetalhesPlano(\'' + p.id + '\')">Ver detalhes</button>' +
+      '</div>';
+  }).join('');
+}
+
+function verDetalhesPlano(id) {
+  var p = (__planosCache || []).filter(function(x) { return x.id === id; })[0];
+  if (!p) return;
+  var det = '<div class="plano-nome" style="margin-bottom:10px">' + p.nome + '</div>';
+  det += '<ul style="margin:0 0 16px 20px;padding:0;font-size:15px;line-height:1.6;color:var(--text)">';
+  det += '<li>Ate ' + p.treinos_max + ' treino' + (p.treinos_max === 1 ? '' : 's') + ' a cada ' + p.treinos_periodo_dias + ' dias</li>';
+  det += '<li>' + (p.alteracoes_max ? ('Ate ' + p.alteracoes_max + ' ajuste' + (p.alteracoes_max === 1 ? '' : 's') + ' a cada ' + p.alteracoes_periodo_dias + ' dias') : 'Sem ajustes inclusos') + '</li>';
+  det += '</ul>';
+  document.getElementById('plano-detalhe-body').innerHTML = det;
+  document.getElementById('plano-detalhe-overlay').classList.add('show');
+}
+
+function closePlanoDetalhe(event) {
+  if (event && event.target !== document.getElementById('plano-detalhe-overlay')) return;
+  document.getElementById('plano-detalhe-overlay').classList.remove('show');
+}
+
+function quererPlano() {
+  closePlanoDetalhe();
+  authTab('up');
+}
+
 function authTab(mode) {
   authMode = mode;
   document.getElementById('tab-in').classList.toggle('active', mode === 'in');
   document.getElementById('tab-up').classList.toggle('active', mode === 'up');
-  document.getElementById('auth-btn').textContent = mode === 'in' ? 'Entrar' : 'Cadastrar';
+  var tabPlanos = document.getElementById('tab-planos');
+  if (tabPlanos) tabPlanos.classList.toggle('active', mode === 'planos');
+  var formFields = document.getElementById('auth-form-fields');
+  var planosContent = document.getElementById('auth-planos-content');
+  if (mode === 'planos') {
+    if (formFields) formFields.style.display = 'none';
+    if (planosContent) { planosContent.style.display = 'block'; renderPlanosEntrada(); }
+  } else {
+    if (formFields) formFields.style.display = '';
+    if (planosContent) planosContent.style.display = 'none';
+    document.getElementById('auth-btn').textContent = mode === 'in' ? 'Entrar' : 'Cadastrar';
+  }
 }
 
 function showMsg(elId, text, type) {
@@ -924,6 +1008,20 @@ async function doLogout() {
 }
 
 // === PROFILE ===
+async function loadUltimasCargas() {
+  if (!user) return;
+  try {
+    var res = await sb.from('logs_execucao').select('exercicio_nome,peso,reps,rpe,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1000);
+    if (res.error || !res.data) return;
+    var map = {};
+    res.data.forEach(function(r) {
+      var k = (r.exercicio_nome || '').trim().toLowerCase();
+      if (k && !(k in map)) map[k] = { peso: r.peso, reps: r.reps, rpe: r.rpe };
+    });
+    ultimasCargas = map;
+  } catch (e) {}
+}
+
 async function loadProfile() {
   if (!user) return;
   var res = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
@@ -951,6 +1049,7 @@ async function loadProfile() {
     renderHomeProfile();
     show('home');
     loadWorkouts();
+    loadUltimasCargas();
     loadAdminMessages();
     refreshGamificacao();
 
@@ -1380,11 +1479,12 @@ function renderDay(sessoes, di, wi) {
     html += '<div class="ex-wrap"><table><thead><tr><th>Exercicio</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Metodo</th><th onclick="alert(\'SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.\')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
     exs.forEach(function(ex, ei) {
       var key = 'w' + wi + 'd' + di + 'e' + ei;
-      var saved = localStorage.getItem('ld_' + wkId + '_' + key) || '';
-      var savedReps = localStorage.getItem('ldreps_' + wkId + '_' + key) || '';
-      var savedRpe = localStorage.getItem('ldrpe_' + wkId + '_' + key) || '';
-      var vid = ex.video_url || ex.video || '';
       var name = ex.nome || ex.exercicio || ex.name || '-';
+      var ultima = ultimasCargas[String(name).trim().toLowerCase()] || {};
+      var saved = localStorage.getItem('ld_' + wkId + '_' + key) || (ultima.peso != null ? String(ultima.peso) : '');
+      var savedReps = localStorage.getItem('ldreps_' + wkId + '_' + key) || (ultima.reps != null ? String(ultima.reps) : '');
+      var savedRpe = localStorage.getItem('ldrpe_' + wkId + '_' + key) || (ultima.rpe != null ? String(ultima.rpe) : '');
+      var vid = ex.video_url || ex.video || '';
       var parceiro = ex.parceiro || ex.partner || '';
       var metodo = ex.metodo || ex.method || '-';
       var series = ex.series || ex.sets || '-';
@@ -1407,9 +1507,10 @@ function renderDay(sessoes, di, wi) {
 
       if (parceiro) {
         var keyP = key + 'p';
-        var savedP = localStorage.getItem('ld_' + wkId + '_' + keyP) || '';
-        var savedPReps = localStorage.getItem('ldreps_' + wkId + '_' + keyP) || '';
-        var savedPRpe = localStorage.getItem('ldrpe_' + wkId + '_' + keyP) || '';
+        var ultimaP = ultimasCargas[String(parceiro).trim().toLowerCase()] || {};
+        var savedP = localStorage.getItem('ld_' + wkId + '_' + keyP) || (ultimaP.peso != null ? String(ultimaP.peso) : '');
+        var savedPReps = localStorage.getItem('ldreps_' + wkId + '_' + keyP) || (ultimaP.reps != null ? String(ultimaP.reps) : '');
+        var savedPRpe = localStorage.getItem('ldrpe_' + wkId + '_' + keyP) || (ultimaP.rpe != null ? String(ultimaP.rpe) : '');
         var vidP = ex.parceiro_video_url || ex.parceiro_video || '';
         var seriesP = ex.parceiro_series || series;
         var repsP = ex.parceiro_reps || reps;
@@ -1501,6 +1602,7 @@ async function registrarTreinoCompleto() {
 
   showMsg('reg-treino-out', 'Treino registrado! (' + rows.length + ' exercicio' + (rows.length > 1 ? 's' : '') + ')', 'ok');
   refreshGamificacao();
+  loadUltimasCargas();
 }
 
 // === GAMIFICACAO LEVE ===
