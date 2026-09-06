@@ -362,11 +362,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡sticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -459,11 +459,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ reformulando... atÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ reformulando... atÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -1482,7 +1482,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -1738,7 +1738,7 @@ async function refreshGamificacao() {
   var card = document.getElementById('gami-card');
   try {
     var res = await sb.from('logs_execucao').select('data').eq('user_id', user.id).order('data', { ascending: false });
-    if (res.error || !res.data || !res.data.length) { if (card) card.style.display = 'none'; return; }
+    if (res.error || !res.data || !res.data.length) { cards.forEach(function(c){ c.style.display = 'none'; }); return; }
 
     var diasSet = {};
     res.data.forEach(function(r) { diasSet[r.data] = true; });
@@ -2034,7 +2034,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -2102,7 +2102,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
@@ -2146,7 +2146,7 @@ function renderAdminTabs() {
 }
 
 function switchAdminView(t) {
-  var card = document.querySelector('#screen-admin .card');
+  var cards = document.querySelectorAll('#screen-admin .cnt > .card');
   var list = document.getElementById('adm-list');
   var chat = document.getElementById('chat-view');
   var planos = document.getElementById('planos-view');
@@ -2154,28 +2154,28 @@ function switchAdminView(t) {
 var screenAdmin = document.getElementById('screen-admin');
 if (screenAdmin) screenAdmin.classList.toggle('dash-wide', t === 'dashboard');
   if (t === 'chat') {
-    if (card) card.style.display = 'none';
+    cards.forEach(function(c){ c.style.display = 'none'; });
     if (list) list.style.display = 'none';
     if (chat) chat.style.display = '';
     if (planos) planos.style.display = 'none';
     if (dash) dash.style.display = 'none';
     loadChat();
   } else if (t === 'planos') {
-    if (card) card.style.display = 'none';
+    cards.forEach(function(c){ c.style.display = 'none'; });
     if (list) list.style.display = 'none';
     if (chat) chat.style.display = 'none';
     if (planos) planos.style.display = '';
     if (dash) dash.style.display = 'none';
     loadPlanos();
   } else if (t === 'dashboard') {
-    if (card) card.style.display = 'none';
+    cards.forEach(function(c){ c.style.display = 'none'; });
     if (list) list.style.display = 'none';
     if (chat) chat.style.display = 'none';
     if (planos) planos.style.display = 'none';
     if (dash) dash.style.display = '';
     loadDashboardAdmin();
   } else {
-    if (card) card.style.display = '';
+    cards.forEach(function(c){ c.style.display = ''; });
     if (list) list.style.display = '';
     if (chat) chat.style.display = 'none';
     if (planos) planos.style.display = 'none';
