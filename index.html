@@ -153,6 +153,12 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   .plano-card-entrada{flex:1 1 0}
 }
 @media (max-width:420px){.tab-auth button{font-size:13px;padding:10px 4px}}
+.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.dash-card-icon{font-size:22px;margin-bottom:6px}
+.dash-card-value{font-size:20px;font-weight:900;color:var(--g);word-break:break-word}
+.dash-card-label{font-size:12px;color:var(--muted);margin-top:4px}
+@media (min-width:641px){.dash-grid{grid-template-columns:repeat(4,1fr)}}
 /* ONBOARDING */
 .ob-step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
 .ob-num{background:var(--g);color:#000;font-weight:900;font-size:16px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -344,11 +350,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂ¡sticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -441,11 +447,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂ§ÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂª.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂ§ÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂ¡ reformulando... atÃÂ© 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂ¡ reformulando... atÃÂÃÂ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -494,6 +500,9 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     </div>
     <div id="planos-view" style="display:none">
       <div id="planos-list"><div class="loading"><div class="spin"></div></div></div>
+    </div>
+    <div id="dashboard-view" style="display:none">
+      <div id="dashboard-content"><div class="loading"><div class="spin"></div></div></div>
     </div>
   </div>
 </div>
@@ -1369,7 +1378,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' Ã¢ÂÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂ¢ÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -1921,7 +1930,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que vocÃÂª quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃÂÃÂª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -1989,7 +1998,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' Ã¢ÂÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂ¢ÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
@@ -2019,7 +2028,7 @@ function escChat(s) {
 function renderAdminTabs() {
   var el = document.getElementById('admin-main-tabs');
   if (!el) return;
-  var tabs = [{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'}];
+  var tabs = [{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'},{k:'dashboard',l:'Dashboard'}];
   el.innerHTML = tabs.map(function(t) {
     return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + '</div>';
   }).join('');
@@ -2037,24 +2046,118 @@ function switchAdminView(t) {
   var list = document.getElementById('adm-list');
   var chat = document.getElementById('chat-view');
   var planos = document.getElementById('planos-view');
+  var dash = document.getElementById('dashboard-view');
   if (t === 'chat') {
     if (card) card.style.display = 'none';
     if (list) list.style.display = 'none';
     if (chat) chat.style.display = '';
     if (planos) planos.style.display = 'none';
+    if (dash) dash.style.display = 'none';
     loadChat();
   } else if (t === 'planos') {
     if (card) card.style.display = 'none';
     if (list) list.style.display = 'none';
     if (chat) chat.style.display = 'none';
     if (planos) planos.style.display = '';
+    if (dash) dash.style.display = 'none';
     loadPlanos();
+  } else if (t === 'dashboard') {
+    if (card) card.style.display = 'none';
+    if (list) list.style.display = 'none';
+    if (chat) chat.style.display = 'none';
+    if (planos) planos.style.display = 'none';
+    if (dash) dash.style.display = '';
+    loadDashboardAdmin();
   } else {
     if (card) card.style.display = '';
     if (list) list.style.display = '';
     if (chat) chat.style.display = 'none';
     if (planos) planos.style.display = 'none';
+    if (dash) dash.style.display = 'none';
   }
+}
+
+var __dashPeriodDias = 30;
+async function loadDashboardAdmin() {
+  var el = document.getElementById('dashboard-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  try {
+    var sinceMs = Date.now() - __dashPeriodDias*24*60*60*1000;
+    var profRes = await sb.from('profiles').select('id,is_admin,created_at');
+    var assinRes = await sb.from('assinaturas').select('plano,status,valor,created_at,updated_at');
+    var treinosRes = await sb.from('workouts').select('id,created_at');
+    var cfgRes = await sb.from('app_config').select('value').eq('key','custo_por_treino').maybeSingle();
+    if (profRes.error) throw profRes.error;
+    if (assinRes.error) throw assinRes.error;
+    if (treinosRes.error) throw treinosRes.error;
+
+    var alunos = (profRes.data || []).filter(function(p) { return !p.is_admin; });
+    var totalAlunos = alunos.length;
+    var novosAlunos = alunos.filter(function(p) { return p.created_at && new Date(p.created_at).getTime() >= sinceMs; }).length;
+
+    var assinaturas = assinRes.data || [];
+    var ativos = assinaturas.filter(function(a) { return a.status === 'active'; });
+    var cancelados = assinaturas.filter(function(a) { return a.status === 'canceled' && a.updated_at && new Date(a.updated_at).getTime() >= sinceMs; });
+    var mrr = ativos.reduce(function(s, a) { return s + Number(a.valor || 0); }, 0);
+    var porPlano = {};
+    ativos.forEach(function(a) { var p = a.plano || '?'; porPlano[p] = (porPlano[p] || 0) + 1; });
+    var planosOrdenados = Object.keys(porPlano).sort(function(x, y) { return porPlano[y] - porPlano[x]; });
+    var nomesPlano = { free: 'Free', fit: 'Fit', vip: 'VIP' };
+    var maisVendidoLabel = planosOrdenados.length ? ((nomesPlano[planosOrdenados[0]] || planosOrdenados[0]) + ' (' + porPlano[planosOrdenados[0]] + ')') : '-';
+
+    var treinos = treinosRes.data || [];
+    var treinosPeriodo = treinos.filter(function(w) { return w.created_at && new Date(w.created_at).getTime() >= sinceMs; }).length;
+
+    var custoPorTreino = Number((cfgRes.data && cfgRes.data.value) || 0);
+    var custoTotal = custoPorTreino * treinosPeriodo;
+
+    el.innerHTML =
+      '<div class="card">' +
+        '<div class="ctitle">Periodo de analise</div>' +
+        '<select id="dash-periodo" style="width:100%;padding:10px;border-radius:8px;background:#111;color:#fff;border:1px solid #333;font-size:16px">' +
+          '<option value="7"' + (__dashPeriodDias === 7 ? ' selected' : '') + '>Ultimos 7 dias</option>' +
+          '<option value="30"' + (__dashPeriodDias === 30 ? ' selected' : '') + '>Ultimos 30 dias</option>' +
+          '<option value="90"' + (__dashPeriodDias === 90 ? ' selected' : '') + '>Ultimos 90 dias</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="dash-grid">' +
+        dashCard('&#128101;', 'Total de alunos', totalAlunos) +
+        dashCard('&#127881;', 'Novos alunos (periodo)', novosAlunos) +
+        dashCard('&#127942;', 'Plano mais vendido', maisVendidoLabel) +
+        dashCard('&#10060;', 'Cancelamentos (periodo)', cancelados.length) +
+        dashCard('&#128176;', 'Receita mensal recorrente', 'R$ ' + mrr.toFixed(2).replace('.', ',')) +
+        dashCard('&#9889;', 'Treinos gerados (periodo)', treinosPeriodo) +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin:-6px 0 14px;padding:0 4px">A receita mensal recorrente e uma estimativa com base nas assinaturas ativas no momento, nao um extrato financeiro exato.</div>' +
+      '<div class="card">' +
+        '<div class="ctitle">Custo estimado de montagem de treinos</div>' +
+        '<div class="fg"><label>Custo por treino gerado (R$)</label><input type="number" step="0.01" min="0" id="dash-custo-treino" value="' + custoPorTreino.toFixed(2) + '"></div>' +
+        '<button class="btn btn-s" onclick="salvarCustoTreino()">Salvar custo</button>' +
+        '<div style="margin-top:14px;font-size:16px;color:var(--muted)">' + treinosPeriodo + ' treino' + (treinosPeriodo === 1 ? '' : 's') + ' gerado' + (treinosPeriodo === 1 ? '' : 's') + ' no periodo &times; R$ ' + custoPorTreino.toFixed(2).replace('.', ',') + ' = <b style="color:var(--text)">R$ ' + custoTotal.toFixed(2).replace('.', ',') + '</b></div>' +
+      '</div>';
+
+    var selEl = document.getElementById('dash-periodo');
+    if (selEl) selEl.addEventListener('change', function() {
+      __dashPeriodDias = Number(this.value);
+      loadDashboardAdmin();
+    });
+  } catch (e) {
+    el.innerHTML = '<div class="card"><p style="color:#e55">Erro ao carregar dashboard: ' + escChat((e && e.message) || String(e)) + '</p></div>';
+  }
+}
+
+function dashCard(icon, label, value) {
+  return '<div class="dash-card"><div class="dash-card-icon">' + icon + '</div><div class="dash-card-value">' + value + '</div><div class="dash-card-label">' + label + '</div></div>';
+}
+
+async function salvarCustoTreino() {
+  var inp = document.getElementById('dash-custo-treino');
+  if (!inp) return;
+  var num = Number(inp.value || 0);
+  if (isNaN(num) || num < 0) return;
+  await sb.from('app_config').update({ value: String(num) }).eq('key', 'custo_por_treino');
+  loadDashboardAdmin();
 }
 
 async function loadChat() {
