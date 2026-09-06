@@ -161,6 +161,15 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .dash-card-value{font-size:20px;font-weight:900;color:var(--g);word-break:break-word}
 .dash-card-label{font-size:12px;color:var(--muted);margin-top:4px}
 @media (min-width:641px){.dash-grid{grid-template-columns:repeat(4,1fr)}}
+#screen-admin .cnt{transition:max-width .25s ease}
+@media (min-width:900px){
+#screen-admin.dash-wide .cnt{max-width:1200px}
+#screen-admin.dash-wide .dash-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin:20px 0}
+#screen-admin.dash-wide .dash-card{padding:28px 20px}
+#screen-admin.dash-wide .dash-card-icon{font-size:34px;margin-bottom:10px}
+#screen-admin.dash-wide .dash-card-value{font-size:30px}
+#screen-admin.dash-wide .dash-card-label{font-size:15px;margin-top:6px}
+}
 /* ONBOARDING */
 .ob-step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
 .ob-num{background:var(--g);color:#000;font-weight:900;font-size:16px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -353,11 +362,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂÃÂÃÂ¡sticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -450,11 +459,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂÃÂÃÂª.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂÃÂÃÂ¡ reformulando... atÃÂÃÂÃÂÃÂ© 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¡ reformulando... atÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -1473,7 +1482,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -2025,7 +2034,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que vocÃÂÃÂÃÂÃÂª quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -2093,7 +2102,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
@@ -2123,7 +2132,7 @@ function escChat(s) {
 function renderAdminTabs() {
   var el = document.getElementById('admin-main-tabs');
   if (!el) return;
-  var tabs = [{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'},{k:'dashboard',l:'Dashboard'}];
+  var tabs = [{k:'dashboard',l:'Dashboard'},{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'}];
   el.innerHTML = tabs.map(function(t) {
     return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + '</div>';
   }).join('');
@@ -2142,6 +2151,8 @@ function switchAdminView(t) {
   var chat = document.getElementById('chat-view');
   var planos = document.getElementById('planos-view');
   var dash = document.getElementById('dashboard-view');
+var screenAdmin = document.getElementById('screen-admin');
+if (screenAdmin) screenAdmin.classList.toggle('dash-wide', t === 'dashboard');
   if (t === 'chat') {
     if (card) card.style.display = 'none';
     if (list) list.style.display = 'none';
