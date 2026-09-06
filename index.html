@@ -344,11 +344,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃ¡sticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -441,11 +441,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃ§Ã£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃª.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂ§ÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃ¡ reformulando... atÃ© 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂ¡ reformulando... atÃÂ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -627,6 +627,7 @@ var authMode = 'in';
 var isAdmin = false;
 var msgTargetId = null;
 var ultimasCargas = {};
+var planoDesejado = null;
 var adminViewMode = false;
 var adminAlunoId = null;
 var adminAlunoProfile = null;
@@ -915,12 +916,19 @@ async function renderPlanosEntrada() {
 }
 
 function verDetalhesPlano(id) {
+  planoDesejado = id;
   var p = (__planosCache || []).filter(function(x) { return x.id === id; })[0];
   if (!p) return;
   var det = '<div class="plano-nome" style="margin-bottom:10px">' + p.nome + '</div>';
   det += '<ul style="margin:0 0 16px 20px;padding:0;font-size:15px;line-height:1.6;color:var(--text)">';
   det += '<li>Ate ' + p.treinos_max + ' treino' + (p.treinos_max === 1 ? '' : 's') + ' a cada ' + p.treinos_periodo_dias + ' dias</li>';
   det += '<li>' + (p.alteracoes_max ? ('Ate ' + p.alteracoes_max + ' ajuste' + (p.alteracoes_max === 1 ? '' : 's') + ' a cada ' + p.alteracoes_periodo_dias + ' dias') : 'Sem ajustes inclusos') + '</li>';
+  var extras = {
+    free: ['Treino personalizado ao seu objetivo', 'Videos demonstrativos', 'Acompanhamento de evolucao'],
+    fit: ['Treino de acordo com seu objetivo, criado por um treinador', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos', 'Fale com o treinador'],
+    vip: ['Treino de acordo com seu objetivo, criado por um treinador', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos', 'Fale com o treinador']
+  };
+  (extras[p.id] || []).forEach(function(b) { det += '<li>' + b + '</li>'; });
   det += '</ul>';
   document.getElementById('plano-detalhe-body').innerHTML = det;
   document.getElementById('plano-detalhe-overlay').classList.add('show');
@@ -956,6 +964,7 @@ function authTab(mode) {
 
 function showMsg(elId, text, type) {
   var el = document.getElementById(elId);
+  if (!el) return;
   el.innerHTML = text
     ? '<div class="alert al-' + (type || 'err') + '">' + text + '</div>'
     : '';
@@ -990,6 +999,11 @@ async function doAuth() {
     }
     await loadProfile();
     subscribePush();
+    if (planoDesejado === 'fit' || planoDesejado === 'vip') {
+      var __pd = planoDesejado;
+      planoDesejado = null;
+      assinarPlano(__pd);
+    }
   } catch (e) {
     var m = e.message || 'Erro desconhecido';
     if (m.indexOf('Invalid login') >= 0) m = 'Email ou senha incorretos.';
@@ -1355,7 +1369,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' â se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' Ã¢ÂÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -1907,7 +1921,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que vocÃª quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃÂª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -1975,7 +1989,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' â se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' Ã¢ÂÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
