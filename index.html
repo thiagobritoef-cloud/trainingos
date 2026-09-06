@@ -141,16 +141,18 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 #push-toast .pt-body{font-size:14px;opacity:.85;margin-bottom:14px;color:var(--text)}
 #push-toast .pt-actions{display:flex;gap:8px;justify-content:flex-end}
 .planos-carousel{width:100%}
-.planos-track{display:flex;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding:4px 4px 14px}
-.plano-card-entrada{scroll-snap-align:center;flex:0 0 78%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;position:relative}
-.plano-card-entrada.destaque{border-color:var(--g);box-shadow:0 0 0 2px var(--g)}
-.plano-badge{background:var(--g);color:#fff;font-size:11px;font-weight:800;line-height:1.3;border-radius:8px;padding:5px 8px;display:block;max-width:150px;margin:0 auto 10px}
+.planos-track{display:flex;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding:20px 4px 14px}
+.plano-card-entrada{scroll-snap-align:center;flex:0 0 78%;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.plano-card-entrada .btn{margin-top:auto}
+.plano-card-entrada.destaque{border-color:var(--g);box-shadow:0 0 0 2px var(--g),0 10px 30px rgba(76,175,80,.25);background:linear-gradient(180deg,rgba(76,175,80,.10),var(--card) 45%);padding-top:32px}
+.plano-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--g);color:#fff;font-size:11px;font-weight:800;line-height:1.3;border-radius:20px;padding:6px 12px;max-width:calc(100% - 24px);text-align:center;box-shadow:0 6px 14px rgba(76,175,80,.35);z-index:2}
 .plano-nome{font-size:18px;font-weight:900;margin-bottom:6px}
 .plano-preco{font-size:24px;font-weight:900;color:var(--g);margin-bottom:16px}
 .plano-preco small{font-size:13px;font-weight:600;color:var(--muted)}
 @media (min-width:641px){
-  .planos-track{flex-wrap:nowrap;overflow-x:visible;scroll-snap-type:none}
-  .plano-card-entrada{flex:1 1 0}
+.planos-track{flex-wrap:nowrap;overflow-x:visible;scroll-snap-type:none;align-items:stretch}
+.plano-card-entrada{flex:1 1 0}
+.plano-card-entrada.destaque{transform:scale(1.04);z-index:2}
 }
 @media (max-width:420px){.tab-auth button{font-size:13px;padding:10px 4px}}
 .dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
@@ -268,7 +270,8 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div id="auth-msg"></div>
     <div class="fg"><label>Email</label><input type="email" id="a-email" placeholder="seu@email.com"></div>
     <div class="fg"><label>Senha</label><input type="password" id="a-pass" placeholder="Minimo 6 caracteres" onkeydown="if(event.key==='Enter')doAuth()"></div>
-    <button class="btn btn-p" id="auth-btn" onclick="doAuth()">Entrar</button>
+    <div id="link-esqueci-senha" style="text-align:right;margin:-8px 0 14px"><a href="javascript:void(0)" onclick="abrirEsqueciSenha()" style="color:var(--muted);font-size:13px;text-decoration:underline">Esqueci minha senha</a></div>
+<button class="btn btn-p" id="auth-btn" onclick="doAuth()">Entrar</button>
     </div>
     <div id="auth-planos-content" style="display:none">
       <div class="planos-carousel"><div class="planos-track" id="planos-track"><p style="color:var(--muted);font-size:15px;text-align:center;padding:20px 0">Carregando planos...</p></div></div>
@@ -350,11 +353,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃÂÃÂÃÂÃÂ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂ¡sticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃÂÃÂÃÂÃÂ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -447,11 +450,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂ§ÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂª.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂ£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃÂÃÂÃÂÃÂª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃÂÃÂÃÂÃÂª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂ¡ reformulando... atÃÂÃÂ© 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃÂÃÂÃÂÃÂ¡ reformulando... atÃÂÃÂÃÂÃÂ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -606,6 +609,28 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
 </div>
 
+<!-- ESQUECI SENHA MODAL -->
+<div class="overlay" id="esqueci-senha-overlay" onclick="closeEsqueciSenha(event)">
+<div class="modal">
+<button class="modal-close" onclick="closeEsqueciSenha()">&#10005;</button>
+<div class="plano-nome" style="margin-bottom:10px">Recuperar senha</div>
+<div id="esqueci-senha-msg"></div>
+<div class="fg"><label>Email</label><input type="email" id="esqueci-email" placeholder="seu@email.com"></div>
+<button class="btn btn-p" id="esqueci-btn" style="width:100%" onclick="enviarEsqueciSenha()">Enviar link de recuperacao</button>
+</div>
+</div>
+
+<!-- NOVA SENHA MODAL -->
+<div class="overlay" id="nova-senha-overlay">
+<div class="modal">
+<div class="plano-nome" style="margin-bottom:10px">Defina sua nova senha</div>
+<div id="nova-senha-msg"></div>
+<div class="fg"><label>Nova senha</label><input type="password" id="nova-senha-1" placeholder="Minimo 6 caracteres"></div>
+<div class="fg"><label>Confirme a nova senha</label><input type="password" id="nova-senha-2" placeholder="Repita a senha"></div>
+<button class="btn btn-p" id="nova-senha-btn" style="width:100%" onclick="salvarNovaSenha()">Salvar nova senha</button>
+</div>
+</div>
+
 <!-- INSTALL BANNER -->
 <div id="install-banner">
   <div class="ib-title">&#128241; Adicionar ao iPhone</div>
@@ -623,6 +648,15 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 var SB_URL = 'https://uvqtiikeleadvecnuven.supabase.co';
 var SB_KEY = 'sb_publishable_oaYWMsc31CNGEb_HHo09_A_pYkEqk4w';
 var sb = supabase.createClient(SB_URL, SB_KEY);
+sb.auth.onAuthStateChange(function(event, session) {
+  if (event === 'PASSWORD_RECOVERY') {
+    var esq = document.getElementById('esqueci-senha-overlay');
+    if (esq) esq.classList.remove('show');
+    var nv = document.getElementById('nova-senha-overlay');
+    if (nv) nv.classList.add('show');
+  }
+});
+
 var VAPID_PUBLIC_KEY = 'BHdWMR2RjPGRI72pc8HYBaGkKKGvyHiRnLxC94CvGqEG5V_00vbA1mPgv8QDWlwT31RdvKpjGtO4UFS1DZR1gds';
 
 var user = null;
@@ -953,6 +987,65 @@ function quererPlano() {
   authTab('up');
 }
 
+function abrirEsqueciSenha() {
+  var emailField = document.getElementById('a-email');
+  document.getElementById('esqueci-email').value = (emailField ? emailField.value : '').trim();
+  showMsg('esqueci-senha-msg', '');
+  document.getElementById('esqueci-senha-overlay').classList.add('show');
+}
+
+function closeEsqueciSenha(event) {
+  if (event && event.target !== document.getElementById('esqueci-senha-overlay')) return;
+  document.getElementById('esqueci-senha-overlay').classList.remove('show');
+}
+
+async function enviarEsqueciSenha() {
+  var email = document.getElementById('esqueci-email').value.trim();
+  if (!email) { showMsg('esqueci-senha-msg', 'Informe seu email.'); return; }
+  var btn = document.getElementById('esqueci-btn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    var res = await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://thiagobritoef-cloud.github.io/trainingos/' });
+    if (res.error) {
+      showMsg('esqueci-senha-msg', 'Nao foi possivel enviar o email. Tente novamente.');
+    } else {
+      showMsg('esqueci-senha-msg', 'Email enviado! Verifique sua caixa de entrada e clique no link para criar uma nova senha.', 'ok');
+    }
+  } catch (e) {
+    showMsg('esqueci-senha-msg', 'Erro ao enviar email de recuperacao.');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Enviar link de recuperacao';
+}
+
+async function salvarNovaSenha() {
+  var p1 = document.getElementById('nova-senha-1').value;
+  var p2 = document.getElementById('nova-senha-2').value;
+  if (!p1 || p1.length < 6) { showMsg('nova-senha-msg', 'A senha deve ter no minimo 6 caracteres.'); return; }
+  if (p1 !== p2) { showMsg('nova-senha-msg', 'As senhas nao coincidem.'); return; }
+  var btn = document.getElementById('nova-senha-btn');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    var res = await sb.auth.updateUser({ password: p1 });
+    if (res.error) {
+      showMsg('nova-senha-msg', 'Nao foi possivel salvar a nova senha. Tente novamente.');
+      btn.disabled = false;
+      btn.textContent = 'Salvar nova senha';
+    } else {
+      showMsg('nova-senha-msg', 'Senha atualizada com sucesso!', 'ok');
+      setTimeout(function() {
+        document.getElementById('nova-senha-overlay').classList.remove('show');
+        location.reload();
+      }, 1500);
+    }
+  } catch (e) {
+    showMsg('nova-senha-msg', 'Erro ao salvar nova senha.');
+    btn.disabled = false;
+    btn.textContent = 'Salvar nova senha';
+  }
+}
 function authTab(mode) {
   authMode = mode;
   document.getElementById('tab-in').classList.toggle('active', mode === 'in');
@@ -968,6 +1061,8 @@ function authTab(mode) {
     if (formFields) formFields.style.display = '';
     if (planosContent) planosContent.style.display = 'none';
     document.getElementById('auth-btn').textContent = mode === 'in' ? 'Entrar' : 'Cadastrar';
+      var linkEsq = document.getElementById('link-esqueci-senha');
+      if (linkEsq) linkEsq.style.display = mode === 'in' ? '' : 'none';
   }
 }
 
@@ -1378,7 +1473,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂ¢ÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -1930,7 +2025,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que vocÃÂÃÂª quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃÂÃÂÃÂÃÂª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -1998,7 +2093,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂ¢ÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
