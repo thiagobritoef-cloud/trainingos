@@ -1,4 +1,4 @@
-var V = 'tos-v8';
+var V = 'tos-v9';
 self.addEventListener('install', function(e) {
   self.skipWaiting();
 });
@@ -32,22 +32,19 @@ var title = data.title || 'TO BE FITNESS';
 var body = data.body || '';
 var url = data.url || './';
 e.waitUntil(
+Promise.all([
 self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
-var visibleClient = null;
-for (var i = 0; i < list.length; i++) {
-if (list[i].visibilityState === 'visible') { visibleClient = list[i]; break; }
-}
-if (visibleClient) {
-visibleClient.postMessage({ type: 'push-toast', title: title, body: body, url: url });
-return;
-}
-return self.registration.showNotification(title, {
+list.forEach(function(c) {
+c.postMessage({ type: 'push-toast', title: title, body: body, url: url });
+});
+}),
+self.registration.showNotification(title, {
 body: body,
 icon: './icon-192.png',
 badge: './icon-192.png',
 data: { url: url }
-});
 })
+])
 );
 });
 
