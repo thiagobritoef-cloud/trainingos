@@ -261,6 +261,28 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   .frow{grid-template-columns:1fr}
   .cnt{padding:12px}
 }
+
+.home-hero{text-align:center;padding:18px 4px 6px}
+.home-hero .auth-logo{display:flex;flex-direction:column;align-items:center}
+.home-hero-title{font-size:26px;font-weight:900;margin-bottom:6px}
+.home-hero-sub{color:var(--muted);font-size:16px;margin-bottom:4px}
+.section-label{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px;font-size:18px;font-weight:800}
+.section-label .section-chev{color:var(--muted);font-size:22px;line-height:1}
+.treino-card{display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--g);border-radius:16px;padding:16px;margin-bottom:14px;cursor:pointer;box-shadow:0 0 0 3px rgba(76,175,80,.15)}
+.treino-card-txt{flex:1}
+.treino-card-title{font-weight:900;font-size:17px}
+.treino-card-sub{color:var(--muted);font-size:14px;margin-top:2px}
+.list-row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.list-row-txt{flex:1;font-weight:700;font-size:16px}
+.row-chev{color:var(--muted);font-size:20px;line-height:1}
+.icon-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.icon-badge.solid{background:var(--g);color:#08210c}
+.icon-badge.outline{border:1.5px solid var(--border);color:var(--text)}
+#screen-home .cnt{padding-bottom:90px}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#111;border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:500}
+.bottom-nav .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;cursor:pointer}
+.bottom-nav .nav-item .nav-ico{font-size:20px}
+.bottom-nav .nav-item.active{color:var(--g)}
 </style>
 </head>
 <body>
@@ -362,11 +384,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <div class="fg">
         <label>Descreva seus objetivos</label>
-        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braços e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
+        <textarea id="p-goal-desc" placeholder="Ex: quero ganhar massa muscular nos braÃ§os e melhorar o condicionamento para jogar futebol aos fins de semana..."></textarea>
       </div>
       <div class="fg">
         <label>Materiais / Equipamentos</label>
-        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elásticos, etc."></textarea>
+        <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, elÃ¡sticos, etc."></textarea>
       </div>
       <div class="fg">
         <label>Dores / Lesoes / Restricoes</label>
@@ -374,7 +396,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <button class="btn btn-p" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
     </div>
-    <div class="card">
+    <div class="card" id="prog-card">
       <div class="ctitle">Progresso: Peso e Fotos</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Registre seu peso e uma foto periodicamente para acompanhar sua evolucao.</div>
       <div class="frow">
@@ -387,7 +409,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div id="prog-chart" style="margin-top:16px"></div>
       <div id="prog-list" style="margin-top:12px"></div>
     </div>
-    <div class="card">
+    <div class="card" id="rc-card">
       <div class="ctitle">Sugestao e Feedback</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Tem uma sugestao, feedback ou encontrou algum problema? Conte pra gente.</div>
       <div class="fg"><input type="text" id="rc-titulo" placeholder="Assunto"></div>
@@ -400,40 +422,82 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 <!-- ===== HOME ===== -->
 <div id="screen-home" class="screen">
-  <div class="hdr">
-    <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
-    <div class="hdr-btns">
-      <button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
-      <button class="ibtn" onclick="showInstall()" title="Instalar no celular">&#128241;</button>
-      <button class="ibtn" onclick="goDicas()" title="Dicas">&#128161;</button>
-      <button class="ibtn" onclick="goProfile()" title="Editar perfil">&#9998;</button>
-      <button class="ibtn" id="admin-btn" onclick="goAdmin()" title="Painel do treinador" style="display:none">&#128101;</button>
-      <button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
-    </div>
-  </div>
-  <div class="cnt">
-    <div id="msg-banner-area"></div>
-    <div id="home-profile" class="card" style="display:none"></div>
-    <div id="gami-card" class="card" style="display:none">
-      <div class="ctitle">Sua Consistencia</div>
-      <div class="gami-stats">
-        <div class="gami-stat"><div class="gami-num" id="gami-streak">0</div><div class="gami-lbl">&#128293; dias seguidos</div></div>
-        <div class="gami-stat"><div class="gami-num" id="gami-total">0</div><div class="gami-lbl">dias treinados</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div id="gen-wrap">
-        <button class="btn btn-p" onclick="generateWorkout()" id="gen-btn">&#9889; Gerar Novo Treino</button>
-      </div>
-      <div id="gen-loading" style="display:none" class="loading">
-        <div class="spin"></div>
-        <div>Gerando treino com IA...<br><small style="color:#555">Aguarde cerca de 30 segundos</small></div>
-      </div>
-      <div id="gen-err" style="display:none"></div>
-      <div id="quota-info" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:16px;color:var(--muted);display:none;justify-content:space-between"></div>
-    </div>
-    <div id="w-list"></div>
-  </div>
+<div class="hdr">
+<span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+<div class="hdr-btns">
+<button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
+<button class="ibtn" onclick="showInstall()" title="Instalar no celular">&#128241;</button>
+<button class="ibtn" onclick="goDicas()" title="Dicas">&#128161;</button>
+<button class="ibtn" onclick="goProfile()" title="Editar perfil">&#9998;</button>
+<button class="ibtn" id="admin-btn" onclick="goAdmin()" title="Painel do treinador" style="display:none">&#128101;</button>
+<button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
+</div>
+</div>
+<div class="cnt">
+<div id="msg-banner-area"></div>
+
+<div class="home-hero">
+<div class="auth-logo" style="margin-bottom:14px"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
+<h1 class="home-hero-title">Ol&aacute;, vamos treinar?</h1>
+<p class="home-hero-sub">Seu objetivo, nosso foco.</p>
+</div>
+
+<div class="section-label"><span>Meu Treino</span><span class="section-chev">&#8250;</span></div>
+
+<div class="treino-card" onclick="irTreinoPersonalizado()">
+<div class="icon-badge solid">&#127947;</div>
+<div class="treino-card-txt">
+<div class="treino-card-title">Treino Personalizado</div>
+<div class="treino-card-sub">Criado especialmente para voc&ecirc;</div>
+</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="irResultados()">
+<div class="icon-badge outline">&#128202;</div>
+<div class="list-row-txt">Meus Resultados</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="irEvolucao()">
+<div class="icon-badge outline">&#128200;</div>
+<div class="list-row-txt">Minha Evolu&ccedil;&atilde;o</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="irSuporte()">
+<div class="icon-badge outline">&#128172;</div>
+<div class="list-row-txt">Suporte</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div id="home-profile" class="card" style="display:none;margin-top:18px"></div>
+<div id="gami-card" class="card" style="display:none;margin-top:18px">
+<div class="ctitle">Sua Consistencia</div>
+<div class="gami-stats">
+<div class="gami-stat"><div class="gami-num" id="gami-streak">0</div><div class="gami-lbl">&#128293; dias seguidos</div></div>
+<div class="gami-stat"><div class="gami-num" id="gami-total">0</div><div class="gami-lbl">dias treinados</div></div>
+</div>
+</div>
+<div class="card" style="margin-top:18px">
+<div id="gen-wrap">
+<button class="btn btn-p" onclick="generateWorkout()" id="gen-btn">&#9889; Gerar Novo Treino</button>
+</div>
+<div id="gen-loading" style="display:none" class="loading">
+<div class="spin"></div>
+<div>Gerando treino com IA...<br><small style="color:#555">Aguarde cerca de 30 segundos</small></div>
+</div>
+<div id="gen-err" style="display:none"></div>
+<div id="quota-info" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:16px;color:var(--muted);display:none;justify-content:space-between"></div>
+</div>
+<div id="w-list" style="margin-top:6px"></div>
+</div>
+<div class="bottom-nav">
+<div class="nav-item active" onclick="goHome()"><div class="nav-ico">&#127968;</div><div class="nav-lbl">In&iacute;cio</div></div>
+<div class="nav-item" onclick="irTreinoPersonalizado()"><div class="nav-ico">&#127947;</div><div class="nav-lbl">Treino</div></div>
+<div class="nav-item" onclick="irEvolucao()"><div class="nav-ico">&#128202;</div><div class="nav-lbl">Progresso</div></div>
+<div class="nav-item" onclick="goProfile()"><div class="nav-ico">&#128100;</div><div class="nav-lbl">Perfil</div></div>
+</div>
 </div>
 
 <!-- ===== WORKOUT ===== -->
@@ -459,11 +523,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
     <div class="card" style="margin-top:16px">
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteração nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra você.</div>
-      <textarea id="ajuste-txt" placeholder="Escreva aqui o que você quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma alteraÃ§Ã£o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra vocÃª.</div>
+      <textarea id="ajuste-txt" placeholder="Escreva aqui o que vocÃª quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago está reformulando... até 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago estÃ¡ reformulando... atÃ© 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -1298,40 +1362,69 @@ function badge(txt) {
 
 // === WORKOUTS LIST ===
 async function loadWorkouts() {
-  if (!user) return;
-  var el = document.getElementById('w-list');
-  el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+if (!user) return;
+var el = document.getElementById('w-list');
+el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
-  updateQuotaInfo();
+updateQuotaInfo();
 
-  var res = await sb.from('workouts')
-    .select('id,nome,dividir,created_at,duracao_semanas')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+var res = await sb.from('workouts')
+.select('id,nome,dividir,created_at,duracao_semanas')
+.eq('user_id', user.id)
+.order('created_at', { ascending: false });
 
-  if (res.error || !res.data || !res.data.length) {
-    el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:16px">Nenhum treino ainda.<br>Gere seu primeiro treino acima!</p></div>';
-    return;
-  }
+if (res.error || !res.data || !res.data.length) {
+el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:16px">Nenhum treino ainda.<br>Gere seu primeiro treino acima!</p></div>';
+window.__latestWorkoutId = null;
+return;
+}
 
-  checkAutoGenerate(res.data[0]);
+checkAutoGenerate(res.data[0]);
+window.__latestWorkoutId = res.data[0].id;
 
-  var total = res.data.length;
-  var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Historico (' + total + ')</div>';
-  res.data.forEach(function(w, i) {
-    var num = total - i;
-    var d = new Date(w.created_at).toLocaleDateString('pt-BR');
-    html += '<div class="wi" data-id="' + w.id + '">' +
-      '<div class="wi-num">Treino ' + num + '</div>' +
-      '<div class="wi-name">' + (w.nome || 'Programa') + '</div>' +
-      '<div class="wi-meta">' + (w.dividir || '') + (w.dividir ? ' &bull; ' : '') + d + '</div>' +
-      '</div>';
-  });
-  el.innerHTML = html;
+var total = res.data.length;
+var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Historico (' + total + ')</div>';
+res.data.forEach(function(w, i) {
+var num = total - i;
+var d = new Date(w.created_at).toLocaleDateString('pt-BR');
+html += '<div class="wi" data-id="' + w.id + '">' +
+'<div class="wi-num">Treino ' + num + '</div>' +
+'<div class="wi-name">' + (w.nome || 'Programa') + '</div>' +
+'<div class="wi-meta">' + (w.dividir || '') + (w.dividir ? ' &bull; ' : '') + d + '</div>' +
+'</div>';
+});
+el.innerHTML = html;
 
-  el.querySelectorAll('.wi').forEach(function(item) {
-    item.addEventListener('click', function() { openWorkout(this.dataset.id); });
-  });
+el.querySelectorAll('.wi').forEach(function(item) {
+item.addEventListener('click', function() { openWorkout(this.dataset.id); });
+});
+}
+
+// === HOME REDESIGN: navegacao dos atalhos ===
+function irTreinoPersonalizado() {
+if (window.__latestWorkoutId) { openWorkout(window.__latestWorkoutId); }
+else { generateWorkout(); }
+}
+function irResultados() {
+goHome();
+setTimeout(function() {
+var el = document.getElementById('gami-card');
+if (el) { el.style.display = 'block'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+}, 50);
+}
+function irEvolucao() {
+goProfile();
+setTimeout(function() {
+var el = document.getElementById('prog-card');
+if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}, 150);
+}
+function irSuporte() {
+goProfile();
+setTimeout(function() {
+var el = document.getElementById('rc-card');
+if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}, 150);
 }
 
 async function updateQuotaInfo() {
@@ -1482,7 +1575,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' — se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' â se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -2034,7 +2127,7 @@ async function adminGerarNovoTreino() {
 // === AJUSTE COM O THIAGO ===
 async function pedirAjuste() {
   var txt = document.getElementById('ajuste-txt').value.trim();
-  if (!txt) { alert('Escreva o que você quer ajustar.'); return; }
+  if (!txt) { alert('Escreva o que vocÃª quer ajustar.'); return; }
   var effectiveProfile = adminViewMode ? adminAlunoProfile : profile;
   if (!wkId || !wkData || !effectiveProfile) { alert('Nenhum treino aberto.'); return; }
 
@@ -2102,7 +2195,7 @@ async function pedirAjuste() {
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message + ' — se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+    showMsg('ajuste-err', 'Erro: ' + e.message + ' â se o ajuste demorou muito, ele pode ter sido salvo mesmo assim. Toque em recarregar (\u21bb) para conferir.');
     var savedWkId = wkId;
     setTimeout(async function() {
       try {
