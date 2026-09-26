@@ -563,6 +563,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div class="ctitle">Convidar aluno</div>
       <div class="fg"><label>Nome do aluno</label><input type="text" id="conv-nome" placeholder="Nome do aluno"></div>
       <button class="btn btn-p" onclick="gerarConvite()">Gerar link de convite</button>
+      <button class="btn btn-s" onclick="gerarConviteGeral()" style="margin-top:8px">Gerar link geral (multi-uso)</button>
       <button class="btn btn-s" onclick="openMsgModalAll()" style="margin-top:8px">Mensagem para todos os alunos</button>
       <div id="conv-link-box" style="display:none;margin-top:10px;font-size:16px">
         <div id="conv-link-txt" style="word-break:break-all;padding:8px;border:1px solid #ddd;border-radius:8px"></div>
@@ -2504,6 +2505,22 @@ async function gerarConvite() {
   loadConvites();
 }
 
+async function gerarConviteGeral() {
+  var nomeEl = document.getElementById('conv-nome');
+  var nome = (nomeEl.value || '').trim() || 'Link Geral';
+  var token = gerarTokenConvite();
+  var res = await sb.from('convites').insert({ nome: nome, token: token, created_by: user.id, tipo: 'geral' }).select().single();
+  if (res.error) { alert('Erro ao gerar convite: ' + res.error.message); return; }
+  var link = location.origin + location.pathname + '?c=' + token;
+  var box = document.getElementById('conv-link-box');
+  var txt = document.getElementById('conv-link-txt');
+  txt.textContent = link;
+  box.style.display = 'block';
+  box.dataset.link = link;
+  nomeEl.value = '';
+  loadConvites();
+}
+
 function copiarConvite() {
   var box = document.getElementById('conv-link-box');
   var link = box ? (box.dataset.link || '') : '';
@@ -2518,7 +2535,7 @@ function copiarConvite() {
 async function loadConvites() {
   var listEl = document.getElementById('conv-list');
   if (!listEl) return;
-  var res = await sb.from('convites').select('id,nome,status,created_at,accepted_at,user_id').order('created_at', { ascending: false });
+  var res = await sb.from('convites').select('id,nome,status,tipo,created_at,accepted_at,user_id').order('created_at', { ascending: false });
   if (res.error || !res.data) { listEl.innerHTML = ''; return; }
   var ids = res.data.map(function(c) { return c.user_id; }).filter(function(v, i, a) { return v && a.indexOf(v) === i; });
   var profMap = {};
@@ -2526,10 +2543,24 @@ async function loadConvites() {
     var profRes = await sb.from('profiles').select('id,nome,email').in('id', ids);
     (profRes.data || []).forEach(function(p) { profMap[p.id] = p; });
   }
+  var geralIds = res.data.filter(function(c) { return c.tipo === 'geral'; }).map(function(c) { return c.id; });
+  var usosMap = {};
+  if (geralIds.length) {
+    var usosRes = await sb.from('convite_usos').select('convite_id').in('convite_id', geralIds);
+    (usosRes.data || []).forEach(function(u) { usosMap[u.convite_id] = (usosMap[u.convite_id] || 0) + 1; });
+  }
   var html = '<div style="font-size:16px;color:#888;margin-bottom:6px">Convites enviados</div>';
   res.data.forEach(function(c) {
     var statusTxt, statusColor;
-    if (c.status === 'aceito') {
+    if (c.tipo === 'geral') {
+      if (c.status === 'cancelado') {
+        statusTxt = 'Cancelado';
+        statusColor = '#999';
+      } else {
+        statusTxt = (usosMap[c.id] || 0) + ' pessoa(s) entraram';
+        statusColor = '#3ab26a';
+      }
+    } else if (c.status === 'aceito') {
       statusTxt = 'Aceito em ' + new Date(c.accepted_at).toLocaleDateString('pt-BR');
       statusColor = '#3ab26a';
     } else if (c.status === 'cancelado') {
@@ -2543,11 +2574,11 @@ async function loadConvites() {
     var mismatch = !!(p && p.nome && c.nome && p.nome.trim().toLowerCase() !== c.nome.trim().toLowerCase());
     html += '<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:16px">' +
       '<div style="display:flex;justify-content:space-between;align-items:center">' +
-      '<span>' + _escHtml(c.nome) + '</span>' +
+      '<span>' + _escHtml(c.nome) + (c.tipo === 'geral' ? ' <span style="font-size:11px;color:var(--g);border:1px solid var(--g);border-radius:8px;padding:1px 6px;margin-left:4px">GERAL</span>' : '') + '</span>' +
       '<span style="color:' + statusColor + '">' + statusTxt + '</span>' +
       '</div>' +
-      (p ? '<div style="font-size:13px;color:' + (mismatch ? '#e55' : 'var(--muted)') + ';margin-top:2px">' + (mismatch ? '&#9888; Cadastrado como: ' : 'Cadastrado como: ') + _escHtml(p.nome || p.email || '') + '</div>' : '') +
-      (c.status === 'pendente' ? '<button class="btn btn-s" style="margin-top:6px;padding:4px 10px;font-size:13px" onclick="cancelarConvite(\'' + c.id + '\')">Cancelar convite</button>' : '') +
+      (p && c.tipo !== 'geral' ? '<div style="font-size:13px;color:' + (mismatch ? '#e55' : 'var(--muted)') + ';margin-top:2px">' + (mismatch ? '&#9888; Cadastrado como: ' : 'Cadastrado como: ') + _escHtml(p.nome || p.email || '') + '</div>' : '') +
+      ((c.tipo === 'geral' ? c.status !== 'cancelado' : c.status === 'pendente') ? '<button class="btn btn-s" style="margin-top:6px;padding:4px 10px;font-size:13px" onclick="cancelarConvite(\'' + c.id + '\')">Cancelar convite</button>' : '') +
       '</div>';
   });
   listEl.innerHTML = html;
@@ -2555,7 +2586,7 @@ async function loadConvites() {
 
 async function cancelarConvite(id) {
   if (!confirm('Cancelar este convite? O link deixara de funcionar.')) return;
-  var res = await sb.from('convites').update({ status: 'cancelado' }).eq('id', id).eq('status', 'pendente');
+  var res = await sb.from('convites').update({ status: 'cancelado' }).eq('id', id);
   if (res.error) { alert('Erro ao cancelar: ' + res.error.message); return; }
   loadConvites();
 }
