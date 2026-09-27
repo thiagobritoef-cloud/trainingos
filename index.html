@@ -396,6 +396,95 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       </div>
       <button class="btn btn-p" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
     </div>
+    <!-- movido para telas dedicadas -->
+  </div>
+</div>
+
+<!-- ===== HOME ===== -->
+<div id="screen-home" class="screen">
+<div class="hdr">
+<span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+<div class="hdr-btns">
+<button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
+<button class="ibtn" id="admin-btn" onclick="goAdmin()" title="Painel do treinador" style="display:none">Admin</button>
+<button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
+</div>
+</div>
+<div class="cnt">
+<div id="msg-banner-area"></div>
+
+<div class="home-hero">
+<div class="auth-logo" style="margin-bottom:14px"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></div>
+<h1 class="home-hero-title">Ol&aacute;, vamos treinar?</h1>
+<p class="home-hero-sub">Seu objetivo, nosso foco.</p>
+</div>
+
+<div class="section-label"><span>Menu</span></div>
+
+<div class="treino-card" onclick="irTreinoPersonalizado()">
+<div class="treino-card-txt">
+<div class="treino-card-title">Treino Personalizado</div>
+<div class="treino-card-sub">Criado especialmente para voc&ecirc;</div>
+</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="irResultados()">
+<div class="list-row-txt">Meus Resultados</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="goProfile()">
+<div class="list-row-txt">Perfil</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="irEvolucao()">
+<div class="list-row-txt">Minha Evolu&ccedil;&atilde;o</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
+<div class="list-row" onclick="irSuporte()">
+<div class="list-row-txt">Fale com o Treinador</div>
+<div class="row-chev">&#8250;</div>
+</div>
+</div>
+<div class="bottom-nav">
+<div class="nav-item active" onclick="goHome()"><div class="nav-ico">&#127968;</div><div class="nav-lbl">In&iacute;cio</div></div>
+<div class="nav-item" onclick="irTreinoPersonalizado()"><div class="nav-ico">&#127947;</div><div class="nav-lbl">Treino</div></div>
+<div class="nav-item" onclick="irEvolucao()"><div class="nav-ico">&#128202;</div><div class="nav-lbl">Progresso</div></div>
+<div class="nav-item" onclick="goProfile()"><div class="nav-ico">&#128100;</div><div class="nav-lbl">Perfil</div></div>
+</div>
+</div>
+
+<!-- ===== RESULTADOS ===== -->
+<div id="screen-resultados" class="screen">
+  <div class="hdr">
+    <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+    <div class="hdr-btns">
+      <button class="ibtn" onclick="goHome()" title="Voltar">&#8592;</button>
+    </div>
+  </div>
+  <div class="cnt">
+    <div id="gami-card" class="card" style="margin-top:18px">
+      <div class="ctitle">Sua Consistencia</div>
+      <div class="gami-stats">
+        <div class="gami-stat"><div class="gami-num" id="gami-streak">0</div><div class="gami-lbl">dias seguidos</div></div>
+        <div class="gami-stat"><div class="gami-num" id="gami-total">0</div><div class="gami-lbl">dias treinados</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EVOLUCAO ===== -->
+<div id="screen-evolucao" class="screen">
+  <div class="hdr">
+    <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+    <div class="hdr-btns">
+      <button class="ibtn" onclick="goHome()" title="Voltar">&#8592;</button>
+    </div>
+  </div>
+  <div class="cnt">
     <div class="card" id="prog-card">
       <div class="ctitle">Progresso: Peso e Fotos</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Registre seu peso e uma foto periodicamente para acompanhar sua evolucao.</div>
@@ -409,8 +498,20 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div id="prog-chart" style="margin-top:16px"></div>
       <div id="prog-list" style="margin-top:12px"></div>
     </div>
+  </div>
+</div>
+
+<!-- ===== SUPORTE ===== -->
+<div id="screen-suporte" class="screen">
+  <div class="hdr">
+    <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+    <div class="hdr-btns">
+      <button class="ibtn" onclick="goHome()" title="Voltar">&#8592;</button>
+    </div>
+  </div>
+  <div class="cnt">
     <div class="card" id="rc-card">
-      <div class="ctitle">Sugestao e Feedback</div>
+      <div class="ctitle">Fale com o Treinador</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Tem uma sugestao, feedback ou encontrou algum problema? Conte pra gente.</div>
       <div class="fg"><input type="text" id="rc-titulo" placeholder="Assunto"></div>
       <div class="fg"><textarea id="rc-msg" placeholder="Escreva sua sugestao ou feedback..."></textarea></div>
@@ -418,86 +519,6 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <button class="btn btn-s" id="rc-btn" onclick="sendReclamacao()">Enviar</button>
     </div>
   </div>
-</div>
-
-<!-- ===== HOME ===== -->
-<div id="screen-home" class="screen">
-<div class="hdr">
-<span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
-<div class="hdr-btns">
-<button class="ibtn" onclick="recarregar()" title="Recarregar">&#8635;</button>
-<button class="ibtn" onclick="showInstall()" title="Instalar no celular">&#128241;</button>
-<button class="ibtn" onclick="goDicas()" title="Dicas">&#128161;</button>
-<button class="ibtn" onclick="goProfile()" title="Editar perfil">&#9998;</button>
-<button class="ibtn" id="admin-btn" onclick="goAdmin()" title="Painel do treinador" style="display:none">&#128101;</button>
-<button class="ibtn" onclick="doLogout()" title="Sair">&#8594;</button>
-</div>
-</div>
-<div class="cnt">
-<div id="msg-banner-area"></div>
-
-<div class="home-hero">
-<div class="auth-logo" style="margin-bottom:14px"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
-<h1 class="home-hero-title">Ol&aacute;, vamos treinar?</h1>
-<p class="home-hero-sub">Seu objetivo, nosso foco.</p>
-</div>
-
-<div class="section-label"><span>Meu Treino</span><span class="section-chev">&#8250;</span></div>
-
-<div class="treino-card" onclick="irTreinoPersonalizado()">
-<div class="icon-badge solid">&#127947;</div>
-<div class="treino-card-txt">
-<div class="treino-card-title">Treino Personalizado</div>
-<div class="treino-card-sub">Criado especialmente para voc&ecirc;</div>
-</div>
-<div class="row-chev">&#8250;</div>
-</div>
-
-<div class="list-row" onclick="irResultados()">
-<div class="icon-badge outline">&#128202;</div>
-<div class="list-row-txt">Meus Resultados</div>
-<div class="row-chev">&#8250;</div>
-</div>
-
-<div class="list-row" onclick="irEvolucao()">
-<div class="icon-badge outline">&#128200;</div>
-<div class="list-row-txt">Minha Evolu&ccedil;&atilde;o</div>
-<div class="row-chev">&#8250;</div>
-</div>
-
-<div class="list-row" onclick="irSuporte()">
-<div class="icon-badge outline">&#128172;</div>
-<div class="list-row-txt">Suporte</div>
-<div class="row-chev">&#8250;</div>
-</div>
-
-<div id="home-profile" class="card" style="display:none;margin-top:18px"></div>
-<div id="gami-card" class="card" style="display:none;margin-top:18px">
-<div class="ctitle">Sua Consistencia</div>
-<div class="gami-stats">
-<div class="gami-stat"><div class="gami-num" id="gami-streak">0</div><div class="gami-lbl">&#128293; dias seguidos</div></div>
-<div class="gami-stat"><div class="gami-num" id="gami-total">0</div><div class="gami-lbl">dias treinados</div></div>
-</div>
-</div>
-<div class="card" style="margin-top:18px">
-<div id="gen-wrap">
-<button class="btn btn-p" onclick="generateWorkout()" id="gen-btn">&#9889; Gerar Novo Treino</button>
-</div>
-<div id="gen-loading" style="display:none" class="loading">
-<div class="spin"></div>
-<div>Gerando treino com IA...<br><small style="color:#555">Aguarde cerca de 30 segundos</small></div>
-</div>
-<div id="gen-err" style="display:none"></div>
-<div id="quota-info" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:16px;color:var(--muted);display:none;justify-content:space-between"></div>
-</div>
-<div id="w-list" style="margin-top:6px"></div>
-</div>
-<div class="bottom-nav">
-<div class="nav-item active" onclick="goHome()"><div class="nav-ico">&#127968;</div><div class="nav-lbl">In&iacute;cio</div></div>
-<div class="nav-item" onclick="irTreinoPersonalizado()"><div class="nav-ico">&#127947;</div><div class="nav-lbl">Treino</div></div>
-<div class="nav-item" onclick="irEvolucao()"><div class="nav-ico">&#128202;</div><div class="nav-lbl">Progresso</div></div>
-<div class="nav-item" onclick="goProfile()"><div class="nav-ico">&#128100;</div><div class="nav-lbl">Perfil</div></div>
-</div>
 </div>
 
 <!-- ===== WORKOUT ===== -->
@@ -517,6 +538,18 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <span id="admin-view-banner-txt"></span>
       <button onclick="exitAdminWorkoutView()">Voltar ao painel</button>
     </div>
+    <div id="gen-wrap-card" class="card">
+      <div id="gen-wrap">
+        <button class="btn btn-p" onclick="generateWorkout()" id="gen-btn">Gerar Novo Treino</button>
+      </div>
+      <div id="gen-loading" style="display:none" class="loading">
+        <div class="spin"></div>
+        <div>Gerando treino com IA...<br><small style="color:#555">Aguarde cerca de 30 segundos</small></div>
+      </div>
+      <div id="gen-err" style="display:none"></div>
+      <div id="quota-info" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:16px;color:var(--muted);display:none;justify-content:space-between"></div>
+    </div>
+    <div id="w-list" style="margin-top:6px"></div>
     <div id="w-header" class="card"></div>
     <div class="tabs-scroll"><div class="tabs" id="week-tabs"></div></div>
     <div id="day-area"></div>
@@ -1239,7 +1272,6 @@ async function loadProfile() {
     var needsOnboarding = !profile.onboarding_visto;
     sb.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('id', user.id).then(function(){}).catch(function(){});
 
-    renderHomeProfile();
     show('home');
     loadWorkouts();
     loadUltimasCargas();
@@ -1326,6 +1358,8 @@ async function saveProfile() {
 
 function renderHomeProfile() {
   if (!profile) return;
+  var elChk = document.getElementById('home-profile');
+  if (!elChk) return;
   var p = profile;
   var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '-';
   var el = document.getElementById('home-profile');
@@ -1408,25 +1442,16 @@ if (window.__latestWorkoutId) { openWorkout(window.__latestWorkoutId); }
 else { generateWorkout(); }
 }
 function irResultados() {
-goHome();
-setTimeout(function() {
-var el = document.getElementById('gami-card');
-if (el) { el.style.display = 'block'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-}, 50);
+refreshGamificacao();
+show('resultados');
 }
 function irEvolucao() {
-goProfile();
-setTimeout(function() {
-var el = document.getElementById('prog-card');
-if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}, 150);
+initProgDate();
+loadProgresso();
+show('evolucao');
 }
 function irSuporte() {
-goProfile();
-setTimeout(function() {
-var el = document.getElementById('rc-card');
-if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}, 150);
+show('suporte');
 }
 
 async function updateQuotaInfo() {
