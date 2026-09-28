@@ -284,6 +284,16 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .icon-badge.outline{border:1.5px solid var(--border);color:var(--text)}
 #screen-home .cnt{padding-bottom:90px}
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#111;border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:500}
+#tut-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+#tut-overlay.active{display:flex}
+.tut-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 22px;max-width:380px;width:100%;text-align:center}
+.tut-title{font-size:19px;font-weight:900;margin-bottom:10px}
+.tut-text{color:var(--muted);font-size:15px;line-height:1.5;margin-bottom:22px}
+.tut-dots{display:flex;justify-content:center;gap:6px;margin-bottom:18px}
+.tut-dot{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.tut-dot.active{background:var(--g)}
+.tut-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tut-skip{color:var(--muted);font-size:14px;cursor:pointer;background:none;border:none}
 .bottom-nav .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;cursor:pointer}
 .bottom-nav .nav-item .nav-ico{font-size:20px}
 .bottom-nav .nav-item.active{color:var(--g)}
@@ -1281,6 +1291,7 @@ async function loadProfile() {
 
     show('home');
     loadWorkouts();
+    maybeShowTutorial();
     loadUltimasCargas();
     loadAdminMessages();
     refreshGamificacao();
@@ -1404,6 +1415,56 @@ function badge(txt) {
 }
 
 // === WORKOUTS LIST ===
+var TUT_STEPS = [
+  { title: 'Novidades no TO BE FITNESS', text: 'Renovamos o aplicativo pra deixar sua experiencia mais simples e rapida. Vamos te mostrar rapidinho o que mudou.' },
+  { title: 'Nova tela inicial', text: 'A Home ficou mais limpa: um menu direto pra Treino Personalizado, Meus Resultados, Perfil, Minha Evolucao e Fale com o Treinador.' },
+  { title: 'Fale com o Treinador', text: 'O antigo Suporte agora se chama Fale com o Treinador, com uma tela propria pra voce enviar sua mensagem.' },
+  { title: 'Historico do treino', text: 'Na tela de Treino Personalizado, toque em qualquer treino do historico pra ver os exercicios na hora, sem sair da lista.' },
+  { title: 'Resultados e Evolucao', text: 'Sua consistencia e seu progresso de peso e fotos agora tem telas proprias, mais faceis de acompanhar.' }
+];
+var tutStep = 0;
+var TUT_VERSION = 'v3';
+
+function maybeShowTutorial() {
+  try {
+    if (localStorage.getItem('tobe_tutorial_' + TUT_VERSION + '_seen')) return;
+  } catch (e) {}
+  tutStep = 0;
+  renderTutStep();
+  var ov = document.getElementById('tut-overlay');
+  if (ov) ov.classList.add('active');
+}
+
+function renderTutStep() {
+  var s = TUT_STEPS[tutStep];
+  document.getElementById('tut-title').textContent = s.title;
+  document.getElementById('tut-text').textContent = s.text;
+  var dots = document.getElementById('tut-dots');
+  dots.innerHTML = '';
+  TUT_STEPS.forEach(function(_, i) {
+    dots.innerHTML += '<div class="tut-dot' + (i === tutStep ? ' active' : '') + '"></div>';
+  });
+  var btn = document.getElementById('tut-next-btn');
+  btn.textContent = (tutStep === TUT_STEPS.length - 1) ? 'Concluir' : 'Proximo';
+}
+
+function tutNext() {
+  if (tutStep < TUT_STEPS.length - 1) {
+    tutStep++;
+    renderTutStep();
+  } else {
+    tutClose();
+  }
+}
+
+function tutSkip() { tutClose(); }
+
+function tutClose() {
+  var ov = document.getElementById('tut-overlay');
+  if (ov) ov.classList.remove('active');
+  try { localStorage.setItem('tobe_tutorial_' + TUT_VERSION + '_seen', '1'); } catch (e) {}
+}
+
 function resetWorkoutDetailPosition() {
   var container = document.getElementById('workout-detail');
   var anchor = document.getElementById('workout-detail-anchor');
@@ -2852,5 +2913,16 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<div id="tut-overlay">
+  <div class="tut-card">
+    <div class="tut-dots" id="tut-dots"></div>
+    <div class="tut-title" id="tut-title"></div>
+    <div class="tut-text" id="tut-text"></div>
+    <div class="tut-actions">
+      <button class="tut-skip" onclick="tutSkip()">Pular</button>
+      <button class="btn btn-p" style="width:auto;padding:10px 24px" id="tut-next-btn" onclick="tutNext()">Proximo</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
