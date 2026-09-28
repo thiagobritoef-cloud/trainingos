@@ -1429,6 +1429,10 @@ function maybeShowTutorial() {
   try {
     if (localStorage.getItem('tobe_tutorial_' + TUT_VERSION + '_seen')) return;
   } catch (e) {}
+  if (profile && profile.tutorial_seen_version === TUT_VERSION) {
+    try { localStorage.setItem('tobe_tutorial_' + TUT_VERSION + '_seen', '1'); } catch (e) {}
+    return;
+  }
   tutStep = 0;
   renderTutStep();
   var ov = document.getElementById('tut-overlay');
@@ -1463,6 +1467,10 @@ function tutClose() {
   var ov = document.getElementById('tut-overlay');
   if (ov) ov.classList.remove('active');
   try { localStorage.setItem('tobe_tutorial_' + TUT_VERSION + '_seen', '1'); } catch (e) {}
+  if (profile) profile.tutorial_seen_version = TUT_VERSION;
+  if (user) {
+    sb.from('profiles').update({ tutorial_seen_version: TUT_VERSION }).eq('id', user.id).then(function(){}).catch(function(){});
+  }
 }
 
 function resetWorkoutDetailPosition() {
