@@ -217,6 +217,45 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 
 /* ADMIN */
+.al-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.al-tile{background:#111;border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer}
+.al-tile b{display:block;font-size:24px;font-weight:900;color:var(--text)}
+.al-tile span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.al-tile.ok b{color:var(--g)}.al-tile.warn b{color:#ffb300}.al-tile.bad b{color:#ff5252}
+.al-bar{margin-bottom:10px}
+.al-search{width:100%;box-sizing:border-box;background:#111;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px 14px;font-size:15px}
+.al-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px}
+.al-chip{flex:0 0 auto;background:#111;border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.al-chip small{opacity:.7;margin-left:4px}
+.al-chip.on{background:var(--g);color:#000;border-color:var(--g)}
+.al-grid-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.al-empty{padding:30px 0;text-align:center;color:var(--muted)}
+.al-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.al-card.blk{opacity:.75;border-color:#5a2020}
+.al-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.al-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#fff;flex:0 0 auto}
+.al-id{flex:1;min-width:0}
+.al-name{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-mail{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-plan{font-size:11px;font-weight:900;letter-spacing:.5px;padding:5px 10px;border-radius:20px;background:#222;color:var(--muted)}
+.al-plan.p-fit{background:#1d3a5a;color:#7fc0ff}.al-plan.p-vip{background:#4a3a10;color:#ffd24d}.al-plan.p-free{background:#1f3a1f;color:var(--g)}
+.al-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.al-b{font-size:11px;font-weight:800;padding:4px 9px;border-radius:8px;background:#222;color:var(--muted)}
+.al-b.ok{background:#14301a;color:var(--g)}.al-b.warn{background:#3a2e0a;color:#ffb300}.al-b.bad{background:#3a1414;color:#ff6b6b}
+.al-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;text-align:center}
+.al-stats div{background:#111;border-radius:10px;padding:8px 2px}
+.al-stats b{display:block;font-size:18px;color:var(--g);font-weight:900}
+.al-stats span{display:block;font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.al-info{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.al-info b{color:var(--text);font-weight:700}
+.al-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;color:var(--muted)}
+.al-row select{flex:1;background:#111;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px}
+.al-actions{display:flex;gap:6px}
+.al-actions button{flex:1;background:#111;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 4px;font-size:12px;font-weight:800;cursor:pointer}
+.al-actions button.pri{background:var(--g);color:#000;border-color:var(--g)}
+.al-actions button.danger{color:#ff5252;border-color:#ff5252}
+.al-actions button.danger.on{background:#ff5252;color:#fff}
+
 .adm-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
 .adm-name{font-size:16px;font-weight:900;margin-bottom:2px}
 .adm-email{font-size:16px;color:var(--muted);margin-bottom:8px}
@@ -610,7 +649,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     </div>
     <div class="tabs-scroll"><div class="tabs" id="admin-main-tabs"></div></div>
     <div class="card">
-      <div class="ctitle">Convidar aluno</div>
+      <div class="ctitle" onclick="toggleConvCard()" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:0">Convites e mensagem geral <span id="conv-arrow">&#9662;</span></div><div id="conv-body" style="display:none;margin-top:12px">
       <div class="fg"><label>Nome do aluno</label><input type="text" id="conv-nome" placeholder="Nome do aluno"></div>
       <button class="btn btn-p" onclick="gerarConvite()">Gerar link de convite</button>
       <button class="btn btn-s" onclick="gerarConviteGeral()" style="margin-top:8px">Gerar link geral (multi-uso)</button>
@@ -620,7 +659,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
         <button class="btn" style="margin-top:6px" onclick="copiarConvite()">Copiar link</button>
       </div>
       <div id="conv-list" style="margin-top:14px"></div>
-    </div>
+    </div></div>
     <div id="adm-list"><div class="loading"><div class="spin"></div></div></div>
     <div id="chat-view" style="display:none">
       <div id="chat-list"><div class="loading"><div class="spin"></div></div></div>
@@ -2720,59 +2759,206 @@ async function loadPlanos() {
   el.innerHTML = html;
 }
 
+var admData = { alunos: [], filtro: 'todos', busca: '' };
+
+function admIniciais(n) {
+  var p = String(n || '?').trim().split(/\s+/);
+  var s = p[0].charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : '');
+  return s.toUpperCase();
+}
+function admCor(n) {
+  var h = 0, s = String(n || '');
+  for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+  return h;
+}
+function admFmtData(d) {
+  return d ? new Date(d).toLocaleDateString('pt-BR') : '-';
+}
+
 async function loadAdmin() {
   loadConvites();
   renderAdminTabs();
   var listEl = document.getElementById('adm-list');
   listEl.innerHTML = '<div class="loading"><div class="spin"></div></div>';
 
-  var profRes = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
+  var profRes = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,created_at,last_seen_at,duracao_semanas').order('created_at', { ascending: false });
+  if (profRes.error) profRes = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,created_at,last_seen_at').order('created_at', { ascending: false });
+  if (profRes.error) profRes = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,created_at').order('created_at', { ascending: false });
   if (profRes.error) {
-    listEl.innerHTML = '<div class="alert al-err">Erro ao carregar alunos: ' + profRes.error.message + '</div>';
+    listEl.innerHTML = '<div class="alert al-err">Erro ao carregar alunos: ' + _escHtml(profRes.error.message) + '</div>';
     return;
   }
   var alunos = (profRes.data || []).filter(function(p) { return !p.is_admin; });
 
-  var wkRes = await sb.from('workouts').select('user_id');
+  var wkRes = await sb.from('workouts').select('user_id,created_at');
+  if (wkRes.error) wkRes = await sb.from('workouts').select('user_id');
   var rcRes = await sb.from('reclamacoes').select('user_id');
+  var since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  var lgRes = { data: [] };
+  try { lgRes = await sb.from('logs_execucao').select('user_id,data').gte('data', since); } catch (e) {}
 
-  var wkCount = {};
-  (wkRes.data || []).forEach(function(w) { wkCount[w.user_id] = (wkCount[w.user_id] || 0) + 1; });
-  var rcCount = {};
+  var wkCount = {}, wkLast = {}, rcCount = {}, dias7 = {}, dias30 = {};
+  var lim7 = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  (wkRes.data || []).forEach(function(w) {
+    wkCount[w.user_id] = (wkCount[w.user_id] || 0) + 1;
+    if (w.created_at && (!wkLast[w.user_id] || w.created_at > wkLast[w.user_id])) wkLast[w.user_id] = w.created_at;
+  });
   (rcRes.data || []).forEach(function(r) { rcCount[r.user_id] = (rcCount[r.user_id] || 0) + 1; });
+  ((lgRes && lgRes.data) || []).forEach(function(l) {
+    if (!dias30[l.user_id]) dias30[l.user_id] = {};
+    dias30[l.user_id][l.data] = true;
+    if (l.data >= lim7) { if (!dias7[l.user_id]) dias7[l.user_id] = {}; dias7[l.user_id][l.data] = true; }
+  });
 
-  document.getElementById('adm-summary').textContent = alunos.length + ' aluno(s) cadastrado(s)';
+  var agora = Date.now();
+  alunos.forEach(function(a) {
+    a.__wk = wkCount[a.id] || 0;
+    a.__rc = rcCount[a.id] || 0;
+    a.__d7 = dias7[a.id] ? Object.keys(dias7[a.id]).length : 0;
+    a.__d30 = dias30[a.id] ? Object.keys(dias30[a.id]).length : 0;
+    a.__seen = a.last_seen_at ? Math.floor((agora - new Date(a.last_seen_at).getTime()) / 86400000) : null;
+    a.__ativo = !a.bloqueado && a.__seen !== null && a.__seen <= 7;
+    a.__inativo = !a.bloqueado && !a.__ativo;
+    a.__valid = null; a.__validDias = null;
+    if (wkLast[a.id]) {
+      var v = new Date(wkLast[a.id]);
+      v.setDate(v.getDate() + (a.duracao_semanas || 4) * 7);
+      a.__valid = v;
+      a.__validDias = Math.ceil((v.getTime() - agora) / 86400000);
+    }
+    a.__vencendo = a.__validDias !== null && a.__validDias <= 7;
+  });
+  admData.alunos = alunos;
+  admData.filtro = 'todos';
+  admData.busca = '';
 
   if (!alunos.length) {
+    document.getElementById('adm-summary').innerHTML = '';
     listEl.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:16px">Nenhum aluno cadastrado ainda.</p></div>';
     return;
   }
 
-  var html = '';
-  alunos.forEach(function(a) {
-    var d = a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR') : '-';
-    var isBlocked = !!a.bloqueado;
-    html +=
-      '<div class="adm-card">' +
-      '<div class="adm-name">' + (a.nome || 'Sem nome') + '</div>' +
-      '<div class="adm-email">' + (a.email || '') + ' &bull; entrou em ' + d + '</div>' +
-      '<div class="adm-stats">' +
-      '<div class="adm-stat"><b>' + (wkCount[a.id] || 0) + '</b>Treinos</div>' +
-      '<div class="adm-stat"><b>' + (rcCount[a.id] || 0) + '</b>Sugestoes</div>' +
-      '<div class="adm-email">Plano de treino: <select onchange="setPlanoTreino(\'' + a.id + '\', this.value)">' +
-'<option value=""' + (!a.plano_treino ? ' selected' : '') + '>Sem plano</option>' +
-'<option value="free"' + (a.plano_treino === 'free' ? ' selected' : '') + '>Free</option>' +
-'<option value="fit"' + (a.plano_treino === 'fit' ? ' selected' : '') + '>Fit</option>' +
-'<option value="vip"' + (a.plano_treino === 'vip' ? ' selected' : '') + '>VIP</option>' +
-'</select></div>' +
-'<div class="adm-actions">' +
-      '<button onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')" class="danger ' + (isBlocked ? 'on' : '') + '">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
-      '<button onclick="openMsgModal(\'' + a.id + '\',\'' + (a.nome || 'aluno').replace(/'/g, "") + '\')">&#128172; Mensagem</button>' +
-      '<button onclick="verTreinoAluno(\'' + a.id + '\')">&#128203; Ver treino</button>' +
-      '</div>' +
-      '</div>';
+  listEl.innerHTML =
+    '<div class="al-bar"><input type="text" id="adm-busca" class="al-search" placeholder="Buscar aluno por nome ou e-mail" oninput="setAdmBusca(this.value)"></div>' +
+    '<div class="al-chips" id="adm-chips"></div>' +
+    '<div class="al-grid-wrap" id="adm-grid"></div>';
+  renderAdmResumo();
+  renderAdmChips();
+  renderAdmGrid();
+}
+
+function admContar(f) {
+  var n = 0;
+  admData.alunos.forEach(function(a) { if (admPassa(a, f)) n++; });
+  return n;
+}
+function admPassa(a, f) {
+  if (f === 'todos') return true;
+  if (f === 'ativos') return a.__ativo;
+  if (f === 'inativos') return a.__inativo;
+  if (f === 'vencendo') return !a.bloqueado && a.__vencendo;
+  if (f === 'bloqueados') return !!a.bloqueado;
+  return true;
+}
+
+function renderAdmResumo() {
+  var el = document.getElementById('adm-summary');
+  if (!el) return;
+  function tile(f, n, l, cls) {
+    return '<div class="al-tile ' + cls + '" onclick="setAdmFiltro(\'' + f + '\')"><b>' + n + '</b><span>' + l + '</span></div>';
+  }
+  el.innerHTML = '<div class="al-tiles">' +
+    tile('todos', admContar('todos'), 'Alunos', '') +
+    tile('ativos', admContar('ativos'), 'Ativos (7 dias)', 'ok') +
+    tile('inativos', admContar('inativos'), 'Inativos', 'warn') +
+    tile('vencendo', admContar('vencendo'), 'Treino vencendo', 'warn') +
+    tile('bloqueados', admContar('bloqueados'), 'Bloqueados', 'bad') +
+    '</div>';
+}
+
+function renderAdmChips() {
+  var el = document.getElementById('adm-chips');
+  if (!el) return;
+  var fs = [['todos', 'Todos'], ['ativos', 'Ativos'], ['inativos', 'Inativos'], ['vencendo', 'Treino vencendo'], ['bloqueados', 'Bloqueados']];
+  el.innerHTML = fs.map(function(f) {
+    return '<button class="al-chip' + (admData.filtro === f[0] ? ' on' : '') + '" onclick="setAdmFiltro(\'' + f[0] + '\')">' + f[1] + ' <small>' + admContar(f[0]) + '</small></button>';
+  }).join('');
+}
+
+function setAdmFiltro(f) {
+  admData.filtro = f;
+  renderAdmChips();
+  renderAdmGrid();
+}
+function setAdmBusca(v) {
+  admData.busca = String(v || '').toLowerCase().trim();
+  renderAdmGrid();
+}
+
+function renderAdmGrid() {
+  var el = document.getElementById('adm-grid');
+  if (!el) return;
+  var q = admData.busca;
+  var lista = admData.alunos.filter(function(a) {
+    if (!admPassa(a, admData.filtro)) return false;
+    if (!q) return true;
+    return (String(a.nome || '') + ' ' + String(a.email || '')).toLowerCase().indexOf(q) >= 0;
   });
-  listEl.innerHTML = html;
+  if (!lista.length) {
+    el.innerHTML = '<div class="al-empty">Nenhum aluno encontrado.</div>';
+    return;
+  }
+  el.innerHTML = lista.map(admCardHtml).join('');
+}
+
+function admCardHtml(a) {
+  var nome = a.nome || 'Sem nome';
+  var isBlocked = !!a.bloqueado;
+  var plano = a.plano_treino || '';
+  var planoLbl = plano ? plano.toUpperCase() : 'SEM PLANO';
+  var status = isBlocked ? '<span class="al-b bad">Bloqueado</span>' : (a.__ativo ? '<span class="al-b ok">Ativo</span>' : '<span class="al-b warn">Inativo</span>');
+  var tr;
+  if (a.__validDias === null) tr = '<span class="al-b mute">Sem treino</span>';
+  else if (a.__validDias < 0) tr = '<span class="al-b bad">Treino vencido</span>';
+  else if (a.__validDias <= 7) tr = '<span class="al-b warn">Vence em ' + a.__validDias + ' dia(s)</span>';
+  else tr = '<span class="al-b ok">Treino em dia</span>';
+  var seen = a.__seen === null ? 'Nunca' : (a.__seen === 0 ? 'Hoje' : (a.__seen === 1 ? 'Ontem' : 'H&aacute; ' + a.__seen + ' dias'));
+  var nomeSafe = String(nome).replace(/[^A-Za-z0-9 ]/g, '');
+  return '<div class="al-card' + (isBlocked ? ' blk' : '') + '">' +
+    '<div class="al-top">' +
+      '<div class="al-av" style="background:hsl(' + admCor(nome) + ',45%,26%)">' + _escHtml(admIniciais(nome)) + '</div>' +
+      '<div class="al-id"><div class="al-name">' + _escHtml(nome) + '</div><div class="al-mail">' + _escHtml(a.email || '') + '</div></div>' +
+      '<span class="al-plan p-' + (plano || 'none') + '">' + planoLbl + '</span>' +
+    '</div>' +
+    '<div class="al-badges">' + status + tr + '</div>' +
+    '<div class="al-stats">' +
+      '<div><b>' + a.__wk + '</b><span>Treinos gerados</span></div>' +
+      '<div><b>' + a.__d7 + '</b><span>Treinos feitos (7d)</span></div>' +
+      '<div><b>' + a.__d30 + '</b><span>Treinos feitos (30d)</span></div>' +
+      '<div><b>' + a.__rc + '</b><span>Sugest&otilde;es</span></div>' +
+    '</div>' +
+    '<div class="al-info"><span>&Uacute;ltimo acesso: <b>' + seen + '</b></span><span>Treino v&aacute;lido at&eacute;: <b>' + (a.__valid ? admFmtData(a.__valid) : '-') + '</b></span><span>Entrou em: <b>' + admFmtData(a.created_at) + '</b></span></div>' +
+    '<div class="al-row"><label>Plano</label><select onchange="setPlanoTreino(\'' + a.id + '\', this.value)">' +
+      '<option value=""' + (!plano ? ' selected' : '') + '>Sem plano</option>' +
+      '<option value="free"' + (plano === 'free' ? ' selected' : '') + '>Free</option>' +
+      '<option value="fit"' + (plano === 'fit' ? ' selected' : '') + '>Fit</option>' +
+      '<option value="vip"' + (plano === 'vip' ? ' selected' : '') + '>VIP</option>' +
+    '</select></div>' +
+    '<div class="al-actions">' +
+      '<button class="pri" onclick="verTreinoAluno(\'' + a.id + '\')">Ver treino</button>' +
+      '<button onclick="openMsgModal(\'' + a.id + '\',\'' + nomeSafe + '\')">Mensagem</button>' +
+      '<button class="danger' + (isBlocked ? ' on' : '') + '" onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleConvCard() {
+  var b = document.getElementById('conv-body');
+  var ar = document.getElementById('conv-arrow');
+  if (!b) return;
+  var open = b.style.display === 'none';
+  b.style.display = open ? 'block' : 'none';
+  if (ar) ar.innerHTML = open ? '&#9652;' : '&#9662;';
 }
 
 function _escHtml(t) {
