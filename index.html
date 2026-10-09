@@ -1583,8 +1583,67 @@ function checkAutoGenerate(latest) {
   var fim = new Date(latest.created_at);
   fim.setDate(fim.getDate() + dur * 7);
   if (new Date() >= fim) {
-    generateWorkout(true);
+    var adiada = (profile && profile.troca_adiada_ate) ? new Date(profile.troca_adiada_ate) : null;
+    if (adiada && new Date() < adiada) return;
+    if (adiada) { limparAdiamentoTroca(); generateWorkout(true); return; }
+    mostrarAvisoTroca();
   }
+}
+
+function limparAdiamentoTroca() {
+  try {
+    if (profile) profile.troca_adiada_ate = null;
+    if (user) sb.from('profiles').update({ troca_adiada_ate: null }).eq('id', user.id).then(function(){}).catch(function(){});
+  } catch(e) {}
+}
+
+function fecharAvisoTroca() {
+  var o = document.getElementById('troca-aviso');
+  if (o) o.parentNode.removeChild(o);
+}
+
+function mostrarAvisoTroca() {
+  fecharAvisoTroca();
+  var o = document.createElement('div');
+  o.id = 'troca-aviso';
+  o.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:9999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px';
+  o.innerHTML = '<div style="background:var(--card,#181818);border:1px solid var(--border,#252525);border-radius:16px;padding:24px;max-width:360px;width:100%;text-align:center">'
+    + '<div style="font-size:18px;font-weight:700;margin-bottom:10px">Chegou a hora de mudar seu treino</div>'
+    + '<div style="font-size:14px;opacity:.8;margin-bottom:18px">Podemos mud&aacute;-lo agora ou prefere esperar mais alguns dias?</div>'
+    + '<div style="display:flex;gap:10px"><button class="btn btn-p" id="troca-mudar" style="flex:1">Mudar</button><button class="btn" id="troca-esperar" style="flex:1">Esperar</button></div></div>';
+  document.body.appendChild(o);
+  document.getElementById('troca-mudar').addEventListener('click', function() {
+    fecharAvisoTroca();
+    limparAdiamentoTroca();
+    generateWorkout(true);
+  });
+  document.getElementById('troca-esperar').addEventListener('click', mostrarEscolhaEspera);
+}
+
+function mostrarEscolhaEspera() {
+  var box = document.querySelector('#troca-aviso > div');
+  if (!box) return;
+  box.innerHTML = '<div style="font-size:18px;font-weight:700;margin-bottom:10px">Quanto tempo quer esperar</div>'
+    + '<div style="font-size:14px;opacity:.8;margin-bottom:18px">Seu treino ser&aacute; trocado na data escolhida.</div>'
+    + '<div style="display:flex;gap:10px"><button class="btn btn-p" id="troca-1s" style="flex:1">1 semana</button><button class="btn btn-p" id="troca-2s" style="flex:1">2 semanas</button></div>'
+    + '<button class="btn" id="troca-voltar" style="width:100%;margin-top:10px">Voltar</button>';
+  document.getElementById('troca-1s').addEventListener('click', function() { adiarTroca(7); });
+  document.getElementById('troca-2s').addEventListener('click', function() { adiarTroca(14); });
+  document.getElementById('troca-voltar').addEventListener('click', mostrarAvisoTroca);
+}
+
+function adiarTroca(dias) {
+  var ate = new Date();
+  ate.setDate(ate.getDate() + dias);
+  var iso = ate.toISOString();
+  if (profile) profile.troca_adiada_ate = iso;
+  if (user) sb.from('profiles').update({ troca_adiada_ate: iso }).eq('id', user.id).then(function(){}).catch(function(){});
+  var box = document.querySelector('#troca-aviso > div');
+  if (!box) return;
+  box.innerHTML = '<div style="font-size:18px;font-weight:700;margin-bottom:10px">Combinado!</div>'
+    + '<div style="font-size:14px;opacity:.8;margin-bottom:18px">Vamos trocar seu treino em ' + ate.toLocaleDateString('pt-BR') + '.</div>'
+    + '<button class="btn btn-p" id="troca-ok" style="width:100%">Ok</button>';
+  document.getElementById('troca-ok').addEventListener('click', fecharAvisoTroca);
 }
 
 // === GENERATE ===
