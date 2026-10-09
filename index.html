@@ -132,8 +132,8 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 
 /* TOAST */
-#motiv-toast{position:fixed;left:16px;right:16px;top:16px;max-width:520px;margin:0 auto;background:linear-gradient(135deg,#1a2e1a,#111);border:1px solid var(--g);border-radius:12px;padding:14px 16px;z-index:800;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);transform:translateY(-120%);opacity:0;transition:transform .35s ease,opacity .35s ease}
-#motiv-toast.show{transform:translateY(0);opacity:1}
+#motiv-toast{position:fixed;left:16px;right:16px;top:50%;max-width:520px;margin:0 auto;pointer-events:none;background:linear-gradient(135deg,#1a2e1a,#111);border:1px solid var(--g);border-radius:12px;padding:14px 16px;z-index:800;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);transform:translateY(-50%) scale(.9);opacity:0;transition:transform .35s ease,opacity .35s ease}
+#motiv-toast.show{transform:translateY(-50%) scale(1);opacity:1}
 #motiv-toast .mt-icon{font-size:20px;flex-shrink:0}
 #motiv-toast .mt-txt{font-size:16px;font-weight:700;line-height:1.4}
 
@@ -1770,7 +1770,7 @@ async function generateWorkoutRun(isAuto) {
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
-      showMsg('gen-err', 'Erro: ' + e.message + ' â se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
+      showMsg('gen-err', 'Erro: ' + e.message + ' - se a geracao demorou muito, ela pode ter sido concluida mesmo assim. Toque em recarregar (\u21bb) para conferir.');
       setTimeout(function() { loadWorkouts(); updateQuotaInfo(); }, 3000);
     }
   }
@@ -2042,7 +2042,7 @@ async function refreshGamificacao() {
   var card = document.getElementById('gami-card');
   try {
     var res = await sb.from('logs_execucao').select('data').eq('user_id', user.id).order('data', { ascending: false });
-    if (res.error || !res.data || !res.data.length) { cards.forEach(function(c){ c.style.display = 'none'; }); return; }
+    if (res.error || !res.data || !res.data.length) { if (card) card.style.display = 'none'; return; }
 
     var diasSet = {};
     res.data.forEach(function(r) { diasSet[r.data] = true; });
