@@ -875,7 +875,7 @@ function showPushToast(title, body, url) {
   var t = document.getElementById('push-toast');
   var ov = document.getElementById('push-toast-overlay');
   if (!t || !ov) return;
-  __pushToastUrl = url || './';
+  __pushToastUrl = (url && !(url.charAt(0) === '/' && url.charAt(1) !== '/')) ? url : './';
   var tt = document.getElementById('push-toast-title');
   var tb = document.getElementById('push-toast-body');
   if (tt) tt.textContent = title || 'TO BE FITNESS';
