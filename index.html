@@ -217,6 +217,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 
 /* ADMIN */
+.adm-dot{display:inline-block;min-width:18px;padding:1px 6px;border-radius:10px;background:#ff5252;color:#fff;font-size:11px;font-weight:900;margin-left:4px;vertical-align:middle;text-align:center}
 .al-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
 .al-tile{background:#111;border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer}
 .al-tile b{display:block;font-size:24px;font-weight:900;color:var(--text)}
@@ -873,6 +874,7 @@ function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 var motivToastTimer = null;
 var __pushToastUrl = './';
 function showPushToast(title, body, url) {
+  try { checkAdminAlerts(); } catch (e) {}
   var t = document.getElementById('push-toast');
   var ov = document.getElementById('push-toast-overlay');
   if (!t || !ov) return;
@@ -1334,6 +1336,7 @@ async function loadProfile() {
     maybeShowTutorial();
     loadUltimasCargas();
     loadAdminMessages();
+    checkAdminAlerts(); if (!admAlertTimer) admAlertTimer = setInterval(checkAdminAlerts, 60000);
     refreshGamificacao();
 
     if (needsOnboarding) {
@@ -2571,12 +2574,37 @@ function escChat(s) {
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+var admBadgeN = 0;
+var admAlertTimer = null;
+async function checkAdminAlerts() {
+  try {
+    if (!user || !profile || !profile.is_admin) return;
+    var since = profile.admin_chat_visto_em || new Date(Date.now() - 30*86400000).toISOString();
+    var r = await sb.from('reclamacoes').select('id', { count: 'exact', head: true }).gt('created_at', since);
+    if (r && !r.error) admSetBadge(r.count || 0);
+  } catch (e) {}
+}
+function admSetBadge(n) {
+  admBadgeN = n;
+  var b = document.getElementById('admin-btn');
+  if (b) b.innerHTML = 'Admin' + (n > 0 ? '<span class="adm-dot">' + (n > 9 ? '9+' : n) + '</span>' : '');
+  renderAdminTabs();
+}
+async function marcarChatVisto() {
+  try {
+    var ts = new Date().toISOString();
+    profile.admin_chat_visto_em = ts;
+    admSetBadge(0);
+    await sb.from('profiles').update({ admin_chat_visto_em: ts }).eq('id', user.id);
+  } catch (e) {}
+}
+
 function renderAdminTabs() {
   var el = document.getElementById('admin-main-tabs');
   if (!el) return;
   var tabs = [{k:'dashboard',l:'Dashboard'},{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'},{k:'disparos',l:'Disparos'}];
   el.innerHTML = tabs.map(function(t) {
-    return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + '</div>';
+    return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + (t.k === 'chat' && admBadgeN > 0 && adminTab !== 'chat' ? ' <span class="adm-dot">' + (admBadgeN > 9 ? '9+' : admBadgeN) + '</span>' : '') + '</div>';
   }).join('');
   el.querySelectorAll('.tab').forEach(function(t) {
     t.addEventListener('click', function() {
@@ -2618,7 +2646,7 @@ if (screenAdmin) screenAdmin.classList.toggle('dash-wide', t === 'dashboard');
     if (chat) chat.style.display = '';
     if (planos) planos.style.display = 'none';
     if (dash) dash.style.display = 'none';
-    loadChat();
+    loadChat(); marcarChatVisto();
   } else if (t === 'planos') {
     cards.forEach(function(c){ c.style.display = 'none'; });
     if (list) list.style.display = 'none';
