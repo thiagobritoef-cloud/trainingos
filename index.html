@@ -1088,6 +1088,7 @@ function show(id) {
 }
 
 function goHome() {
+  try { localStorage.removeItem('tos_view'); } catch (e) {}
   adminViewMode = false; adminAlunoId = null; adminAlunoProfile = null;
   show('home');
   loadWorkouts();
@@ -1337,6 +1338,7 @@ async function loadProfile() {
     loadUltimasCargas();
     loadAdminMessages();
     checkAdminAlerts(); if (!admAlertTimer) admAlertTimer = setInterval(checkAdminAlerts, 60000);
+    try { if (isAdmin && localStorage.getItem('tos_view') === 'admin') { var sat = localStorage.getItem('tos_atab'); if (sat) adminTab = sat; goAdmin(); switchAdminView(adminTab); } } catch (e) {}
     refreshGamificacao();
 
     if (needsOnboarding) {
@@ -2608,7 +2610,7 @@ function renderAdminTabs() {
   }).join('');
   el.querySelectorAll('.tab').forEach(function(t) {
     t.addEventListener('click', function() {
-      adminTab = this.dataset.atab;
+      adminTab = this.dataset.atab; try { localStorage.setItem('tos_atab', adminTab); } catch (e) {}
       renderAdminTabs();
       switchAdminView(adminTab);
     });
@@ -2781,7 +2783,7 @@ async function loadChat() {
 
 async function goAdmin() {
   if (!isAdmin) return;
-  show('admin');
+  show('admin'); try { localStorage.setItem('tos_view', 'admin'); } catch (e) {}
   loadAdmin();
 }
 
