@@ -3084,23 +3084,36 @@ async function dispEnviar() {
   dispData.enviando = true;
   var btn = document.getElementById('disp-btn');
   btn.disabled = true; btn.textContent = 'Enviando...';
-  var ok = 0, falha = 0, i = 0;
+  var ok = 0, falha = 0, i = 0, errMsg = '';
   var fill = function(s, a) { return String(s).split('{nome}').join(String(a.nome || 'aluno').split(' ')[0]); };
   async function worker() {
     while (i < alvos.length) {
       var a = alvos[i++];
       try {
         var corpo = fill(texto, a);
-        await sb.from('mensagens_admin').insert({ user_id: a.id, mensagem: corpo });
+        var ir = await sb.from('mensagens_admin').insert({ user_id: a.id, mensagem: corpo });
         var r = await sb.functions.invoke('send-push', { body: { target: 'user', user_id: a.id, title: fill(titulo, a), body: corpo } });
-        if (r && r.error) falha++; else ok++;
-      } catch (e) { falha++; }
+        if (r && r.error) {
+          falha++;
+          if (!errMsg) {
+            errMsg = String(r.error.message || 'erro');
+            try { var eb = await r.error.context.json(); errMsg += ' - ' + JSON.stringify(eb).slice(0, 200); } catch (e2) {}
+          }
+        } else if (r && r.data && r.data.ok === false) {
+          falha++;
+          if (!errMsg) errMsg = JSON.stringify(r.data).slice(0, 200);
+        } else {
+          ok++;
+          if (r && r.data && (r.data.sent === 0 || r.data.enviados === 0)) { errMsg = 'Sem aparelho inscrito: ' + JSON.stringify(r.data).slice(0, 120); }
+        }
+        if (ir && ir.error && !errMsg) errMsg = 'Mensagem no app: ' + ir.error.message;
+      } catch (e) { falha++; if (!errMsg) errMsg = String(e && e.message || e); }
     }
   }
   await Promise.all([worker(), worker(), worker(), worker()]);
   dispData.enviando = false;
   btn.disabled = false; btn.textContent = 'Enviar notifica\u00e7\u00e3o';
-  showMsg('disp-out', 'Enviadas: ' + ok + (falha ? ' | Falhas: ' + falha : ''), falha ? 'err' : 'ok');
+  showMsg('disp-out', 'Enviadas: ' + ok + (falha ? ' | Falhas: ' + falha : '') + (errMsg ? ' | ' + errMsg : ''), falha ? 'err' : 'ok');
 }
 
 function _escHtml(t) {
