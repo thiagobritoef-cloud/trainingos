@@ -1,4 +1,4 @@
-var V = 'tos-v9';
+var V = 'tos-v10';
 self.addEventListener('install', function(e) {
   self.skipWaiting();
 });
@@ -31,6 +31,7 @@ try { data = e.data ? e.data.json() : {}; } catch (err) {}
 var title = data.title || 'TO BE FITNESS';
 var body = data.body || '';
 var url = data.url || './';
+if (url.charAt(0) === '/' && url.charAt(1) !== '/') url = './';
 e.waitUntil(
 Promise.all([
 self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
@@ -51,6 +52,7 @@ data: { url: url }
 self.addEventListener('notificationclick', function(e) {
   e.notification.close();
   var url = (e.notification.data && e.notification.data.url) || './';
+  if (url.charAt(0) === '/' && url.charAt(1) !== '/') url = './';
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
       for (var i = 0; i < list.length; i++) {
