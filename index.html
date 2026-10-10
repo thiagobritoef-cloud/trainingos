@@ -3371,9 +3371,8 @@ async function checkPushBanner() {
       var reg = await navigator.serviceWorker.ready;
       var sub = await reg.pushManager.getSubscription();
       if (Notification.permission === 'granted' && sub) {
-        ok = true;
-        msg = 'Notifica&ccedil;&otilde;es ativas neste aparelho.';
-        btn = '<button class="btn btn-s" style="width:auto;padding:8px 12px;margin:0" onclick="testarNotificacao()">Testar</button>';
+        if (old && old.parentNode) old.parentNode.removeChild(old);
+        return;
       } else {
         msg = 'Ative as notifica&ccedil;&otilde;es para receber avisos do seu treino.';
         btn = '<button class="btn btn-p" style="width:auto;padding:10px 14px;margin:0" onclick="ativarNotificacoes()">Ativar</button>';
