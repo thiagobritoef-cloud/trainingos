@@ -2571,7 +2571,7 @@ function escChat(s) {
 function renderAdminTabs() {
   var el = document.getElementById('admin-main-tabs');
   if (!el) return;
-  var tabs = [{k:'dashboard',l:'Dashboard'},{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'}];
+  var tabs = [{k:'dashboard',l:'Dashboard'},{k:'alunos',l:'Alunos'},{k:'chat',l:'Chat'},{k:'planos',l:'Planos'},{k:'disparos',l:'Disparos'}];
   el.innerHTML = tabs.map(function(t) {
     return '<div class="tab' + (t.k === adminTab ? ' active' : '') + '" data-atab="' + t.k + '">' + t.l + '</div>';
   }).join('');
@@ -2592,6 +2592,23 @@ function switchAdminView(t) {
   var dash = document.getElementById('dashboard-view');
 var screenAdmin = document.getElementById('screen-admin');
 if (screenAdmin) screenAdmin.classList.toggle('dash-wide', t === 'dashboard');
+  var dvEl = document.getElementById('disparo-view');
+  if (t === 'disparos') {
+    cards.forEach(function(c){ c.style.display = 'none'; });
+    if (list) list.style.display = 'none';
+    if (chat) chat.style.display = 'none';
+    if (planos) planos.style.display = 'none';
+    if (dash) dash.style.display = 'none';
+    if (!dvEl) {
+      dvEl = document.createElement('div');
+      dvEl.id = 'disparo-view';
+      document.querySelector('#screen-admin .cnt').appendChild(dvEl);
+    }
+    dvEl.style.display = '';
+    renderDisparos();
+    return;
+  }
+  if (dvEl) dvEl.style.display = 'none';
   if (t === 'chat') {
     cards.forEach(function(c){ c.style.display = 'none'; });
     if (list) list.style.display = 'none';
@@ -2959,6 +2976,131 @@ function toggleConvCard() {
   var open = b.style.display === 'none';
   b.style.display = open ? 'block' : 'none';
   if (ar) ar.innerHTML = open ? '&#9652;' : '&#9662;';
+}
+
+
+// === DISPARADOR DE MENSAGENS ===
+var dispData = { alunos: [], wk: {}, enviando: false };
+var DISP_TPL = {
+  aniversario: { t: 'Feliz anivers\u00e1rio, {nome}!', b: 'Parab\u00e9ns pelo seu dia! Que venha mais um ano de muita sa\u00fade e evolu\u00e7\u00e3o. Equipe TO BE FITNESS' },
+  inativo2: { t: 'Sentimos sua falta, {nome}', b: 'Voc\u00ea est\u00e1 h\u00e1 2 dias sem olhar seu treino. Volta a treinar!' },
+  ferias: { t: 'Vai viajar, {nome}?', b: 'Voc\u00ea sabia que pode criar um treino para as f\u00e9rias? Assim voc\u00ea n\u00e3o perde o seu ritmo.' },
+  novidade: { t: 'Novidade no app', b: 'Temos novidades no TO BE FITNESS. Abra o app e confira!' }
+};
+
+async function renderDisparos() {
+  var dv = document.getElementById('disparo-view');
+  if (!dv) return;
+  dv.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  var pr = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,last_seen_at,duracao_semanas');
+  if (pr.error) pr = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin,last_seen_at');
+  if (pr.error) pr = await sb.from('profiles').select('id,nome,email,plano_treino,bloqueado,is_admin');
+  if (pr.error) { dv.innerHTML = '<div class="alert al-err">Erro: ' + _escHtml(pr.error.message) + '</div>'; return; }
+  var wr = await sb.from('workouts').select('user_id,created_at');
+  var wk = {};
+  ((wr && wr.data) || []).forEach(function(w) { if (w.created_at && (!wk[w.user_id] || w.created_at > wk[w.user_id])) wk[w.user_id] = w.created_at; });
+  dispData.alunos = (pr.data || []).filter(function(p) { return !p.is_admin && !p.bloqueado; });
+  dispData.wk = wk;
+  dispData.alunos.sort(function(a, b) { return String(a.nome || '').localeCompare(String(b.nome || '')); });
+  var optsAluno = dispData.alunos.map(function(a) { return '<option value="' + a.id + '">' + _escHtml(a.nome || a.email || 'Sem nome') + '</option>'; }).join('');
+  dv.innerHTML =
+    '<div class="card"><div class="ctitle">Disparador de mensagens</div>' +
+    '<div style="font-size:14px;color:var(--muted);margin-bottom:14px">Envia uma notifica&ccedil;&atilde;o para o celular dos alunos. Use {nome} para colocar o nome de cada aluno.</div>' +
+    '<div class="fg"><label>Modelo pronto</label><div class="al-chips" id="disp-tpls">' +
+      '<button class="al-chip" onclick="dispTpl(\'aniversario\')">Anivers&aacute;rio</button>' +
+      '<button class="al-chip" onclick="dispTpl(\'inativo2\')">2 dias sem entrar</button>' +
+      '<button class="al-chip" onclick="dispTpl(\'ferias\')">Treino de f&eacute;rias</button>' +
+      '<button class="al-chip" onclick="dispTpl(\'novidade\')">Novidade</button></div></div>' +
+    '<div class="fg"><label>Quem vai receber</label><select id="disp-aud" onchange="dispAtualiza()">' +
+      '<option value="eu">Somente eu (teste)</option>' +
+      '<option value="todos">Todos os alunos</option>' +
+      '<option value="inativos2">Inativos h&aacute; 2 dias ou mais</option>' +
+      '<option value="inativos7">Inativos h&aacute; 7 dias ou mais</option>' +
+      '<option value="semacesso">Sem acesso registrado</option>' +
+      '<option value="vencendo">Treino vencido ou vencendo (7 dias)</option>' +
+      '<option value="free">Plano Free</option><option value="fit">Plano Fit</option><option value="vip">Plano VIP</option>' +
+      '<option value="aluno">Um aluno espec&iacute;fico</option></select>' +
+    '<select id="disp-aluno" style="display:none;margin-top:8px" onchange="dispAtualiza()">' + optsAluno + '</select></div>' +
+    '<div class="fg"><label>T&iacute;tulo da notifica&ccedil;&atilde;o</label><input type="text" id="disp-titulo" maxlength="60" placeholder="T&iacute;tulo" oninput="dispAtualiza()"></div>' +
+    '<div class="fg"><label>Mensagem</label><textarea id="disp-texto" rows="4" maxlength="240" placeholder="Escreva a mensagem" oninput="dispAtualiza()"></textarea></div>' +
+    '<div id="disp-prev" style="font-size:14px;color:var(--muted);margin-bottom:12px"></div>' +
+    '<button class="btn btn-p" id="disp-btn" onclick="dispEnviar()">Enviar notifica&ccedil;&atilde;o</button>' +
+    '<div class="msg" id="disp-out"></div></div>';
+  dispAtualiza();
+}
+
+function dispTpl(k) {
+  var t = DISP_TPL[k];
+  if (!t) return;
+  document.getElementById('disp-titulo').value = t.t;
+  document.getElementById('disp-texto').value = t.b;
+  if (k === 'aniversario') {
+    var s = document.getElementById('disp-aud');
+    if (s.value === 'todos' || s.value === 'eu') { s.value = 'aluno'; }
+  }
+  if (k === 'inativo2') document.getElementById('disp-aud').value = 'inativos2';
+  dispAtualiza();
+}
+
+function dispAlvos() {
+  var aud = document.getElementById('disp-aud').value;
+  var agora = Date.now();
+  if (aud === 'eu') return [{ id: user.id, nome: (profile && profile.nome) || 'Thiago' }];
+  var dias = function(a) { return a.last_seen_at ? Math.floor((agora - new Date(a.last_seen_at).getTime()) / 86400000) : null; };
+  return dispData.alunos.filter(function(a) {
+    if (aud === 'todos') return true;
+    if (aud === 'inativos2') { var d = dias(a); return d !== null && d >= 2; }
+    if (aud === 'inativos7') { var d7 = dias(a); return d7 !== null && d7 >= 7; }
+    if (aud === 'semacesso') return dias(a) === null;
+    if (aud === 'vencendo') {
+      var l = dispData.wk[a.id];
+      if (!l) return false;
+      var v = new Date(l); v.setDate(v.getDate() + (a.duracao_semanas || 4) * 7);
+      return Math.ceil((v.getTime() - agora) / 86400000) <= 7;
+    }
+    if (aud === 'free' || aud === 'fit' || aud === 'vip') return a.plano_treino === aud;
+    if (aud === 'aluno') return a.id === document.getElementById('disp-aluno').value;
+    return false;
+  });
+}
+
+function dispAtualiza() {
+  var aud = document.getElementById('disp-aud');
+  if (!aud) return;
+  document.getElementById('disp-aluno').style.display = aud.value === 'aluno' ? '' : 'none';
+  var alvos = dispAlvos();
+  var nomes = alvos.slice(0, 6).map(function(a) { return _escHtml(a.nome || 'Sem nome'); }).join(', ');
+  document.getElementById('disp-prev').innerHTML = 'Vai para <b>' + alvos.length + '</b> aluno(s)' + (alvos.length ? ': ' + nomes + (alvos.length > 6 ? ' e mais ' + (alvos.length - 6) : '') : '');
+}
+
+async function dispEnviar() {
+  if (dispData.enviando) return;
+  var titulo = document.getElementById('disp-titulo').value.trim();
+  var texto = document.getElementById('disp-texto').value.trim();
+  if (!titulo || !texto) { showMsg('disp-out', 'Preencha o t\u00edtulo e a mensagem.', 'err'); return; }
+  var alvos = dispAlvos();
+  if (!alvos.length) { showMsg('disp-out', 'Nenhum aluno nesse grupo.', 'err'); return; }
+  if (alvos.length > 1 && !confirm('Enviar para ' + alvos.length + ' alunos agora?')) return;
+  dispData.enviando = true;
+  var btn = document.getElementById('disp-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  var ok = 0, falha = 0, i = 0;
+  var fill = function(s, a) { return String(s).split('{nome}').join(String(a.nome || 'aluno').split(' ')[0]); };
+  async function worker() {
+    while (i < alvos.length) {
+      var a = alvos[i++];
+      try {
+        var corpo = fill(texto, a);
+        await sb.from('mensagens_admin').insert({ user_id: a.id, mensagem: corpo });
+        var r = await sb.functions.invoke('send-push', { body: { target: 'user', user_id: a.id, title: fill(titulo, a), body: corpo } });
+        if (r && r.error) falha++; else ok++;
+      } catch (e) { falha++; }
+    }
+  }
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  dispData.enviando = false;
+  btn.disabled = false; btn.textContent = 'Enviar notifica\u00e7\u00e3o';
+  showMsg('disp-out', 'Enviadas: ' + ok + (falha ? ' | Falhas: ' + falha : ''), falha ? 'err' : 'ok');
 }
 
 function _escHtml(t) {
