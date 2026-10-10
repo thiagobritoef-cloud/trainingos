@@ -3358,33 +3358,43 @@ async function checkPushBanner() {
     var old = document.getElementById('push-banner');
     var ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
     var standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
-    var msg = '', withBtn = true;
+    var msg = '', btn = '', ok = false;
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
       if (ios && !standalone) {
         msg = 'Para receber notifica&ccedil;&otilde;es no iPhone, adicione o app &agrave; Tela de In&iacute;cio (Compartilhar &gt; Adicionar &agrave; Tela de In&iacute;cio) e abra por l&aacute;.';
-        withBtn = false;
-      } else { return; }
+      } else {
+        msg = 'Este aparelho n&atilde;o suporta notifica&ccedil;&otilde;es.';
+      }
     } else if (Notification.permission === 'denied') {
-      if (old) old.parentNode.removeChild(old);
-      return;
+      msg = 'Notifica&ccedil;&otilde;es bloqueadas. Ative em Ajustes do aparelho &gt; Notifica&ccedil;&otilde;es &gt; TO BE FITNESS.';
     } else {
       var reg = await navigator.serviceWorker.ready;
       var sub = await reg.pushManager.getSubscription();
       if (Notification.permission === 'granted' && sub) {
-        if (old) old.parentNode.removeChild(old);
-        return;
+        ok = true;
+        msg = 'Notifica&ccedil;&otilde;es ativas neste aparelho.';
+        btn = '<button class="btn btn-s" style="width:auto;padding:8px 12px;margin:0" onclick="testarNotificacao()">Testar</button>';
+      } else {
+        msg = 'Ative as notifica&ccedil;&otilde;es para receber avisos do seu treino.';
+        btn = '<button class="btn btn-p" style="width:auto;padding:10px 14px;margin:0" onclick="ativarNotificacoes()">Ativar</button>';
       }
-      msg = 'Ative as notifica&ccedil;&otilde;es para receber avisos do seu treino.';
     }
-    if (old) return;
     var area = document.getElementById('msg-banner-area');
     if (!area || !area.parentNode) return;
-    var d = document.createElement('div');
+    var d = old || document.createElement('div');
     d.id = 'push-banner';
-    d.style.cssText = 'background:#14301a;border:1px solid var(--g);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px;display:flex;align-items:center;gap:10px';
-    d.innerHTML = '<div style="flex:1">' + msg + '</div>' + (withBtn ? '<button class="btn btn-p" style="width:auto;padding:10px 14px;margin:0" onclick="ativarNotificacoes()">Ativar</button>' : '');
-    area.parentNode.insertBefore(d, area);
+    d.style.cssText = 'background:' + (ok ? '#111' : '#14301a') + ';border:1px solid ' + (ok ? 'var(--border)' : 'var(--g)') + ';border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;gap:10px';
+    d.innerHTML = '<div style="flex:1">' + msg + '</div>' + btn;
+    if (!old) area.parentNode.insertBefore(d, area);
   } catch (e) {}
+}
+
+async function testarNotificacao() {
+  try {
+    if (!user) return;
+    var r = await sb.functions.invoke('send-push', { body: { target: 'user', user_id: user.id, title: 'Teste de notifica\u00e7\u00e3o', body: 'Se voc\u00ea viu isto, est\u00e1 tudo certo!' } });
+    if (r && r.error) alert('Falha ao enviar: ' + r.error.message);
+  } catch (e) { alert('Falha ao enviar o teste.'); }
 }
 
 async function ativarNotificacoes() {
