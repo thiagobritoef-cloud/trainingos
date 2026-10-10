@@ -2879,6 +2879,8 @@ async function loadAdmin() {
     a.__vencendo = a.__validDias !== null && a.__validDias <= 7;
   });
   admData.alunos = alunos;
+  admData.planoF = '';
+  try { var pr2 = await sb.from('profiles').select('id,plano'); var pm = {}; (pr2.data || []).forEach(function(p) { pm[p.id] = p.plano; }); alunos.forEach(function(a) { a.plano = pm[a.id] || ''; }); } catch (e) {}
   admData.filtro = 'todos';
   admData.busca = '';
 
@@ -2890,6 +2892,7 @@ async function loadAdmin() {
 
   listEl.innerHTML =
     '<div class="al-bar"><input type="text" id="adm-busca" class="al-search" placeholder="Buscar aluno por nome ou e-mail" oninput="setAdmBusca(this.value)"></div>' +
+    '<div id="adm-selects" style="display:flex;gap:8px;margin:0 0 10px"></div>' +
     '<div class="al-chips" id="adm-chips"></div>' +
     '<div class="al-grid-wrap" id="adm-grid"></div>';
   renderAdmResumo();
@@ -2933,6 +2936,21 @@ function renderAdmChips() {
   el.innerHTML = fs.map(function(f) {
     return '<button class="al-chip' + (admData.filtro === f[0] ? ' on' : '') + '" onclick="setAdmFiltro(\'' + f[0] + '\')">' + f[1] + ' <small>' + admContar(f[0]) + '</small></button>';
   }).join('');
+  renderAdmSelects();
+}
+
+function renderAdmSelects() {
+  var el = document.getElementById('adm-selects');
+  if (!el) return;
+  var st = [['todos', 'Todos os status'], ['ativos', 'Ativos'], ['inativos', 'Inativos'], ['vencendo', 'Treino vencendo'], ['bloqueados', 'Bloqueados']];
+  var pl = [['', 'Todos os planos'], ['free', 'Free'], ['fit', 'Fit'], ['vip', 'VIP'], ['_none', 'Sem plano']];
+  function opts(arr, cur) { return arr.map(function(o) { return '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }
+  el.innerHTML = '<select class="al-search" style="flex:1;min-width:0" onchange="setAdmFiltro(this.value)">' + opts(st, admData.filtro) + '</select>' +
+    '<select class="al-search" style="flex:1;min-width:0" onchange="setAdmPlano(this.value)">' + opts(pl, admData.planoF || '') + '</select>';
+}
+function setAdmPlano(v) {
+  admData.planoF = v;
+  renderAdmGrid();
 }
 
 function setAdmFiltro(f) {
@@ -2951,6 +2969,7 @@ function renderAdmGrid() {
   var q = admData.busca;
   var lista = admData.alunos.filter(function(a) {
     if (!admPassa(a, admData.filtro)) return false;
+    if (admData.planoF) { var pp = String(a.plano || '').toLowerCase(); if (admData.planoF === '_none' ? pp !== '' : pp !== admData.planoF) return false; }
     if (!q) return true;
     return (String(a.nome || '') + ' ' + String(a.email || '')).toLowerCase().indexOf(q) >= 0;
   });
