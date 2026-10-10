@@ -3353,14 +3353,57 @@ function urlBase64ToUint8Array(base64String) {
   for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
   return outputArray;
 }
+async function checkPushBanner() {
+  try {
+    var old = document.getElementById('push-banner');
+    var ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    var standalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    var msg = '', withBtn = true;
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (ios && !standalone) {
+        msg = 'Para receber notifica&ccedil;&otilde;es no iPhone, adicione o app &agrave; Tela de In&iacute;cio (Compartilhar &gt; Adicionar &agrave; Tela de In&iacute;cio) e abra por l&aacute;.';
+        withBtn = false;
+      } else { return; }
+    } else if (Notification.permission === 'denied') {
+      if (old) old.parentNode.removeChild(old);
+      return;
+    } else {
+      var reg = await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      if (Notification.permission === 'granted' && sub) {
+        if (old) old.parentNode.removeChild(old);
+        return;
+      }
+      msg = 'Ative as notifica&ccedil;&otilde;es para receber avisos do seu treino.';
+    }
+    if (old) return;
+    var area = document.getElementById('msg-banner-area');
+    if (!area || !area.parentNode) return;
+    var d = document.createElement('div');
+    d.id = 'push-banner';
+    d.style.cssText = 'background:#14301a;border:1px solid var(--g);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px;display:flex;align-items:center;gap:10px';
+    d.innerHTML = '<div style="flex:1">' + msg + '</div>' + (withBtn ? '<button class="btn btn-p" style="width:auto;padding:10px 14px;margin:0" onclick="ativarNotificacoes()">Ativar</button>' : '');
+    area.parentNode.insertBefore(d, area);
+  } catch (e) {}
+}
+
+async function ativarNotificacoes() {
+  try {
+    var p = await Notification.requestPermission();
+    if (p === 'granted') await subscribePush();
+  } catch (e) {}
+  checkPushBanner();
+}
+
 async function subscribePush() {
   try {
     if (!user) return;
+    setTimeout(checkPushBanner, 1500);
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     if (!VAPID_PUBLIC_KEY) return;
     if (Notification.permission === 'denied') return;
     var perm = Notification.permission;
-    if (perm === 'default') { perm = await Notification.requestPermission(); }
+    if (perm === 'default' && !/iPad|iPhone|iPod/.test(navigator.userAgent)) { perm = await Notification.requestPermission(); }
     if (perm !== 'granted') return;
     var reg = await navigator.serviceWorker.ready;
     var sub = await reg.pushManager.getSubscription();
