@@ -345,6 +345,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 <div id="screen-auth" class="screen active">
   <div class="auth-logo"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
   <div class="auth-sub">Periodizacao TBF</div>
+  <div id="conv-welcome" style="display:none;text-align:center;margin:0 auto 14px;max-width:340px;padding:12px 14px;border:1px solid var(--g);border-radius:14px;background:rgba(76,175,80,.08)"></div>
   <div class="auth-box">
     <div class="tab-auth">
       <button id="tab-in" class="active" onclick="authTab('in')">Entrar</button>
@@ -652,7 +653,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div class="tabs-scroll"><div class="tabs" id="admin-main-tabs"></div></div>
     <div class="card">
       <div class="ctitle" onclick="toggleConvCard()" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:0">Convites e mensagem geral <span id="conv-arrow">&#9662;</span></div><div id="conv-body" style="display:none;margin-top:12px">
-      <div class="fg"><label>Nome do aluno</label><input type="text" id="conv-nome" placeholder="Nome do aluno"></div>
+      <div class="fg"><label>Nome do aluno ou do grupo</label><input type="text" id="conv-nome" placeholder="Ex.: Priscila  ou  Alunos da Movement"><div style="font-size:12px;color:var(--muted);margin-top:4px">Aparece na tela de boas-vindas de quem abrir o link (ex.: Bem-vinda, Priscila!).</div></div>
       <button class="btn btn-p" onclick="gerarConvite()">Gerar link de convite</button>
       <button class="btn btn-s" onclick="gerarConviteGeral()" style="margin-top:8px">Gerar link geral (multi-uso)</button>
       <button class="btn btn-s" onclick="openMsgModalAll()" style="margin-top:8px">Mensagem para todos os alunos</button>
@@ -3194,7 +3195,7 @@ async function gerarConvite() {
   var token = gerarTokenConvite();
   var res = await sb.from('convites').insert({ nome: nome, token: token, created_by: user.id }).select().single();
   if (res.error) { alert('Erro ao gerar convite: ' + res.error.message); return; }
-  var link = location.origin + location.pathname + '?c=' + token;
+  var link = location.origin + location.pathname + '?c=' + token + conviteSlug(nome);
   var box = document.getElementById('conv-link-box');
   var txt = document.getElementById('conv-link-txt');
   txt.textContent = link;
@@ -3210,13 +3211,54 @@ async function gerarConviteGeral() {
   var token = gerarTokenConvite();
   var res = await sb.from('convites').insert({ nome: nome, token: token, created_by: user.id, tipo: 'geral' }).select().single();
   if (res.error) { alert('Erro ao gerar convite: ' + res.error.message); return; }
-  var link = location.origin + location.pathname + '?c=' + token;
+  var link = location.origin + location.pathname + '?c=' + token + conviteSlug(nome);
   var box = document.getElementById('conv-link-box');
   var txt = document.getElementById('conv-link-txt');
   txt.textContent = link;
   box.style.display = 'block';
   box.dataset.link = link;
   nomeEl.value = '';
+  loadConvites();
+}
+
+function conviteSlug(nome) {
+  var s = String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  return s ? '&n=' + s : '';
+}
+function _bemVindoPara(n) {
+  var p = String(n || '').trim().split(/\s+/)[0].toLowerCase();
+  return /a$/.test(p) ? 'Bem-vinda' : 'Bem-vindo';
+}
+async function carregarConviteInfo() {
+  try {
+    if (!window.__conviteToken) return;
+    var r = await sb.rpc('convite_info', { p_token: window.__conviteToken });
+    var info = r && r.data;
+    if (!info || !info.nome || info.status === 'cancelado') return;
+    var el = document.getElementById('conv-welcome');
+    if (!el) return;
+    var nome = _escHtml(info.nome);
+    if (info.tipo === 'geral') {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Convite exclusivo para</div>' +
+        '<div style="font-size:21px;font-weight:800;color:var(--g);margin:4px 0">' + nome + '</div>' +
+        '<div style="font-size:14px;color:var(--muted)">Crie sua conta para come&ccedil;ar</div>';
+    } else {
+      el.innerHTML = '<div style="font-size:22px;font-weight:800">' + _bemVindoPara(info.nome) + ', <span style="color:var(--g)">' + nome + '</span>!</div>' +
+        '<div style="font-size:14px;color:var(--muted);margin-top:4px">Crie sua conta para come&ccedil;ar a treinar</div>';
+    }
+    el.style.display = 'block';
+    authTab('up');
+  } catch (e) {}
+}
+async function renomearConvite(btn) {
+  var id = btn.getAttribute('data-id');
+  var atual = decodeURIComponent(btn.getAttribute('data-nome') || '');
+  var n = prompt('Novo nome do convite:', atual);
+  if (n === null) return;
+  n = n.trim();
+  if (!n) return;
+  var r = await sb.from('convites').update({ nome: n }).eq('id', id);
+  if (r.error) { alert('Erro ao renomear: ' + r.error.message); return; }
   loadConvites();
 }
 
@@ -3277,6 +3319,7 @@ async function loadConvites() {
       '<span style="color:' + statusColor + '">' + statusTxt + '</span>' +
       '</div>' +
       (p && c.tipo !== 'geral' ? '<div style="font-size:13px;color:' + (mismatch ? '#e55' : 'var(--muted)') + ';margin-top:2px">' + (mismatch ? '&#9888; Cadastrado como: ' : 'Cadastrado como: ') + _escHtml(p.nome || p.email || '') + '</div>' : '') +
+      (c.status !== 'cancelado' ? '<button class="btn btn-s" style="margin-top:6px;margin-right:6px;padding:4px 10px;font-size:13px" data-id="' + c.id + '" data-nome="' + encodeURIComponent(c.nome || '') + '" onclick="renomearConvite(this)">Editar nome</button>' : '') +
       ((c.tipo === 'geral' ? c.status !== 'cancelado' : c.status === 'pendente') ? '<button class="btn btn-s" style="margin-top:6px;padding:4px 10px;font-size:13px" onclick="cancelarConvite(\'' + c.id + '\')">Cancelar convite</button>' : '') +
       '</div>';
   });
@@ -3490,6 +3533,7 @@ async function subscribePush() {
 async function init() {
   var __cp = new URLSearchParams(location.search);
   if (__cp.get('c') || __cp.get('convite')) window.__conviteToken = __cp.get('c') || __cp.get('convite');
+  carregarConviteInfo();
   try {
     var res = await sb.auth.getSession();
     if (res.data && res.data.session) {
