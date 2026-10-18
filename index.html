@@ -1116,8 +1116,8 @@ async function renderPlanosEntrada() {
     if (res.error || !res.data) { track.innerHTML = '<p style="color:var(--muted);font-size:15px;text-align:center;padding:20px 0">Nao foi possivel carregar os planos.</p>'; return; }
     __planosCache = res.data;
   }
-  track.innerHTML = __planosCache.map(function(p) {
-    var destaque = p.id === 'fit';
+  track.innerHTML = __planosCache.filter(function(p) { return p.id === 'free' || p.id === 'vip'; }).map(function(p) {
+    var destaque = p.id === 'vip';
     var precoNum = Number(p.preco || 0);
     var precoTxt = 'R$ ' + precoNum.toFixed(2).replace('.', ',') + (precoNum > 0 ? '<small>/mes</small>' : '');
       if (p.id === 'vip' && precoNum > 0 && precoNum < 29.9) { precoTxt = '<div style="font-size:13px;font-weight:600;color:var(--muted);text-decoration:line-through">de R$ 29,90</div>' + precoTxt + '<div style="font-size:12px;font-weight:700;color:var(--g);margin-top:4px">Preco de lancamento - vagas limitadas</div>'; }
@@ -1128,6 +1128,23 @@ async function renderPlanosEntrada() {
       '<button class="btn ' + (destaque ? 'btn-p' : '') + '" onclick="verDetalhesPlano(\'' + p.id + '\')">Ver detalhes</button>' +
       '</div>';
   }).join('');
+  var cmpEl = document.getElementById('planos-comparativo');
+  if (!cmpEl) { cmpEl = document.createElement('div'); cmpEl.id = 'planos-comparativo'; track.parentNode.parentNode.appendChild(cmpEl); }
+  var pf = __planosCache.filter(function(x) { return x.id === 'free'; })[0];
+  var pv = __planosCache.filter(function(x) { return x.id === 'vip'; })[0];
+  if (pf && pv) {
+    var cs = 'padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px;';
+    var rows = [
+      ['Treinos personalizados', pf.treinos_max + ' a cada ' + Math.round(pf.treinos_periodo_dias / 7) + ' semanas', pv.treinos_max + ' a cada ' + Math.round(pv.treinos_periodo_dias / 7) + ' semanas'],
+      ['Ajustes com o Thiago', pf.alteracoes_max > 0 ? String(pf.alteracoes_max) : 'Nao inclui', pv.alteracoes_max + ' a cada ' + Math.round(pv.alteracoes_periodo_dias / 7) + ' semanas'],
+      ['Videos e acompanhamento', 'Sim', 'Sim'],
+      ['Valor', 'Gratis', 'R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mes']
+    ];
+    cmpEl.innerHTML = '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
+      '<table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
+      rows.map(function(r) { return '<tr><td style="' + cs + 'color:var(--muted)">' + r[0] + '</td><td style="' + cs + 'text-align:center">' + r[1] + '</td><td style="' + cs + 'text-align:center;font-weight:700">' + r[2] + '</td></tr>'; }).join('') +
+      '</table>';
+  }
 }
 
 function verDetalhesPlano(id) {
