@@ -1175,7 +1175,7 @@ async function enviarEsqueciSenha() {
   btn.disabled = true;
   btn.textContent = 'Enviando...';
   try {
-    var res = await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://thiagobritoef-cloud.github.io/trainingos/' });
+    var res = await sb.auth.resetPasswordForEmail(email, { redirectTo: (location.origin + '/') });
     if (res.error) {
       showMsg('esqueci-senha-msg', 'Nao foi possivel enviar o email. Tente novamente.');
     } else {
