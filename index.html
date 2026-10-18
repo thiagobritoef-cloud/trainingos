@@ -1691,6 +1691,17 @@ async function publicarNovidade() {
   if (r.error) { alert('Erro: ' + r.error.message); return; }
   document.getElementById('nov-titulo').value = '';
   document.getElementById('nov-texto').value = '';
+  var pr = await sb.from('profiles').select('id').in('plano_treino', ['vip', 'fit']);
+  var ids = (pr.data || []).map(function(p) { return p.id; });
+  var corpo = x.length > 140 ? x.slice(0, 137) + '...' : x;
+  var enviados = 0;
+  for (var k = 0; k < ids.length; k++) {
+    try {
+      var rp = await sb.functions.invoke('send-push', { body: { target: 'user', user_id: ids[k], title: 'Novidade VIP: ' + t, body: corpo } });
+      if (!(rp && rp.error)) enviados++;
+    } catch (e) {}
+  }
+  alert('Novidade publicada. Push enviado na hora para ' + enviados + ' aluno(s) VIP.');
   irNovidades();
 }
 function irResultados() {
