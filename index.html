@@ -1120,6 +1120,7 @@ async function renderPlanosEntrada() {
     var destaque = p.id === 'fit';
     var precoNum = Number(p.preco || 0);
     var precoTxt = 'R$ ' + precoNum.toFixed(2).replace('.', ',') + (precoNum > 0 ? '<small>/mes</small>' : '');
+      if (p.id === 'vip' && precoNum > 0 && precoNum < 29.9) { precoTxt = '<div style="font-size:13px;font-weight:600;color:var(--muted);text-decoration:line-through">de R$ 29,90</div>' + precoTxt + '<div style="font-size:12px;font-weight:700;color:var(--g);margin-top:4px">Preco de lancamento - vagas limitadas</div>'; }
     return '<div class="plano-card-entrada' + (destaque ? ' destaque' : '') + '">' +
       (destaque ? '<div class="plano-badge">&#11088; Mais procurado pelos atletas</div>' : '') +
       '<div class="plano-nome">' + p.nome + '</div>' +
