@@ -502,6 +502,11 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 <div class="row-chev">&#8250;</div>
 </div>
 
+<div class="list-row" onclick="irNovidades()">
+<div class="list-row-txt">Novidades</div>
+<div class="row-chev">&#8250;</div>
+</div>
+
 <div class="list-row" onclick="irSuporte()">
 <div class="list-row-txt">Fale com o Treinador</div>
 <div class="row-chev">&#8250;</div>
@@ -560,6 +565,23 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 </div>
 
 <!-- ===== SUPORTE ===== -->
+<div id="screen-novidades" class="screen">
+<div class="hdr">
+<span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
+<div class="hdr-btns">
+<button class="ibtn" onclick="goHome()" title="Voltar">&#8592;</button>
+</div>
+</div>
+<div class="cnt">
+<div class="card"><div class="ctitle">Novidades</div><div id="nov-list"></div></div>
+<div class="card" id="nov-admin" style="display:none"><div class="ctitle">Publicar novidade (admin)</div>
+<div class="fg"><input type="text" id="nov-titulo" placeholder="Título"></div>
+<div class="fg"><textarea id="nov-texto" placeholder="Texto da novidade"></textarea></div>
+<div class="fg"><input type="number" id="nov-dias" value="7" min="0" placeholder="Dias de exclusividade VIP"></div>
+<button class="btn btn-s" onclick="publicarNovidade()">Publicar</button></div>
+</div>
+</div>
+
 <div id="screen-suporte" class="screen">
   <div class="hdr">
     <span class="logo" onclick="goHome()"><span><b class="lg-to">TO</b><b class="lg-be">BE</b></span><small>FITNESS</small></span>
@@ -1623,6 +1645,10 @@ resetWorkoutDetailPosition();
 if (window.__latestWorkoutId) { openWorkout(window.__latestWorkoutId); }
 else { generateWorkout(); }
 }
+// REGRA DE PLANOS (vale para quem se cadastra a partir de 19/10/2026, 00h, horario de Brasilia):
+// - Free novo NAO tem chat direto com o Thiago (Fale com o Treinador), historico completo/grafico de evolucao nem novidades em primeira mao (exclusivos do VIP).
+// - Contas criadas ANTES de 19/10/2026 (legado) mantem esses recursos. A mesma data de corte esta no banco: funcao public.can_direct_chat() (RLS de reclamacoes).
+// - Fit e VIP sempre tem acesso. Para mudar a data de corte, altere aqui E na funcao SQL.
 function podeVip() {
   var p = profile || {};
   if (p.is_admin) return true;
@@ -1639,6 +1665,33 @@ function aplicarGateSuporte() {
   if (podeVip()) { if (c.getAttribute('data-locked') === '1') { c.innerHTML = c.getAttribute('data-orig'); c.setAttribute('data-locked', '0'); } return; }
   c.innerHTML = '<div class="ctitle">Fale com o Treinador</div>' + bannerVip('A mensagem direta com o Thiago, com prioridade de resposta, é exclusiva do plano VIP.');
   c.setAttribute('data-locked', '1');
+}
+async function irNovidades() {
+  show('novidades');
+  var adm = document.getElementById('nov-admin');
+  if (adm) adm.style.display = (profile && profile.is_admin) ? 'block' : 'none';
+  var el = document.getElementById('nov-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  var r = await sb.from('novidades').select('*').order('created_at', { ascending: false });
+  if (r.error || !r.data || !r.data.length) { el.innerHTML = '<p style="color:var(--muted);font-size:16px">Nenhuma novidade por enquanto.</p>'; return; }
+  var agora = Date.now();
+  el.innerHTML = r.data.map(function(n) {
+    var exclusivo = new Date(n.liberado_free_em).getTime() > agora;
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-weight:800;font-size:16px">' + escChat(n.titulo) + (exclusivo ? ' <span style="color:var(--g);font-size:12px">EM PRIMEIRA MÃO - VIP</span>' : '') + '</div><div style="color:var(--muted);font-size:13px;margin:2px 0 6px">' + new Date(n.created_at).toLocaleDateString('pt-BR') + '</div><div style="font-size:15px;line-height:1.5">' + escChat(n.texto) + '</div></div>';
+  }).join('');
+}
+async function publicarNovidade() {
+  var t = (document.getElementById('nov-titulo').value || '').trim();
+  var x = (document.getElementById('nov-texto').value || '').trim();
+  var dias = Number(document.getElementById('nov-dias').value || 0);
+  if (!t || !x) return;
+  var lib = new Date(Date.now() + Math.max(0, dias) * 86400000).toISOString();
+  var r = await sb.from('novidades').insert({ titulo: t, texto: x, liberado_free_em: lib });
+  if (r.error) { alert('Erro: ' + r.error.message); return; }
+  document.getElementById('nov-titulo').value = '';
+  document.getElementById('nov-texto').value = '';
+  irNovidades();
 }
 function irResultados() {
 refreshGamificacao();
