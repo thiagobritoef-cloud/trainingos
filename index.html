@@ -2881,7 +2881,7 @@ async function loadAdmin() {
   });
   admData.alunos = alunos;
   admData.planoF = '';
-  try { var pr2 = await sb.from('profiles').select('id,plano'); var pm = {}; (pr2.data || []).forEach(function(p) { pm[p.id] = p.plano; }); alunos.forEach(function(a) { a.plano = pm[a.id] || ''; }); } catch (e) {}
+ 
   admData.filtro = 'todos';
   admData.busca = '';
 
@@ -2970,7 +2970,7 @@ function renderAdmGrid() {
   var q = admData.busca;
   var lista = admData.alunos.filter(function(a) {
     if (!admPassa(a, admData.filtro)) return false;
-    if (admData.planoF) { var pp = String(a.plano || '').toLowerCase(); if (admData.planoF === '_none' ? pp !== '' : pp !== admData.planoF) return false; }
+    if (admData.planoF) { var pp = String(a.plano_treino || '').toLowerCase(); if (admData.planoF === '_none' ? pp !== '' : pp !== admData.planoF) return false; }
     if (!q) return true;
     return (String(a.nome || '') + ' ' + String(a.email || '')).toLowerCase().indexOf(q) >= 0;
   });
