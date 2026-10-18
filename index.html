@@ -1138,6 +1138,10 @@ async function renderPlanosEntrada() {
       ['Treinos personalizados', '1 a cada 2 meses', 'Até 5 a cada 2 meses'],
       ['Ajuste do treinador', 'Não incluído', 'Até 10 a cada 2 meses'],
       ['Vídeos explicativos', 'Sim', 'Sim'],
+      ['Fale direto com o Thiago', 'Não incluído', 'Incluído'],
+      ['Histórico e evolução', 'Últimos 3 registros', 'Completo, com gráfico'],
+      ['Prioridade nos ajustes', 'Não', 'Sim'],
+      ['Novidades em primeira mão', 'Não', 'Sim'],
       ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês']
     ];
     cmpEl.innerHTML = '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
@@ -1156,9 +1160,9 @@ function verDetalhesPlano(id) {
   det += '<li>Ate ' + p.treinos_max + ' treino' + (p.treinos_max === 1 ? '' : 's') + ' a cada ' + p.treinos_periodo_dias + ' dias</li>';
   det += '<li>' + (p.alteracoes_max ? ('Ate ' + p.alteracoes_max + ' ajuste' + (p.alteracoes_max === 1 ? '' : 's') + ' a cada ' + p.alteracoes_periodo_dias + ' dias') : 'Sem ajustes inclusos') + '</li>';
   var extras = {
-    free: ['Treino personalizado ao seu objetivo', 'Videos demonstrativos', 'Acompanhamento de evolucao'],
+    free: ['Treino personalizado ao seu objetivo', 'Vídeos explicativos', 'Registro de peso e fotos (últimos 3)'],
     fit: ['Treino de acordo com seu objetivo, criado por um treinador', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos', 'Fale com o treinador'],
-    vip: ['Treino de acordo com seu objetivo, criado por um treinador', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos', 'Fale com o treinador']
+    vip: ['Treino de acordo com seu objetivo, criado por um treinador', 'Até 5 treinos a cada 2 meses', 'Até 10 ajustes do treinador a cada 2 meses', 'Fale direto com o Thiago', 'Prioridade nos ajustes', 'Histórico completo e gráfico de evolução', 'Novidades em primeira mão']
   };
   (extras[p.id] || []).forEach(function(b) { det += '<li>' + b + '</li>'; });
   det += '</ul>';
@@ -1619,6 +1623,23 @@ resetWorkoutDetailPosition();
 if (window.__latestWorkoutId) { openWorkout(window.__latestWorkoutId); }
 else { generateWorkout(); }
 }
+function podeVip() {
+  var p = profile || {};
+  if (p.is_admin) return true;
+  if (p.plano_treino === 'vip' || p.plano_treino === 'fit') return true;
+  return !!p.created_at && new Date(p.created_at) < new Date('2026-10-19T00:00:00-03:00');
+}
+function bannerVip(txt) {
+  return '<div style="margin:12px 0;padding:14px;border:1px solid var(--g);border-radius:12px;text-align:center;font-size:14px"><div style="font-weight:800;margin-bottom:6px">Recurso VIP</div><div style="color:var(--muted);margin-bottom:10px">' + txt + '</div><button class="btn btn-p" onclick="assinarPlano(\'vip\')">Assinar VIP - R$ 19,99/mês</button></div>';
+}
+function aplicarGateSuporte() {
+  var c = document.getElementById('rc-card');
+  if (!c) return;
+  if (!c.getAttribute('data-orig')) c.setAttribute('data-orig', c.innerHTML);
+  if (podeVip()) { if (c.getAttribute('data-locked') === '1') { c.innerHTML = c.getAttribute('data-orig'); c.setAttribute('data-locked', '0'); } return; }
+  c.innerHTML = '<div class="ctitle">Fale com o Treinador</div>' + bannerVip('A mensagem direta com o Thiago, com prioridade de resposta, é exclusiva do plano VIP.');
+  c.setAttribute('data-locked', '1');
+}
 function irResultados() {
 refreshGamificacao();
 show('resultados');
@@ -1629,6 +1650,7 @@ loadProgresso();
 show('evolucao');
 }
 function irSuporte() {
+  aplicarGateSuporte();
 show('suporte');
 }
 
@@ -2188,8 +2210,10 @@ async function loadProgresso() {
     return;
   }
 
+  var __lim = !podeVip();
+  if (__lim) res.data = res.data.slice(-3);
   var pontos = res.data.filter(function(r) { return r.peso; });
-  if (chartEl) chartEl.innerHTML = pontos.length > 1 ? svgSparkline(pontos) : '';
+  if (chartEl) chartEl.innerHTML = __lim ? bannerVip('Histórico completo e gráfico de evolução são exclusivos do plano VIP. No Free você vê os 3 últimos registros.') : (pontos.length > 1 ? svgSparkline(pontos) : '');
 
   var rows = res.data.slice().reverse();
   var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Historico</div>';
@@ -2811,16 +2835,17 @@ async function loadChat() {
   var items = rcRes.data || [];
   if (!items.length) { el.innerHTML = '<div class="loading" style="padding:20px 0"><p style="color:#555;font-size:16px">Nenhuma mensagem recebida ainda.</p></div>'; return; }
   var ids = items.map(function(m) { return m.user_id; }).filter(function(v, i, a) { return v && a.indexOf(v) === i; });
-  var profRes = ids.length ? await sb.from('profiles').select('id,nome,email').in('id', ids) : { data: [] };
+  var profRes = ids.length ? await sb.from('profiles').select('id,nome,email,plano_treino').in('id', ids) : { data: [] };
   var names = {};
   (profRes.data || []).forEach(function(p) { names[p.id] = p; });
+  items.sort(function(a, b) { return ((names[a.user_id] || {}).plano_treino === 'vip' ? 0 : 1) - ((names[b.user_id] || {}).plano_treino === 'vip' ? 0 : 1); });
   el.innerHTML = items.map(function(m) {
     var p = names[m.user_id] || {};
     var nome = p.nome || p.email || 'Aluno';
     var d = m.created_at ? new Date(m.created_at).toLocaleDateString('pt-BR') : '';
     return '<div class="card" style="margin-bottom:10px">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
-      '<b style="font-size:16px">' + escChat(nome) + '</b><span style="font-size:13px;color:var(--muted)">' + d + '</span></div>' +
+      '<b style="font-size:16px">' + escChat(nome) + (p.plano_treino === 'vip' ? ' <span style="color:var(--g);font-size:12px;font-weight:800">VIP - PRIORIDADE</span>' : '') + '</b><span style="font-size:13px;color:var(--muted)">' + d + '</span></div>' +
       (m.titulo ? '<div style="font-weight:800;font-size:16px;margin-bottom:4px">' + escChat(m.titulo) + '</div>' : '') +
       '<div style="font-size:16px;color:var(--text)">' + escChat(m.mensagem) + '</div>' +
       '<button class="btn btn-s" style="margin-top:10px" onclick="openMsgModal(&quot;' + m.user_id + '&quot;, decodeURIComponent(&quot;' + encodeURIComponent(nome) + '&quot;))">Responder</button>' +
