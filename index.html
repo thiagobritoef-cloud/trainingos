@@ -1135,10 +1135,10 @@ async function renderPlanosEntrada() {
   if (pf && pv) {
     var cs = 'padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px;';
     var rows = [
-      ['Treinos personalizados', pf.treinos_max + ' a cada ' + Math.round(pf.treinos_periodo_dias / 7) + ' semanas', pv.treinos_max + ' a cada ' + Math.round(pv.treinos_periodo_dias / 7) + ' semanas'],
-      ['Ajustes com o Thiago', pf.alteracoes_max > 0 ? String(pf.alteracoes_max) : 'Nao inclui', pv.alteracoes_max + ' a cada ' + Math.round(pv.alteracoes_periodo_dias / 7) + ' semanas'],
-      ['Videos e acompanhamento', 'Sim', 'Sim'],
-      ['Valor', 'Gratis', 'R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mes']
+      ['Treinos personalizados', '1 a cada 2 meses', 'Até 5 a cada 2 meses'],
+      ['Ajuste do treinador', 'Não incluído', 'Até 10 a cada 2 meses'],
+      ['Vídeos explicativos', 'Sim', 'Sim'],
+      ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês']
     ];
     cmpEl.innerHTML = '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
       '<table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
