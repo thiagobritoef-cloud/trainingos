@@ -3160,12 +3160,12 @@ function admCardHtml(a) {
       '<div><b>' + a.__rc + '</b><span>Sugest&otilde;es</span></div>' +
     '</div>' +
     '<div class="al-info"><span>&Uacute;ltimo acesso: <b>' + seen + '</b></span><span>Treino v&aacute;lido at&eacute;: <b>' + (a.__valid ? admFmtData(a.__valid) : '-') + '</b></span><span>Entrou em: <b>' + admFmtData(a.created_at) + '</b></span></div>' +
-    '<div class="al-row"><label>Plano</label><select onchange="setPlanoTreino(\'' + a.id + '\', this.value)">' +
-      '<option value=""' + (!plano ? ' selected' : '') + '>Sem plano</option>' +
-      '<option value="free"' + (plano === 'free' ? ' selected' : '') + '>Free</option>' +
-      '<option value="fit"' + (plano === 'fit' ? ' selected' : '') + '>Fit</option>' +
-      '<option value="vip"' + (plano === 'vip' ? ' selected' : '') + '>VIP</option>' +
-    '</select></div>' +
+    '<div class="al-row"><label>Plano do aluno</label><select onchange="setPlanoTreino(\'' + a.id + '\', this.value, \'' + (plano || '') + '\', this)">' +
+          (!plano ? '<option value="" selected>Sem plano</option>' : '') +
+          '<option value="free"' + (plano === 'free' ? ' selected' : '') + '>Free</option>' +
+          (plano === 'fit' ? '<option value="fit" selected>Fit (legado)</option>' : '') +
+          '<option value="vip"' + (plano === 'vip' ? ' selected' : '') + '>VIP</option>' +
+          '</select></div>' +
     '<div class="al-actions">' +
       '<button class="pri" onclick="verTreinoAluno(\'' + a.id + '\')">Ver treino</button>' +
       '<button onclick="openMsgModal(\'' + a.id + '\',\'' + nomeSafe + '\')">Mensagem</button>' +
@@ -3490,8 +3490,12 @@ async function toggleBloqueado(id, current) {
   loadAdmin();
 }
 
-async function setPlanoTreino(id, value) {
-  await sb.from('profiles').update({ plano_treino: value || null }).eq('id', id);
+async function setPlanoTreino(id, value, anterior, el) {
+  var rotulo = { '': 'Sem plano', free: 'Free', fit: 'Fit', vip: 'VIP' };
+  if (value === (anterior || '')) return;
+  if (!confirm('Alterar o plano deste aluno de ' + rotulo[anterior || ''] + ' para ' + rotulo[value || ''] + '?')) { if (el) el.value = anterior || ''; return; }
+  var r = await sb.from('profiles').update({ plano_treino: value || null }).eq('id', id);
+  if (r.error) { alert('Não foi possível alterar o plano: ' + r.error.message); if (el) el.value = anterior || ''; return; }
   loadAdmin();
 }
 
