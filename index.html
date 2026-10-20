@@ -643,6 +643,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma altera&ccedil;&atilde;o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra voc&ecirc;.</div>
       <textarea id="ajuste-txt" placeholder="Escreva aqui o que voc&ecirc; quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
+<button type="button" class="btn btn-s" style="margin-top:8px" onclick="ditarVoz('ajuste-txt', this)">&#127908; Falar em vez de escrever</button>
       <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
       <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago est&aacute; reformulando... at&eacute; 2 minutos</div></div>
@@ -1721,6 +1722,36 @@ async function excluirMinhaConta() {
   alert('Conta excluída.');
   location.href = './';
 }
+var __rec = null;
+function ditarVoz(id, btn) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Este aparelho não permite ditado por voz aqui. Use o microfone do teclado do celular.'); return; }
+  var ta = document.getElementById(id);
+  if (!ta) return;
+  if (__rec) { try { __rec.stop(); } catch (e) {} return; }
+  var rec = new SR();
+  __rec = rec;
+  rec.lang = 'pt-BR';
+  rec.interimResults = true;
+  rec.continuous = true;
+  var base = ta.value ? ta.value.replace(/\s+$/, '') + ' ' : '';
+  var finalTxt = '';
+  var rot = btn.innerHTML;
+  btn.innerHTML = '&#9209; Parar de gravar';
+  rec.onresult = function(ev) {
+    var interim = '';
+    for (var i = ev.resultIndex; i < ev.results.length; i++) {
+      var r = ev.results[i];
+      if (r.isFinal) finalTxt += r[0].transcript; else interim += r[0].transcript;
+    }
+    ta.value = base + finalTxt + interim;
+  };
+  rec.onerror = function(ev) {
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') alert('Permita o uso do microfone para falar o seu pedido.');
+  };
+  rec.onend = function() { __rec = null; btn.innerHTML = rot; };
+  try { rec.start(); } catch (e) { __rec = null; btn.innerHTML = rot; }
+}
 function irResultados() {
 refreshGamificacao();
 show('resultados');
@@ -2129,7 +2160,7 @@ function renderDay(sessoes, di, wi) {
       }
     });
     html += '</tbody></table></div>';
-    html += '<button class="reg-treino-btn" id="reg-treino-btn">&#10003; Registrar Treino</button><div class="msg" id="reg-treino-out"></div>' + '<div class="card" style="margin-top:14px"><div style="font-weight:700;margin-bottom:6px">Fazer mudan&ccedil;as no meu treino</div><div style="font-size:13px;opacity:.75;margin-bottom:8px">Descreva o que quer mudar. Vamos aplicar no treino e lembrar disso nos pr&oacute;ximos.</div><textarea id="mud-txt" rows="3" style="width:100%;box-sizing:border-box" placeholder="Ex.: trocar agachamento por leg press, n&atilde;o quero exerc&iacute;cios de joelho"></textarea><button class="btn btn-p" id="mud-btn" style="margin-top:8px" onclick="fazerMudancasTreino()">Fazer mudan&ccedil;as</button><div id="mud-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div>Aplicando mudan&ccedil;as...</div></div><div class="msg" id="mud-err"></div></div>';
+    html += '<button class="reg-treino-btn" id="reg-treino-btn">&#10003; Registrar Treino</button><div class="msg" id="reg-treino-out"></div>' + '<div class="card" style="margin-top:14px"><div style="font-weight:700;margin-bottom:6px">Fazer mudan&ccedil;as no meu treino</div><div style="font-size:13px;opacity:.75;margin-bottom:8px">Descreva o que quer mudar. Vamos aplicar no treino e lembrar disso nos pr&oacute;ximos.</div><textarea id="mud-txt" rows="3" style="width:100%;box-sizing:border-box" placeholder="Ex.: trocar agachamento por leg press, n&atilde;o quero exerc&iacute;cios de joelho"></textarea><button type="button" class="btn btn-s" style="margin-top:8px" onclick="ditarVoz(\'mud-txt\', this)">&#127908; Falar em vez de escrever</button><button class="btn btn-p" id="mud-btn" style="margin-top:8px" onclick="fazerMudancasTreino()">Fazer mudan&ccedil;as</button><div id="mud-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div>Aplicando mudan&ccedil;as...</div></div><div class="msg" id="mud-err"></div></div>';
   }
   html += '</div>';
 
