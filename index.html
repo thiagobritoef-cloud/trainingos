@@ -3378,10 +3378,10 @@ async function gerarConvite() {
   var token = gerarTokenConvite();
   var res = await sb.from('convites').insert({ nome: nome, token: token, created_by: user.id }).select().single();
   if (res.error) { alert('Erro ao gerar convite: ' + res.error.message); return; }
-  var link = location.origin + location.pathname + '?c=' + token + conviteSlug(nome);
+  var link = 'https://app.tobefit.com.br/?c=' + token + conviteSlug(nome);
   var box = document.getElementById('conv-link-box');
   var txt = document.getElementById('conv-link-txt');
-  txt.textContent = link;
+  txt.textContent = 'Convite de ' + nome + ' pronto. Toque em Copiar link.';
   box.style.display = 'block';
   box.dataset.link = link;
   nomeEl.value = '';
@@ -3394,10 +3394,10 @@ async function gerarConviteGeral() {
   var token = gerarTokenConvite();
   var res = await sb.from('convites').insert({ nome: nome, token: token, created_by: user.id, tipo: 'geral' }).select().single();
   if (res.error) { alert('Erro ao gerar convite: ' + res.error.message); return; }
-  var link = location.origin + location.pathname + '?c=' + token + conviteSlug(nome);
+  var link = 'https://app.tobefit.com.br/?c=' + token + conviteSlug(nome);
   var box = document.getElementById('conv-link-box');
   var txt = document.getElementById('conv-link-txt');
-  txt.textContent = link;
+  txt.textContent = 'Convite de ' + nome + ' pronto. Toque em Copiar link.';
   box.style.display = 'block';
   box.dataset.link = link;
   nomeEl.value = '';
