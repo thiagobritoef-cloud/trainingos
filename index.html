@@ -451,10 +451,12 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div class="fg">
         <label>Dores / Lesões / Restrições</label>
         <textarea id="p-rest" placeholder="Ex: dor no joelho, cirurgia lombar, etc."></textarea>
+<div style="font-size:12px;color:var(--muted);margin-top:4px">Dado de saúde, informado por você. Usamos só para adaptar seu treino. Ao preencher, você consente com esse uso (veja a Política de Privacidade).</div>
       </div>
       <button class="btn btn-p" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
-<button class="btn" style="margin-top:18px;background:transparent;color:#e55;border:1px solid #e55" onclick="excluirMinhaConta()">Excluir minha conta</button>
+
 <div style="text-align:center;margin-top:10px;font-size:12px"><a href="privacidade.html" target="_blank" style="color:var(--muted)">Política de Privacidade</a></div>
+<div style="text-align:center;margin-top:48px"><a href="#" onclick="excluirMinhaConta();return false" style="color:#e55;font-size:12px;text-decoration:underline">Excluir minha conta</a></div>
     </div>
     <!-- movido para telas dedicadas -->
   </div>
@@ -1325,6 +1327,7 @@ async function doAuth() {
       res = await sb.auth.signInWithPassword({ email: email, password: pass });
     }
     if (res.error) throw res.error;
+    if (authMode === 'up' && !res.data.session) { showMsg('auth-msg', 'Cadastro criado! Enviamos um link de confirmação para ' + email + '. Confirme o e-mail e depois entre.', 'ok'); btn.disabled = false; btn.textContent = 'Cadastrar'; return; }
     user = (res.data.session || {}).user || res.data.user;
     if (!user) throw new Error('Sessao nao encontrada. Verifique seu email.');
     if (authMode === 'up') { registrarAceiteTermos(); }
@@ -1351,8 +1354,8 @@ async function doAuth() {
   }
 }
 
-async function doLogout() {
-  await sb.auth.signOut();
+async function doLogout() { await sb.auth.signOut();
+  try { Object.keys(localStorage).filter(function(k) { return k.indexOf('prof_extras_') === 0; }).forEach(function(k) { localStorage.removeItem(k); }); } catch (e) {}
   user = null; profile = null;
   adminViewMode = false; adminAlunoId = null; adminAlunoProfile = null;
   show('auth');
@@ -1419,8 +1422,7 @@ async function loadProfile() {
   }
 }
 
-function fillProfileForm() {
-  if (!profile) return;
+function fillProfileForm() { if (!profile) return; try { renderPlanoCard(); } catch (e) {}
   var p = profile;
   setVal('p-name', p.nome || '');
   setVal('p-sex', p.sexo || 'Masculino');
@@ -2211,16 +2213,14 @@ async function registrarTreinoCompleto() {
   var loads = exArea.querySelectorAll('.ex-load');
   var rows = [];
   var repsMap = {}, rpeMap = {};
-  exArea.querySelectorAll('.ex-mini').forEach(function(inp) {
-    if (!inp.value) return;
+  exArea.querySelectorAll('.ex-mini').forEach(function(inp) { if (!inp.value || inp.dataset.touched !== '1') return;
     if (inp.dataset.field === 'reps') repsMap[inp.dataset.k] = inp.value;
     if (inp.dataset.field === 'rpe') rpeMap[inp.dataset.k] = inp.value;
   });
   loads.forEach(function(inp) {
     var k = inp.dataset.k;
     if (!k || !inp.dataset.ex) return;
-    var peso = parseFloat(inp.value);
-    var reps = parseInt(repsMap[k]);
+    var peso = inp.dataset.touched === '1' ? parseFloat(inp.value) : NaN; var reps = parseInt(repsMap[k]);
     var rpe = parseInt(rpeMap[k]);
     if (isNaN(peso) && isNaN(reps) && isNaN(rpe)) return;
     rows.push({
@@ -2234,7 +2234,7 @@ async function registrarTreinoCompleto() {
       rpe: isNaN(rpe) ? null : rpe, data: ymdLocal(new Date()) });
   });
 
-  if (!rows.length) { showMsg('reg-treino-out', 'Preencha ao menos um exercicio (kg, reps ou RPE) antes de registrar.'); return; }
+  if (!rows.length) { showMsg('reg-treino-out', 'Digite o que você fez hoje (kg, reps ou RPE) antes de registrar. Os valores em cinza são do treino anterior.'); return; }
 
   btn.disabled = true; btn.textContent = 'Salvando...';
   showMsg('reg-treino-out', '');
@@ -2245,16 +2245,16 @@ async function registrarTreinoCompleto() {
   if (res.error) { showMsg('reg-treino-out', res.error.message); return; }
 
   showMsg('reg-treino-out', 'Treino registrado! (' + rows.length + ' exercicio' + (rows.length > 1 ? 's' : '') + ')', 'ok');
-  refreshGamificacao();
-  loadUltimasCargas();
-  } catch (e) {
-    var _btn = document.getElementById('reg-treino-btn');
+  refreshGamificacao(); loadUltimasCargas();
+    try { if (localStorage.getItem('tbf_pode_push') !== '1') { localStorage.setItem('tbf_pode_push', '1'); if ('Notification' in window && Notification.permission === 'default') { setTimeout(function() { if (confirm('Quer que a gente avise quando sua carga puder subir e quando seu treino estiver pronto?')) subscribePush(); }, 1200); } } } catch (e2) {}
+  } catch (e) { var _btn = document.getElementById('reg-treino-btn');
     if (_btn) { _btn.disabled = false; _btn.textContent = '\u2713 Registrar Treino'; }
     showMsg('reg-treino-out', 'Erro ao registrar treino: ' + (e && e.message ? e.message : String(e)));
   }
 }
 
 // === GAMIFICACAO LEVE ===
+document.addEventListener('input', function(e) { var t = e.target; if (t && t.classList && (t.classList.contains('ex-load') || t.classList.contains('ex-mini'))) t.dataset.touched = '1'; });
 function ymdLocal(dt) { var m = dt.getMonth() + 1, da = dt.getDate(); return dt.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (da < 10 ? '0' : '') + da; }
 async function refreshGamificacao() {
   if (!user) return;
@@ -2388,7 +2388,7 @@ function renderPlanoCard() {
   if (out) out.innerHTML =
     '<div style="margin-top:8px">' +
     '<button class="btn ' + (pid === 'vip' ? 'btn-p' : '') + '" style="width:100%" onclick="assinarPlano(\'vip\')" ' + (pid === 'vip' ? 'disabled' : '') + '>Assinar VIP - Oferta Black R$19,99/mês</button>' +
-    '<div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center"><s>de R$ 29,90</s> &middot; preço especial de Black, vagas limitadas</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center"><s>de R$ 29,90</s> &middot; preço especial de Black: R$ 19,99/mês por 12 meses, depois valor vigente com aviso prévio. 7 dias para desistir.</div>' +
     '<a href="#" style="display:block;text-align:center;font-size:12px;color:var(--g);margin-top:8px" onclick="var d=document.getElementById(\'plano-detalhes\');d.style.display=d.style.display===\'none\'?\'block\':\'none\';return false;">detalhes</a>' +
     '<div id="plano-detalhes" style="display:none;margin-top:8px">' + "<table style=\"width:100%;border-collapse:collapse;font-size:12px\"><tr><th style=\"text-align:left;padding:6px 4px\"></th><th style=\"padding:6px 4px\">Free</th><th style=\"padding:6px 4px;color:var(--g)\">VIP</th></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Treinos personalizados</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">1 por mês</td><td style=\"padding:6px 4px;text-align:center\">Até 10 por mês</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Ajuste inteligente</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não incluído</td><td style=\"padding:6px 4px;text-align:center\">Até 30 por mês</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Vídeos explicativos</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Sim</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Histórico e evolução</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Últimos 3 registros</td><td style=\"padding:6px 4px;text-align:center\">Completo, com gráfico</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Novidades em primeira mão</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Valor</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Grátis</td><td style=\"padding:6px 4px;text-align:center\">Black: R$ 19,99/mês por 12 meses</td></tr></table>" + '</div>' +
     '</div>';
@@ -3710,7 +3710,7 @@ async function subscribePush() {
     if (!VAPID_PUBLIC_KEY) return;
     if (Notification.permission === 'denied') return;
     var perm = Notification.permission;
-    if (perm === 'default' && !/iPad|iPhone|iPod/.test(navigator.userAgent)) { perm = await Notification.requestPermission(); }
+    if (perm === 'default' && !/iPad|iPhone|iPod/.test(navigator.userAgent) && localStorage.getItem('tbf_pode_push') === '1') { perm = await Notification.requestPermission(); }
     if (perm !== 'granted') return;
     var reg = await navigator.serviceWorker.ready;
     var sub = await reg.pushManager.getSubscription();
