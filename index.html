@@ -337,6 +337,19 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .bottom-nav .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;cursor:pointer}
 .bottom-nav .nav-item .nav-ico{font-size:20px}
 .bottom-nav .nav-item.active{color:var(--g)}
+@media (max-width: 600px) {
+#ex-area table { min-width: 0; }
+#ex-area thead { display: none; }
+#ex-area tr { display: block; border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 10px; }
+#ex-area td { display: block; padding: 3px 0; border: none; }
+#ex-area td:nth-child(2)::before { content: 'Método: '; color: var(--muted); }
+#ex-area td:nth-child(3)::before { content: 'Séries: '; color: var(--muted); }
+#ex-area td:nth-child(4)::before { content: 'Reps: '; color: var(--muted); }
+#ex-area td:nth-child(5)::before { content: 'Descanso: '; color: var(--muted); }
+#ex-area td:nth-child(6) { display: flex; gap: 8px; align-items: center; }
+#ex-area td:nth-child(6)::before { content: 'Carga: '; color: var(--muted); }
+#ex-area td:nth-child(6) input { flex: 1; min-width: 0; width: auto; }
+}
 </style>
 </head>
 <body>
@@ -1179,7 +1192,7 @@ async function renderPlanosEntrada() {
             ['Novidades em primeira mão', 'Não', 'Sim'],
       ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês por 12 meses']
     ];
-    cmpEl.innerHTML = '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
+    cmpEl.innerHTML = '<div style="margin-top:18px;padding:14px;border:1px solid var(--g);border-radius:14px"><div style="font-size:15px;font-weight:800;text-align:center;margin-bottom:8px">Por que ser VIP</div><div style="font-size:14px;line-height:1.6">&#10003; <b>Ajuste inteligente:</b> peça mudanças e o treino é reformulado<br>&#10003; <b>Mais treinos:</b> gere novos programas quando precisar<br>&#10003; <b>Evolução completa:</b> histórico inteiro e gráfico das suas cargas</div><div style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center">Menos de R$ 0,70 por dia. Oferta Black válida até 30/11/2026. 7 dias para desistir: não gostou, devolvemos.</div></div>' + '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
       '<table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
       rows.map(function(r) { return '<tr><td style="' + cs + 'color:var(--muted)">' + r[0] + '</td><td style="' + cs + 'text-align:center">' + r[1] + '</td><td style="' + cs + 'text-align:center;font-weight:700">' + r[2] + '</td></tr>'; }).join('') +
       '</table>';
@@ -2078,14 +2091,15 @@ function renderWorkout(wk) {
     }
   }
 
+  var __wi0 = 0; try { if (wkCreatedAt) __wi0 = Math.max(0, Math.min(semanas.length - 1, Math.floor((Date.now() - new Date(wkCreatedAt).getTime()) / (7 * 86400000)))); } catch (e) {} if (isNaN(__wi0)) __wi0 = 0;
   var tabHtml = '';
   semanas.forEach(function(s, i) {
     var lbl = 'Sem ' + (s.semana || i + 1);
     if (s.fase) lbl += ' ' + s.fase;
-    tabHtml += '<div class="tab' + (i === 0 ? ' active' : '') + '" data-wi="' + i + '">' + lbl + '</div>';
+    tabHtml += '<div class="tab' + (i === __wi0 ? ' active' : '') + '" data-wi="' + i + '">' + lbl + '</div>';
   });
   document.getElementById('week-tabs').innerHTML = tabHtml;
-  renderWeek(semanas, 0);
+  renderWeek(semanas, __wi0); abrirDiaAtual(semanas, __wi0);
 
   document.getElementById('week-tabs').querySelectorAll('.tab').forEach(function(t) {
     t.addEventListener('click', function() {
@@ -2098,6 +2112,19 @@ function renderWorkout(wk) {
   show('workout');
 }
 
+async function abrirDiaAtual(semanas, wi) {
+  try {
+    if (!user || !wkId) return;
+    var sessoes = (semanas[wi] || {}).sessoes || []; if (sessoes.length < 2) return;
+    var r = await sb.from('logs_execucao').select('dia_nome').eq('user_id', user.id).eq('workout_id', wkId).eq('semana', wi + 1);
+    if (r.error || !r.data) return;
+    var feitos = {}; r.data.forEach(function(x) { feitos[x.dia_nome || ''] = true; });
+    for (var i = 0; i < sessoes.length; i++) {
+      var s = sessoes[i] || {}; var nome = s.foco || s.nome || s.dia || '';
+      if (!feitos[nome]) { if (i > 0) { var tabs = document.querySelectorAll('#day-tabs .tab'); if (tabs[i]) tabs[i].click(); } return; }
+    }
+  } catch (e) {}
+}
 function renderWeek(semanas, wi) {
   var s = semanas[wi] || {};
   var sessoes = s.sessoes || [];
