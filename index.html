@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="TrainingOS">
+<meta name="apple-mobile-web-app-title" content="To Be Fitness">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="icon" type="image/png" href="./icon-192.png">
@@ -344,7 +344,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 <!-- ===== AUTH ===== -->
 <div id="screen-auth" class="screen active">
   <div class="auth-logo"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
-  <div class="auth-sub">Periodizacao TBF</div>
+  <div class="auth-sub">Periodização TBF</div>
   <div id="conv-welcome" style="display:none;text-align:center;margin:0 auto 14px;max-width:340px;padding:12px 14px;border:1px solid var(--g);border-radius:14px;background:rgba(76,175,80,.08)"></div>
   <div class="auth-box">
     <div class="tab-auth">
@@ -355,7 +355,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div id="auth-form-fields">
     <div id="auth-msg"></div>
     <div class="fg"><label>Email</label><input type="email" id="a-email" placeholder="seu@email.com"></div>
-    <div class="fg"><label>Senha</label><input type="password" id="a-pass" placeholder="Minimo 6 caracteres" onkeydown="if(event.key==='Enter')doAuth()"></div>
+    <div class="fg"><label>Senha</label><input type="password" id="a-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doAuth()"></div>
     <div id="a-terms-row" style="display:none;margin:2px 0 12px;font-size:12px;color:var(--muted);line-height:1.45"><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" id="a-terms" style="margin-top:2px"><span>Li e aceito os <a href="termos.html" target="_blank" style="color:var(--g)">Termos de Uso</a>, incluindo as regras de cobrança e cancelamento.</span></label></div>
     <div id="link-esqueci-senha" style="text-align:right;margin:-8px 0 14px"><a href="javascript:void(0)" onclick="abrirEsqueciSenha()" style="color:var(--muted);font-size:13px;text-decoration:underline">Esqueci minha senha</a></div>
 <button class="btn btn-p" id="auth-btn" onclick="doAuth()">Entrar</button>
@@ -383,7 +383,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div id="plano-msg" style="display:none"></div>
     </div>
     <div class="card">
-      <div class="ctitle">Perfil do Atleta</div><div style="margin:-4px 0 12px"><a href="javascript:void(0)" onclick="goDicas()" style="color:var(--accent, #6BA83A);font-size:15px;text-decoration:underline;cursor:pointer">Duvidas? Toque aqui para ver explicacoes</a></div>
+      <div class="ctitle">Perfil do aluno</div><div style="margin:-4px 0 12px"><a href="javascript:void(0)" onclick="goDicas()" style="color:var(--accent, #6BA83A);font-size:15px;text-decoration:underline;cursor:pointer">Duvidas? Toque aqui para ver explicacoes</a></div>
       <div id="p-msg"></div>
       <div class="fg"><label>Nome</label><input type="text" id="p-name" placeholder="Nome completo"></div>
       <div class="frow">
@@ -413,7 +413,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
           </select>
         </div>
         <div class="fg">
-          <label>Nivel</label>
+          <label>Nível</label>
           <select id="p-level">
             <option>Iniciante</option>
             <option>Intermediario</option>
@@ -432,7 +432,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
           </select>
         </div>
         <div class="fg">
-          <label>Duracao</label>
+          <label>Duração de cada treino (semanas)</label>
           <select id="p-dur">
             <option value="4">4 semanas</option>
             <option value="6">6 semanas</option>
@@ -449,7 +449,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
         <textarea id="p-mat" placeholder="Ex: halteres, barra, maquinas, el&aacute;sticos, etc."></textarea>
       </div>
       <div class="fg">
-        <label>Dores / Lesoes / Restricoes</label>
+        <label>Dores / Lesões / Restrições</label>
         <textarea id="p-rest" placeholder="Ex: dor no joelho, cirurgia lombar, etc."></textarea>
       </div>
       <button class="btn btn-p" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
@@ -510,7 +510,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 </div>
 
 <div class="list-row" onclick="irSuporte()">
-<div class="list-row-txt">Fale com o Treinador</div>
+<div class="list-row-txt">Suporte</div>
 <div class="row-chev">&#8250;</div>
 </div>
 </div>
@@ -532,7 +532,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
   <div class="cnt">
     <div id="gami-card" class="card" style="margin-top:18px">
-      <div class="ctitle">Sua Consistencia</div>
+      <div class="ctitle">Sua Consistência</div>
       <div class="gami-stats">
         <div class="gami-stat"><div class="gami-num" id="gami-streak">0</div><div class="gami-lbl">dias seguidos</div></div>
         <div class="gami-stat"><div class="gami-num" id="gami-total">0</div><div class="gami-lbl">dias treinados</div></div>
@@ -593,7 +593,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   </div>
   <div class="cnt">
     <div class="card" id="rc-card">
-      <div class="ctitle">Fale com o Treinador</div>
+      <div class="ctitle">Suporte</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Tem uma sugestao, feedback ou encontrou algum problema? Conte pra gente.</div>
       <div class="fg"><input type="text" id="rc-titulo" placeholder="Assunto"></div>
       <div class="fg"><textarea id="rc-msg" placeholder="Escreva sua sugestao ou feedback..."></textarea></div>
@@ -640,13 +640,13 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     </div>
 
     <div class="card" style="margin-top:16px">
-      <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Fale com o Thiago</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma altera&ccedil;&atilde;o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o treinador Thiago reformula pra voc&ecirc;.</div>
+      <div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Suporte</div>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Quer alguma altera&ccedil;&atilde;o nesse treino? Escreva o que quer ajustar (ex: "troca agachamento por leg press", "menos volume no dia de perna") e o app reformula pra voc&ecirc;.</div>
       <textarea id="ajuste-txt" placeholder="Escreva aqui o que voc&ecirc; quer ajustar..." style="width:100%;min-height:70px;background:var(--bg2,#111);color:#fff;border:1px solid #333;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:vertical"></textarea>
 <button type="button" class="btn btn-s" style="margin-top:8px" onclick="ditarVoz('ajuste-txt', this)">&#127908; Falar em vez de escrever</button>
-      <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste ao Thiago</button>
+      <button class="btn btn-p" style="margin-top:10px" onclick="pedirAjuste()" id="ajuste-btn">Pedir ajuste</button>
       <button class="btn btn-s" style="display:none" onclick="adminGerarNovoTreino()" id="admin-gen-new-btn">&#9889; Gerar treino totalmente novo (nao conta nos creditos do aluno)</button>
-      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Thiago est&aacute; reformulando... at&eacute; 2 minutos</div></div>
+      <div id="ajuste-loading" style="display:none;padding:14px 0" class="loading"><div class="spin"></div><div style="margin-top:8px;font-size:16px;color:#555">Reformulando seu treino com o m&eacute;todo TBF... at&eacute; 2 minutos</div></div>
       <div id="ajuste-err" style="display:none;margin-top:8px"></div>
     </div>
   </div>
@@ -658,7 +658,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="card" style="max-width:360px;margin-top:16px">
     <div style="font-size:40px;margin-bottom:10px">&#128683;</div>
     <div style="font-weight:900;font-size:17px;margin-bottom:8px">Conta bloqueada</div>
-    <div style="color:var(--muted);font-size:16px;line-height:1.6;margin-bottom:16px">Seu acesso foi temporariamente bloqueado pelo treinador. Entre em contato com o Thiago para mais informacoes.</div>
+    <div style="color:var(--muted);font-size:16px;line-height:1.6;margin-bottom:16px">Seu acesso foi temporariamente bloqueado pelo treinador. Entre em contato pelo e-mail contato2bfitness@gmail.com.</div>
     <button class="btn btn-s" onclick="doLogout()">Sair</button>
   </div>
 </div>
@@ -779,7 +779,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e registre</b><span>Abra o treino, assista aos videos e preencha carga, reps e RPE de cada exercicio. No final da tela, toque em "Registrar Treino" para salvar tudo de uma vez.</span></div></div>
     <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Acompanhe seu progresso</b><span>Na tela de Perfil, registre peso e fotos. Na tela inicial, veja sua sequencia de dias treinados.</span></div></div>
     <div class="ob-step"><div class="ob-num">5</div><div class="ob-txt"><b>Consulte a aba Dicas</b><span>O icone de lampada explica como usar o app e o significado de cada metodo de treino.</span></div></div>
-    <div class="ob-step"><div class="ob-num">6</div><div class="ob-txt"><b>Fale com o Thiago</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
+    <div class="ob-step"><div class="ob-num">6</div><div class="ob-txt"><b>Suporte</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
     <div class="ob-step"><div class="ob-num">7</div><div class="ob-txt"><b>Instale no celular</b><span>Toque no icone de celular no topo para adicionar o app na tela de inicio.</span></div></div>
     <button class="btn btn-p" onclick="closeOnboarding()">Vamos Comecar!</button>
   </div>
@@ -818,7 +818,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 <div class="modal">
 <div class="plano-nome" style="margin-bottom:10px">Defina sua nova senha</div>
 <div id="nova-senha-msg"></div>
-<div class="fg"><label>Nova senha</label><input type="password" id="nova-senha-1" placeholder="Minimo 6 caracteres"></div>
+<div class="fg"><label>Nova senha</label><input type="password" id="nova-senha-1" placeholder="Mínimo 6 caracteres"></div>
 <div class="fg"><label>Confirme a nova senha</label><input type="password" id="nova-senha-2" placeholder="Repita a senha"></div>
 <button class="btn btn-p" id="nova-senha-btn" style="width:100%" onclick="salvarNovaSenha()">Salvar nova senha</button>
 </div>
@@ -1013,7 +1013,7 @@ var DICAS_USO = [
   {ic:'&#9997;', t:'Registrar carga, reps e RPE', d:'Preencha carga, reps e RPE de cada exercicio e toque no botao "Registrar Treino" no final da tela para salvar tudo de uma vez. RPE e o esforco percebido de 1 a 10 (10 = falha total) e ajuda o Thiago a acompanhar sua evolucao.'},
   {ic:'&#128200;', t:'Acompanhar seu progresso', d:'Na tela de Perfil, registre seu peso e uma foto periodicamente. Um grafico mostra sua evolucao ao longo do tempo.'},
   {ic:'&#128293;', t:'Sua consistencia', d:'A tela inicial mostra sua sequencia de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
-  {ic:'&#128172;', t:'Pedir ajuste ao Thiago', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
+  {ic:'&#128172;', t:'Pedir ajuste', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
   {ic:'&#128241;', t:'Instalar no celular', d:'Toque no icone de celular no topo da tela inicial para adicionar o TO BE FITNESS na tela de inicio, como um aplicativo.'},
   {ic:'&#128276;', t:'Mensagens do treinador', d:'Avisos e recados do Thiago aparecem automaticamente no topo da tela inicial.'}
 ];
@@ -1095,6 +1095,20 @@ window.addEventListener('beforeinstallprompt', function(e) {
   deferredInstall = e;
 });
 
+function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }
+function oferecerInstalacao() {
+  try {
+    if (isStandalone() || localStorage.getItem('tbf_install_ok') === '1') return;
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent)) { document.getElementById('install-banner').classList.add('show'); localStorage.setItem('tbf_install_ok', '1'); return; }
+    if (!deferredInstall || document.getElementById('install-android')) return;
+    var b = document.createElement('div'); b.id = 'install-android';
+    b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:1500;background:#1a1a1a;border:1px solid var(--g);border-radius:14px;padding:14px;text-align:center';
+    b.innerHTML = '<div style="font-weight:800;margin-bottom:4px">Leve seu treino no bolso</div><div style="font-size:14px;color:var(--muted);margin-bottom:10px">Abre na hora, mesmo com internet ruim na academia.</div><button class="btn btn-p" id="inst-go">Adicionar à tela inicial</button> <button class="btn btn-s" id="inst-no">Agora não</button>';
+    document.body.appendChild(b);
+    document.getElementById('inst-go').onclick = function() { b.remove(); try { deferredInstall.prompt(); } catch (e) {} deferredInstall = null; localStorage.setItem('tbf_install_ok', '1'); };
+    document.getElementById('inst-no').onclick = function() { b.remove(); };
+  } catch (e) {}
+}
 function showInstall() {
   document.getElementById('install-banner').classList.add('show');
   if (deferredInstall) {
@@ -1160,14 +1174,12 @@ async function renderPlanosEntrada() {
   if (pf && pv) {
     var cs = 'padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px;';
     var rows = [
-      ['Treinos personalizados', '1 a cada 2 meses', 'Até 5 a cada 2 meses'],
-      ['Ajuste do treinador', 'Não incluído', 'Até 10 a cada 2 meses'],
+      ['Treinos personalizados', '1 por mês', 'Até 10 por mês'],
+      ['Ajuste inteligente', 'Não incluído', 'Até 30 por mês'],
       ['Vídeos explicativos', 'Sim', 'Sim'],
-      ['Fale direto com o Thiago', 'Não incluído', 'Incluído'],
-      ['Histórico e evolução', 'Últimos 3 registros', 'Completo, com gráfico'],
-      ['Prioridade nos ajustes', 'Não', 'Sim'],
-      ['Novidades em primeira mão', 'Não', 'Sim'],
-      ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês']
+            ['Histórico e evolução', 'Últimos 3 registros', 'Completo, com gráfico'],
+            ['Novidades em primeira mão', 'Não', 'Sim'],
+      ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês por 12 meses']
     ];
     cmpEl.innerHTML = '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
       '<table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
@@ -1186,8 +1198,8 @@ function verDetalhesPlano(id) {
   det += '<li>' + (p.alteracoes_max ? ('Ate ' + p.alteracoes_max + ' ajuste' + (p.alteracoes_max === 1 ? '' : 's') + ' a cada ' + p.alteracoes_periodo_dias + ' dias') : 'Sem ajustes inclusos') + '</li>';
   var extras = {
     free: ['Treino personalizado ao seu objetivo', 'Vídeos explicativos', 'Registro de peso e fotos (últimos 3)'],
-    fit: ['Treino de acordo com seu objetivo, criado por um treinador', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos', 'Fale com o treinador'],
-    vip: ['Treino de acordo com seu objetivo, criado por um treinador', 'Até 5 treinos a cada 2 meses', 'Até 10 ajustes do treinador a cada 2 meses', 'Fale direto com o Thiago', 'Prioridade nos ajustes', 'Histórico completo e gráfico de evolução', 'Novidades em primeira mão']
+    fit: ['Treino montado com o método de um personal com 10 anos de prática', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos'],
+    vip: ['Treino montado com o método de um personal com 10 anos de prática', 'Até 10 treinos por mês', 'Até 30 ajustes inteligentes por mês', 'Histórico completo e gráfico de evolução', 'Novidades em primeira mão']
   };
   (extras[p.id] || []).forEach(function(b) { det += '<li>' + b + '</li>'; });
   det += '</ul>';
@@ -1490,7 +1502,7 @@ function renderHomeProfile() {
     badge(p.nivel) + badge(p.objetivo) +
     '</div>';
   if (p.restricoes) {
-    el.innerHTML += '<div style="margin-top:10px;font-size:16px;color:#ff8a65"><strong>Restricoes:</strong> ' + p.restricoes + '</div>';
+    el.innerHTML += '<div style="margin-top:10px;font-size:16px;color:#ff8a65"><strong>Restrições:</strong> ' + p.restricoes + '</div>';
   }
   if (p.materiais) {
     el.innerHTML += '<div style="margin-top:6px;font-size:16px;color:#aaa"><strong>Materiais:</strong> ' + p.materiais + '</div>';
@@ -1517,8 +1529,8 @@ function badge(txt) {
 // === WORKOUTS LIST ===
 var TUT_STEPS = [
   { title: 'Novidades no TO BE FITNESS', text: 'Renovamos o aplicativo pra deixar sua experiencia mais simples e rapida. Vamos te mostrar rapidinho o que mudou.' },
-  { title: 'Nova tela inicial', text: 'A Home ficou mais limpa: um menu direto pra Treino Personalizado, Meus Resultados, Perfil, Minha Evolucao e Fale com o Treinador.' },
-  { title: 'Fale com o Treinador', text: 'O antigo Suporte agora se chama Fale com o Treinador, com uma tela propria pra voce enviar sua mensagem.' },
+  { title: 'Nova tela inicial', text: 'A Home ficou mais limpa: um menu direto pra Treino Personalizado, Meus Resultados, Perfil, Minha Evolucao e Suporte.' },
+  { title: 'Suporte', text: 'O antigo Suporte agora se chama Suporte, com uma tela propria pra voce enviar sua mensagem.' },
   { title: 'Historico do treino', text: 'Na tela de Treino Personalizado, toque em qualquer treino do historico pra ver os exercicios na hora, sem sair da lista.' },
   { title: 'Resultados e Evolucao', text: 'Sua consistencia e seu progresso de peso e fotos agora tem telas proprias, mais faceis de acompanhar.' }
 ];
@@ -1649,7 +1661,7 @@ if (window.__latestWorkoutId) { openWorkout(window.__latestWorkoutId); }
 else { generateWorkout(); }
 }
 // REGRA DE PLANOS (vale para quem se cadastra a partir de 19/10/2026, 00h, horario de Brasilia):
-// - Free novo NAO tem chat direto com o Thiago (Fale com o Treinador), historico completo/grafico de evolucao nem novidades em primeira mao (exclusivos do VIP).
+// - Free novo NAO tem chat direto com o Thiago (Suporte), historico completo/grafico de evolucao nem novidades em primeira mao (exclusivos do VIP).
 // - Contas criadas ANTES de 19/10/2026 (legado) mantem esses recursos. A mesma data de corte esta no banco: funcao public.can_direct_chat() (RLS de reclamacoes).
 // - Fit e VIP sempre tem acesso. Para mudar a data de corte, altere aqui E na funcao SQL.
 function podeVip() {
@@ -1665,8 +1677,8 @@ function aplicarGateSuporte() {
   var c = document.getElementById('rc-card');
   if (!c) return;
   if (!c.getAttribute('data-orig')) c.setAttribute('data-orig', c.innerHTML);
-  if (podeVip()) { if (c.getAttribute('data-locked') === '1') { c.innerHTML = c.getAttribute('data-orig'); c.setAttribute('data-locked', '0'); } return; }
-  c.innerHTML = '<div class="ctitle">Fale com o Treinador</div>' + bannerVip('A mensagem direta com o Thiago, com prioridade de resposta, é exclusiva do plano VIP.');
+  if (true) { if (c.getAttribute('data-locked') === '1') { c.innerHTML = c.getAttribute('data-orig'); c.setAttribute('data-locked', '0'); } return; }
+  c.innerHTML = '<div class="ctitle">Suporte</div>' + bannerVip('A mensagem direta com o Thiago, com prioridade de resposta, é exclusiva do plano VIP.');
   c.setAttribute('data-locked', '1');
 }
 async function irNovidades() {
@@ -1896,6 +1908,7 @@ function confirmTreinoAnswer(yes) {
 }
 
 async function generateWorkoutRun(isAuto) {
+  try { if (profile) show('workout'); } catch (e) {}
   if (!profile) { if (!isAuto) { alert('Configure seu perfil primeiro.'); goProfile(); } return; }
 
   document.getElementById('gen-wrap').style.display = 'none';
@@ -2002,7 +2015,7 @@ async function openWorkout(id) {
   if (typeof d === 'string') d = JSON.parse(d);
   wkData = d;
   renderWorkout(d);
-  showToast(pickRandom(MOTIV_ABRIR), '&#128293;');
+  if (!window.__motivVisto) { window.__motivVisto = 1; showToast(pickRandom(MOTIV_ABRIR), '&#128293;'); }
 }
 
 // === RENDER ===
@@ -2013,6 +2026,7 @@ function showMetodoInfo(nome) {
   alert(info.n + "\n\n" + (info.desc || "") + (info.obs ? "\n\nObs: " + info.obs : "") + "\n\nSeries: " + (info.sr || "-") + " | Descanso: " + (info.rest || "-") + " | Nivel: " + (info.niv || "-"));
 }
 function renderWorkout(wk) {
+  try { if (!window.__instOff) { window.__instOff = 1; setTimeout(oferecerInstalacao, 2500); } } catch (e) {}
   var wd = document.getElementById('workout-detail');
   if (wd) wd.style.display = 'block';
   var hdr = document.getElementById('w-header');
@@ -2217,8 +2231,7 @@ async function registrarTreinoCompleto() {
       exercicio_nome: decodeURIComponent(inp.dataset.ex),
       peso: isNaN(peso) ? null : peso,
       reps: isNaN(reps) ? null : reps,
-      rpe: isNaN(rpe) ? null : rpe
-    });
+      rpe: isNaN(rpe) ? null : rpe, data: ymdLocal(new Date()) });
   });
 
   if (!rows.length) { showMsg('reg-treino-out', 'Preencha ao menos um exercicio (kg, reps ou RPE) antes de registrar.'); return; }
@@ -2242,6 +2255,7 @@ async function registrarTreinoCompleto() {
 }
 
 // === GAMIFICACAO LEVE ===
+function ymdLocal(dt) { var m = dt.getMonth() + 1, da = dt.getDate(); return dt.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (da < 10 ? '0' : '') + da; }
 async function refreshGamificacao() {
   if (!user) return;
   var card = document.getElementById('gami-card');
@@ -2255,10 +2269,10 @@ async function refreshGamificacao() {
 
     var cursor = new Date();
     cursor.setHours(0, 0, 0, 0);
-    var todayStr = cursor.toISOString().slice(0, 10);
+    var todayStr = ymdLocal(cursor);
     if (!diasSet[todayStr]) cursor.setDate(cursor.getDate() - 1);
     var streak = 0;
-    while (diasSet[cursor.toISOString().slice(0, 10)]) {
+    while (diasSet[ymdLocal(cursor)]) {
       streak++;
       cursor.setDate(cursor.getDate() - 1);
     }
@@ -2272,14 +2286,14 @@ async function refreshGamificacao() {
 // === PROGRESSO: PESO E FOTOS ===
 function initProgDate() {
   var el = document.getElementById('prog-data');
-  if (el && !el.value) el.value = new Date().toISOString().slice(0, 10);
+  if (el && !el.value) el.value = ymdLocal(new Date());
 }
 
 async function salvarProgresso() {
   if (!user) return;
   var pesoVal = parseFloat(document.getElementById('prog-peso').value);
   var peso = isNaN(pesoVal) ? null : pesoVal;
-  var data = document.getElementById('prog-data').value || new Date().toISOString().slice(0, 10);
+  var data = document.getElementById('prog-data').value || ymdLocal(new Date());
   var fileInput = document.getElementById('prog-foto');
   var file = fileInput.files && fileInput.files[0];
   if (!peso && !file) { showMsg('prog-out', 'Informe ao menos o peso ou uma foto.'); return; }
@@ -2370,13 +2384,13 @@ function renderPlanoCard() {
   if (!el || !profile) return;
   var pid = profile.plano_treino;
   var nomes = { free: 'Free', fit: 'Fit', vip: 'VIP' };
-  el.innerHTML = pid ? ('Plano ' + (nomes[pid] || pid) + ' ativo') : 'Sem plano de assinatura';
+  el.innerHTML = pid ? ('Plano ' + (nomes[pid] || pid) + ' ativo') : 'Plano Free';
   if (out) out.innerHTML =
     '<div style="margin-top:8px">' +
     '<button class="btn ' + (pid === 'vip' ? 'btn-p' : '') + '" style="width:100%" onclick="assinarPlano(\'vip\')" ' + (pid === 'vip' ? 'disabled' : '') + '>Assinar VIP - Oferta Black R$19,99/mês</button>' +
     '<div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center"><s>de R$ 29,90</s> &middot; preço especial de Black, vagas limitadas</div>' +
     '<a href="#" style="display:block;text-align:center;font-size:12px;color:var(--g);margin-top:8px" onclick="var d=document.getElementById(\'plano-detalhes\');d.style.display=d.style.display===\'none\'?\'block\':\'none\';return false;">detalhes</a>' +
-    '<div id="plano-detalhes" style="display:none;margin-top:8px">' + "<table style=\"width:100%;border-collapse:collapse;font-size:12px\"><tr><th style=\"text-align:left;padding:6px 4px\"></th><th style=\"padding:6px 4px\">Free</th><th style=\"padding:6px 4px;color:var(--g)\">VIP</th></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Treinos personalizados</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">1 a cada 2 meses</td><td style=\"padding:6px 4px;text-align:center\">Até 5 a cada 2 meses</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Ajuste do treinador</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não incluído</td><td style=\"padding:6px 4px;text-align:center\">Até 10 a cada 2 meses</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Vídeos explicativos</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Sim</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Fale direto com o Thiago</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não incluído</td><td style=\"padding:6px 4px;text-align:center\">Incluído</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Histórico e evolução</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Últimos 3 registros</td><td style=\"padding:6px 4px;text-align:center\">Completo, com gráfico</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Prioridade nos ajustes</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Novidades em primeira mão</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Valor</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Grátis</td><td style=\"padding:6px 4px;text-align:center\">Black: R$ 19,99/mês</td></tr></table>" + '</div>' +
+    '<div id="plano-detalhes" style="display:none;margin-top:8px">' + "<table style=\"width:100%;border-collapse:collapse;font-size:12px\"><tr><th style=\"text-align:left;padding:6px 4px\"></th><th style=\"padding:6px 4px\">Free</th><th style=\"padding:6px 4px;color:var(--g)\">VIP</th></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Treinos personalizados</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">1 por mês</td><td style=\"padding:6px 4px;text-align:center\">Até 10 por mês</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Ajuste inteligente</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não incluído</td><td style=\"padding:6px 4px;text-align:center\">Até 30 por mês</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Vídeos explicativos</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Sim</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Histórico e evolução</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Últimos 3 registros</td><td style=\"padding:6px 4px;text-align:center\">Completo, com gráfico</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Novidades em primeira mão</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Valor</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Grátis</td><td style=\"padding:6px 4px;text-align:center\">Black: R$ 19,99/mês por 12 meses</td></tr></table>" + '</div>' +
     '</div>';
 }
 
@@ -2636,8 +2650,8 @@ async function pedirAjuste() {
     wkData = workout;
     document.getElementById('ajuste-txt').value = '';
     renderWorkout(workout);
-    sb.functions.invoke('send-push', { body: { target: 'user', user_id: (adminViewMode ? adminAlunoId : user.id), title: 'Treino atualizado', body: 'Seu treino foi ajustado pelo Thiago. Toque para ver.' } }).catch(function(){});
-    showMsg('ajuste-err', adminViewMode ? 'Ajuste aplicado! (nao contou nos creditos do aluno)' : 'Treino ajustado pelo Thiago!', 'ok');
+    sb.functions.invoke('send-push', { body: { target: 'user', user_id: (adminViewMode ? adminAlunoId : user.id), title: 'Treino atualizado', body: 'Seu treino foi ajustado. Toque para ver.' } }).catch(function(){});
+    showMsg('ajuste-err', adminViewMode ? 'Ajuste aplicado! (nao contou nos creditos do aluno)' : 'Treino ajustado!', 'ok');
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
@@ -2729,8 +2743,8 @@ async function fazerMudancasTreino() {
     wkData = workout;
     document.getElementById('mud-txt').value = '';
     renderWorkout(workout);
-    sb.functions.invoke('send-push', { body: { target: 'user', user_id: (adminViewMode ? adminAlunoId : user.id), title: 'Treino atualizado', body: 'Seu treino foi ajustado pelo Thiago. Toque para ver.' } }).catch(function(){});
-    showMsg('mud-err', adminViewMode ? 'Ajuste aplicado! (nao contou nos creditos do aluno)' : 'Treino ajustado pelo Thiago!', 'ok');
+    sb.functions.invoke('send-push', { body: { target: 'user', user_id: (adminViewMode ? adminAlunoId : user.id), title: 'Treino atualizado', body: 'Seu treino foi ajustado. Toque para ver.' } }).catch(function(){});
+    showMsg('mud-err', adminViewMode ? 'Ajuste aplicado! (nao contou nos creditos do aluno)' : 'Treino ajustado!', 'ok');
     if (!adminViewMode) updateQuotaInfo();
 
   } catch(e) {
@@ -3170,7 +3184,7 @@ function admCardHtml(a) {
   var nome = a.nome || 'Sem nome';
   var isBlocked = !!a.bloqueado;
   var plano = a.plano_treino || '';
-  var planoLbl = plano ? plano.toUpperCase() : 'SEM PLANO';
+  var planoLbl = plano ? plano.toUpperCase() : 'FREE';
   var status = isBlocked ? '<span class="al-b bad">Bloqueado</span>' : (a.__ativo ? '<span class="al-b ok">Ativo</span>' : '<span class="al-b warn">Inativo</span>');
   var tr;
   if (a.__validDias === null) tr = '<span class="al-b mute">Sem treino</span>';
