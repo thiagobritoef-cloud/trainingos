@@ -776,14 +776,10 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="modal">
     <div class="auth-logo" style="margin-bottom:18px"><b class="lg-to">TO</b><b class="lg-be">BE</b><small>FITNESS</small></div>
     <div class="ctitle">Bem-vindo(a)!</div>
-    <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Preencha seu perfil</b><span>Idade, peso, altura, objetivo e dias disponiveis - isso guia todo o seu treino.</span></div></div>
-    <div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Gere seu treino</b><span>Toque em "Gerar Novo Treino" na tela inicial. Em ~30 segundos seu programa fica pronto.</span></div></div>
-    <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Treine e registre</b><span>Abra o treino, assista aos videos e preencha carga, reps e RPE de cada exercicio. No final da tela, toque em "Registrar Treino" para salvar tudo de uma vez.</span></div></div>
-    <div class="ob-step"><div class="ob-num">4</div><div class="ob-txt"><b>Acompanhe seu progresso</b><span>Na tela de Perfil, registre peso e fotos. Na tela inicial, veja sua sequencia de dias treinados.</span></div></div>
-    <div class="ob-step"><div class="ob-num">5</div><div class="ob-txt"><b>Consulte a aba Dicas</b><span>O icone de lampada explica como usar o app e o significado de cada metodo de treino.</span></div></div>
-    <div class="ob-step"><div class="ob-num">6</div><div class="ob-txt"><b>Suporte</b><span>Quer ajustar algo no treino? Escreva o pedido direto na tela do treino.</span></div></div>
-    <div class="ob-step"><div class="ob-num">7</div><div class="ob-txt"><b>Instale no celular</b><span>Toque no icone de celular no topo para adicionar o app na tela de inicio.</span></div></div>
-    <button class="btn btn-p" onclick="closeOnboarding()">Vamos Comecar!</button>
+<div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Método de um personal com 10 anos de prática</b><span>Preencha seu perfil e gere seu treino em cerca de 30 segundos.</span></div></div>
+<div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Registre suas cargas</b><span>Anote kg, repetições e esforço em cada exercício e acompanhe sua evolução e sua sequência de treinos.</span></div></div>
+<div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Ajuste inteligente (VIP)</b><span>Peça mudanças e o app reformula o treino para você, sem perder o seu ritmo.</span></div></div>
+<button class="btn btn-p" onclick="closeOnboarding()">Vamos Comecar!</button>
   </div>
 </div>
 
@@ -837,7 +833,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <button class="btn btn-p" onclick="closeInstall()">Entendi</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"></script>
 <script>
 // === CONFIG ===
 var SB_URL = 'https://uvqtiikeleadvecnuven.supabase.co';
@@ -1446,6 +1442,9 @@ function setVal(id, val) {
 
 async function saveProfile() {
   if (!user) return;
+  var __n = document.getElementById('p-name').value.trim(); var __a = parseInt(document.getElementById('p-age').value);
+  if (!__n || !__a) { showMsg('p-msg', 'Preencha nome e idade.'); return; }
+  if (__a < 18) { showMsg('p-msg', 'O app é para maiores de 18 anos.'); return; }
   var btn = document.getElementById('p-save-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   showMsg('p-msg', '');
@@ -1483,9 +1482,7 @@ async function saveProfile() {
 
   if (res.error) { showMsg('p-msg', res.error.message); return; }
 
-  profile = Object.assign({}, data);
-  showMsg('p-msg', 'Perfil salvo!', 'ok');
-  setTimeout(function() { renderHomeProfile(); goHome(); }, 900);
+  profile = Object.assign({}, profile || {}, data); showMsg('p-msg', 'Perfil salvo!', 'ok'); setTimeout(function() { renderHomeProfile(); goHome(); }, 900); if (!profile.onboarding_visto) setTimeout(showOnboarding, 1600);
 }
 
 function renderHomeProfile() {
@@ -1540,6 +1537,7 @@ var tutStep = 0;
 var TUT_VERSION = 'v3';
 
 function maybeShowTutorial() {
+  if (profile && !profile.onboarding_visto) { try { localStorage.setItem('tobe_tutorial_' + TUT_VERSION + '_seen', '1'); } catch (e) {} return; }
   try {
     if (localStorage.getItem('tobe_tutorial_' + TUT_VERSION + '_seen')) return;
   } catch (e) {}
@@ -1644,8 +1642,8 @@ var num = total - i;
 var d = new Date(w.created_at).toLocaleDateString('pt-BR');
 html += '<div class="wi" data-id="' + w.id + '">' +
 '<div class="wi-num">Treino ' + num + '</div>' +
-'<div class="wi-name">' + (w.nome || 'Programa') + '</div>' +
-'<div class="wi-meta">' + (w.dividir || '') + (w.dividir ? ' &bull; ' : '') + d + '</div>' +
+'<div class="wi-name">' + escChat(w.nome || 'Programa') + '</div>' +
+'<div class="wi-meta">' + escChat(w.dividir || '') + (w.dividir ? ' &bull; ' : '') + d + '</div>' +
 '<div class="wi-arrow">&#9662;</div>' +
 '</div>';
 });
@@ -1804,7 +1802,7 @@ function checkAutoGenerate(latest) {
   if (new Date() >= fim) {
     var adiada = (profile && profile.troca_adiada_ate) ? new Date(profile.troca_adiada_ate) : null;
     if (adiada && new Date() < adiada) return;
-    if (adiada) { limparAdiamentoTroca(); generateWorkout(true); return; }
+    if (adiada) { limparAdiamentoTroca(); mostrarAvisoTroca(); return; }
     mostrarAvisoTroca();
   }
 }
@@ -2027,7 +2025,33 @@ function showMetodoInfo(nome) {
   if (!info) { alert("Metodo: " + nome); return; }
   alert(info.n + "\n\n" + (info.desc || "") + (info.obs ? "\n\nObs: " + info.obs : "") + "\n\nSeries: " + (info.sr || "-") + " | Descanso: " + (info.rest || "-") + " | Nivel: " + (info.niv || "-"));
 }
+function safeTxt(s) { return String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function sanitizeProg(o) {
+  if (Array.isArray(o)) { o.forEach(function(x, i) { if (typeof x === 'string') o[i] = safeTxt(x); else sanitizeProg(x); }); return o; }
+  if (o && typeof o === 'object') {
+    Object.keys(o).forEach(function(k) {
+      var v = o[k];
+      if (typeof v === 'string') {
+        if (/video_url$/.test(k)) o[k] = /^https?:\/\//i.test(v) ? v.replace(/"/g, '%22').replace(/'/g, '%27').replace(/</g, '%3C').replace(/>/g, '%3E') : '';
+        else o[k] = safeTxt(v);
+      } else if (v && typeof v === 'object') sanitizeProg(v);
+    });
+  }
+  return o;
+}
+function aplicarGateAjusteForms() {
+  try {
+    if (!profile || profile.is_admin || profile.plano_treino === 'vip' || profile.plano_treino === 'fit') return;
+    ['mud-txt', 'ajuste-txt'].forEach(function(id) {
+      var t = document.getElementById(id); if (!t) return;
+      var card = t.closest('.card') || t.parentElement; if (!card) return;
+      card.innerHTML = bannerVip('O ajuste inteligente do treino é exclusivo do plano VIP.');
+    });
+  } catch (e) {}
+}
 function renderWorkout(wk) {
+  try { sanitizeProg(wk); } catch (e) {}
+  setTimeout(aplicarGateAjusteForms, 0);
   try { if (!window.__instOff) { window.__instOff = 1; setTimeout(oferecerInstalacao, 2500); } } catch (e) {}
   var wd = document.getElementById('workout-detail');
   if (wd) wd.style.display = 'block';
