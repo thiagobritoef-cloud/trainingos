@@ -2298,7 +2298,7 @@ async function registrarTreinoCompleto() {
   btn.disabled = true; btn.textContent = 'Salvando...';
   showMsg('reg-treino-out', '');
 
-  var res = await sb.from('logs_execucao').insert(rows);
+  var res; if (navigator.onLine === false) { res = { error: { offline: true } }; } else { try { res = await sb.from('logs_execucao').insert(rows); } catch (eN) { res = { error: { message: 'network', offline: true } }; } } if (res.error && (res.error.offline || /fetch|network|Failed/i.test(res.error.message || ''))) { filaOffline(rows); res = { error: null }; }
   btn.disabled = false; btn.textContent = '\u2713 Registrar Treino';
 
   if (res.error) { showMsg('reg-treino-out', res.error.message); return; }
@@ -3792,7 +3792,18 @@ async function subscribePush() {
 }
 
 // === INIT ===
-async function init() {
+
+function offSnap(wk){try{if(!user||!wkId||window.__offMode)return;var p=Object.assign({},profile||{});delete p.restricoes;localStorage.setItem('tos_off',JSON.stringify({user:{id:user.id,email:user.email},profile:p,wk:{id:wkId,programa:wk,created_at:wkCreatedAt,sequencia:wkSequencia},cargas:ultimasCargas,hist:window.__hist||{}}))}catch(e){}}
+function offBar(txt,showBtn){var b=document.getElementById('off-bar');if(!b){b=document.createElement('div');b.id='off-bar';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:1400;background:#b26a00;color:#fff;font-size:13px;font-weight:700;padding:max(6px,env(safe-area-inset-top)) 12px 6px;text-align:center;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap';document.body.appendChild(b)}b.innerHTML='<span>'+txt+'</span>'+(showBtn?'<button type="button" onclick="location.reload()" style="background:#fff;color:#000;border:0;border-radius:8px;padding:6px 12px;font-weight:800;min-height:32px">Tentar de novo</button>':'');b.style.display='flex'}
+function offBarHide(){var b=document.getElementById('off-bar');if(b)b.style.display='none'}
+function restoreOffline(){try{var raw=localStorage.getItem('tos_off');if(!raw)return false;var s=JSON.parse(raw);if(!s||!s.user||!s.wk||!s.wk.programa)return false;window.__offMode=true;user=s.user;profile=s.profile||{};isAdmin=false;wkId=s.wk.id;wkData=s.wk.programa;wkSequencia=s.wk.sequencia||1;wkCreatedAt=s.wk.created_at||null;ultimasCargas=s.cargas||{};window.__hist=s.hist||{};show('workout');renderWorkout(wkData);offBar('Sem internet. Seu \u00faltimo treino est\u00e1 dispon\u00edvel e os registros ser\u00e3o enviados ao reconectar.',true);return true}catch(e){return false}}
+function filaOffline(rows){try{var q=JSON.parse(localStorage.getItem('tos_q')||'[]');q=q.concat(rows);localStorage.setItem('tos_q',JSON.stringify(q));showToast('Sem internet: treino salvo no aparelho e sera enviado ao reconectar','')}catch(e){}}
+var __syncing=false;
+async function syncFila(){if(__syncing||!user||navigator.onLine===false||window.__offMode)return;var q;try{q=JSON.parse(localStorage.getItem('tos_q')||'[]')}catch(e){q=[]}if(!q.length)return;__syncing=true;try{var mine=q.filter(function(r){return r.user_id===user.id});var other=q.filter(function(r){return r.user_id!==user.id});if(!mine.length)return;var r=await sb.from('logs_execucao').insert(mine);if(!r.error){localStorage.setItem('tos_q',JSON.stringify(other));showToast('Registros offline enviados ('+mine.length+')','');try{refreshGamificacao();loadUltimasCargas()}catch(e){}}}catch(e){}finally{__syncing=false}}
+window.addEventListener('online',function(){offBarHide();if(window.__offMode){location.reload();return}syncFila()});
+window.addEventListener('offline',function(){if(!window.__offMode)offBar('Sem internet. Voc\u00ea pode treinar; os registros ser\u00e3o enviados ao reconectar.',false)});
+setInterval(function(){syncFila()},60000);
+async function init() { if (navigator.onLine === false && restoreOffline()) return;
   var __cp = new URLSearchParams(location.search);
   if (__cp.get('c') || __cp.get('convite')) window.__conviteToken = __cp.get('c') || __cp.get('convite');
   carregarConviteInfo();
@@ -3851,6 +3862,10 @@ function execPular(){var E=__ex;if(!E)return;if(E.i+1<E.items.length){E.i++;E.s=
 function execBeep(){try{var A=window.AudioContext||window.webkitAudioContext;var c=new A();var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.2;o.start();setTimeout(function(){o.stop();c.close()},350)}catch(e){}try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}}
 function execTick(){var E=__ex;if(!E)return;clearInterval(E.tm);var f=function(){var el=document.getElementById('eo-t');if(!el||E.mode!=='rest'){clearInterval(E.tm);return}var left=Math.ceil((E.end-Date.now())/1000);if(left<=0){clearInterval(E.tm);execBeep();execAvancar();return}el.textContent=Math.floor(left/60)+':'+('0'+(left%60)).slice(-2)};f();E.tm=setInterval(f,250)}
 function execFinalizar(){var E=__ex;if(!E)return;var di=E.di,wi=E.wi,n=0;E.items.forEach(function(it){if(!it.sets.length)return;var best=it.sets.reduce(function(a,b){return(b.peso>a.peso||(b.peso===a.peso&&b.reps>a.reps))?b:a});var key='w'+wi+'d'+di+'e'+it.ei;var area=document.getElementById('ex-area');if(!area)return;var set=function(sel,val,lsk){var el=area.querySelector(sel+'[data-k="'+key+'"]');if(el){el.value=val;el.dataset.touched='1'}try{localStorage.setItem(lsk+wkId+'_'+key,String(val))}catch(e){}};if(best.peso>0)set('.ex-load',best.peso,'ld_');set('.ex-mini[data-field="reps"]',best.reps,'ldreps_');n++});execFechar();if(!n){showToast('Nenhuma serie registrada','');return}Promise.resolve().then(function(){return registrarTreinoCompleto()}).catch(function(){});showToast('Treino registrado ('+n+' exercicios)','')}
+
+try{var __rw=renderWorkout;renderWorkout=function(wk){var r=__rw.apply(this,arguments);try{offSnap(wk)}catch(e){}return r}}catch(e){}
+try{var __lo=doLogout;doLogout=async function(){try{localStorage.removeItem('tos_off')}catch(e){}return __lo.apply(this,arguments)}}catch(e){}
+setTimeout(function(){try{syncFila()}catch(e){}},4000);
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
