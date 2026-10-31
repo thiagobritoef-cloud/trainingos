@@ -851,7 +851,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="ib-title">&#128241; Adicionar ao iPhone</div>
   <div class="ib-text">
     1. Toque em <strong>&#8679; Compartilhar</strong> no Safari<br>
-    2. Role e toque em <strong>Adicionar a Tela de Inicio</strong><br>
+    2. Role e toque em <strong>Adicionar à Tela de Início</strong><br>
     3. Toque em <strong>Adicionar</strong>
   </div>
   <button class="btn btn-p" onclick="closeInstall()">Entendi</button>
@@ -892,31 +892,31 @@ var adminAlunoProfile = null;
 var wkCreatedAt = null;
 
 var MOTIV_GERADO = [
-  'Treino novo na area! Bora dar o seu melhor.',
-  'Programa pronto! O proximo passo e seu: comece hoje.',
-  'Treino gerado com tudo que voce precisa. Agora e suar a camisa!',
-  'Seu treino ta pronto. Consistencia e o que separa quem sonha de quem conquista.',
+  'Treino novo na área! Bora dar o seu melhor.',
+  'Programa pronto! O próximo passo é seu: comece hoje.',
+  'Treino gerado com tudo que você precisa. Agora é suar a camisa!',
+  'Seu treino está pronto. Consistência é o que separa quem sonha de quem conquista.',
   'Novo ciclo, nova energia. Vamos nessa!',
-  'Treino pronto! Todo grande resultado comeca com o primeiro treino da semana.',
-  'Seu programa foi montado pensando em voce. Agora e hora de executar.',
-  'Treino na mao! O corpo que voce quer se constroi um treino de cada vez.'
+  'Treino pronto! Todo grande resultado começa com o primeiro treino da semana.',
+  'Seu programa foi montado pensando em você. Agora é hora de executar.',
+  'Treino na mao! O corpo que você quer se constroi um treino de cada vez.'
 ];
 var MOTIV_ABRIR = [
-  'Bora treinar! Foco na execucao de hoje.',
-  'Hoje e dia de evoluir. Da o seu maximo!',
+  'Bora treinar! Foco na execução de hoje.',
+  'Hoje é dia de evoluir. Dá o seu máximo!',
   'Cada treino te aproxima do seu objetivo. Vamos nessa!',
-  'Respira, foca e treina com intencao hoje.',
-  'Voce ja deu o primeiro passo abrindo o app. Agora e so treinar!',
-  'Disciplina vence motivacao nos dias dificeis. Bora!',
+  'Respira, foca e treina com intenção hoje.',
+  'Você já deu o primeiro passo abrindo o app. Agora é só treinar!',
+  'Disciplina vence motivação nos dias difíceis. Bora!',
   'Hoje é mais um degrau na sua evolução.',
-  'Sem desculpas, so execucao. Vamos com tudo!'
+  'Sem desculpas, só execução. Vamos com tudo!'
 ];
 var MOTIV_VOLTA = [
   'Sentimos sua falta por aqui! Bora retomar o treino?',
-  'Ja faz alguns dias que voce nao treina. Que tal comecar hoje?',
-  'Todo recomeco conta. Vamos voltar aos treinos?',
+  'Já faz alguns dias que você não treina. Que tal começar hoje?',
+  'Todo recomeço conta. Vamos voltar aos treinos?',
   'Seu objetivo continua te esperando. Vamos retomar?',
-  'Um treino hoje ja e um passo a frente de ontem. Bora voltar?'
+  'Um treino hoje já é um passo a frente de ontem. Bora voltar?'
 ];
 
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -1036,7 +1036,7 @@ var DICAS_USO = [
   {ic:'&#128200;', t:'Acompanhar seu progresso', d:'Na tela de Perfil, registre seu peso e uma foto periodicamente. Um grafico mostra sua evolucao ao longo do tempo.'},
   {ic:'&#128293;', t:'Sua consistencia', d:'A tela inicial mostra sua sequencia de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
   {ic:'&#128172;', t:'Pedir ajuste', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
-  {ic:'&#128241;', t:'Instalar no celular', d:'Toque no icone de celular no topo da tela inicial para adicionar o TO BE FITNESS na tela de inicio, como um aplicativo.'},
+  {ic:'&#128241;', t:'Instalar no celular', d:'Toque no icone de celular no topo da tela inicial para adicionar o TO BE FITNESS na tela de início, como um aplicativo.'},
   {ic:'&#128276;', t:'Mensagens do treinador', d:'Avisos e recados do Thiago aparecem automaticamente no topo da tela inicial.'}
 ];
 
@@ -1180,7 +1180,7 @@ async function renderPlanosEntrada() {
   track.innerHTML = __planosCache.filter(function(p) { return p.id === 'free' || p.id === 'vip'; }).map(function(p) {
     var destaque = p.id === 'vip';
     var precoNum = Number(p.preco || 0);
-    var precoTxt = 'R$ ' + precoNum.toFixed(2).replace('.', ',') + (precoNum > 0 ? '<small>/mes</small>' : '');
+    var precoTxt = 'R$ ' + precoNum.toFixed(2).replace('.', ',') + (precoNum > 0 ? '<small>/mês</small>' : '');
       if (p.id === 'vip' && precoNum > 0 && precoNum < 29.9) { precoTxt = '<div style="font-size:13px;font-weight:600;color:var(--muted);text-decoration:line-through">de R$ 29,90</div>' + precoTxt + '<div style="font-size:12px;font-weight:700;color:var(--g);margin-top:4px">Black November, até 30/11/2026: R$ 19,99/mês por 12 meses. Depois, o valor vigente da tabela, hoje R$ 29,90/mês, com aviso prévio por e-mail.</div>'; }
     return '<div class="plano-card-entrada' + (destaque ? ' destaque' : '') + '">' +
       (destaque ? '<div class="plano-badge">&#11088; Oferta Black</div>' : '') +
@@ -1204,7 +1204,7 @@ async function renderPlanosEntrada() {
       ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês por 12 meses']
     ];
     cmpEl.innerHTML = '<div style="margin-top:18px;padding:14px;border:1px solid var(--g);border-radius:14px"><div style="font-size:15px;font-weight:800;text-align:center;margin-bottom:8px">Por que ser VIP</div><div style="font-size:14px;line-height:1.6">&#10003; <b>Ajuste inteligente:</b> peça mudanças e o treino é reformulado<br>&#10003; <b>Mais treinos:</b> gere novos programas quando precisar<br>&#10003; <b>Evolução completa:</b> histórico inteiro e gráfico das suas cargas</div><div style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center">Menos de R$ 0,70 por dia. Oferta Black válida até 30/11/2026. 7 dias para desistir: não gostou, devolvemos.</div></div>' + '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
-      '<table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
+      '<table style="width:100%;table-layout:fixed;word-break:break-word;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
       rows.map(function(r) { return '<tr><td style="' + cs + 'color:var(--muted)">' + r[0] + '</td><td style="' + cs + 'text-align:center">' + r[1] + '</td><td style="' + cs + 'text-align:center;font-weight:700">' + r[2] + '</td></tr>'; }).join('') +
       '</table>';
   }
@@ -1216,8 +1216,8 @@ function verDetalhesPlano(id) {
   if (!p) return;
   var det = '<div class="plano-nome" style="margin-bottom:10px">' + p.nome + '</div>';
   det += '<ul style="margin:0 0 16px 20px;padding:0;font-size:15px;line-height:1.6;color:var(--text)">';
-  det += '<li>Ate ' + p.treinos_max + ' treino' + (p.treinos_max === 1 ? '' : 's') + ' a cada ' + p.treinos_periodo_dias + ' dias</li>';
-  det += '<li>' + (p.alteracoes_max ? ('Ate ' + p.alteracoes_max + ' ajuste' + (p.alteracoes_max === 1 ? '' : 's') + ' a cada ' + p.alteracoes_periodo_dias + ' dias') : 'Sem ajustes inclusos') + '</li>';
+  det += '<li>Até ' + p.treinos_max + ' treino' + (p.treinos_max === 1 ? '' : 's') + ' a cada ' + p.treinos_periodo_dias + ' dias</li>';
+  det += '<li>' + (p.alteracoes_max ? ('Até ' + p.alteracoes_max + ' ajuste' + (p.alteracoes_max === 1 ? '' : 's') + ' a cada ' + p.alteracoes_periodo_dias + ' dias') : 'Sem ajustes inclusos') + '</li>';
   var extras = {
     free: ['Treino personalizado ao seu objetivo', 'Vídeos explicativos', 'Registro de peso e fotos (últimos 3)'],
     fit: ['Treino montado com o método de um personal com 10 anos de prática', 'Adaptacoes automaticas aos treinos', 'Treino completo com os acessorios que voce tiver em maos'],
@@ -1437,7 +1437,7 @@ async function loadProfile() {
       }
     }
   } else {
-    show('profile');
+    show('profile'); try { renderPlanoCard(); } catch (e) {}
   }
 }
 
@@ -1553,7 +1553,7 @@ var TUT_STEPS = [
   { title: 'Novidades no TO BE FITNESS', text: 'Renovamos o aplicativo pra deixar sua experiencia mais simples e rapida. Vamos te mostrar rapidinho o que mudou.' },
   { title: 'Nova tela inicial', text: 'A Home ficou mais limpa: um menu direto pra Treino Personalizado, Meus Resultados, Perfil, Minha Evolucao e Suporte.' },
   { title: 'Suporte', text: 'O antigo Suporte agora se chama Suporte, com uma tela propria pra voce enviar sua mensagem.' },
-  { title: 'Historico do treino', text: 'Na tela de Treino Personalizado, toque em qualquer treino do historico pra ver os exercicios na hora, sem sair da lista.' },
+  { title: 'Histórico do treino', text: 'Na tela de Treino Personalizado, toque em qualquer treino do historico pra ver os exercicios na hora, sem sair da lista.' },
   { title: 'Resultados e Evolucao', text: 'Sua consistencia e seu progresso de peso e fotos agora tem telas proprias, mais faceis de acompanhar.' }
 ];
 var tutStep = 0;
@@ -1659,7 +1659,7 @@ checkAutoGenerate(res.data[0]);
 window.__latestWorkoutId = res.data[0].id;
 
 var total = res.data.length;
-var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Historico (' + total + ')</div>';
+var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Histórico (' + total + ')</div>';
 res.data.forEach(function(w, i) {
 var num = total - i;
 var d = new Date(w.created_at).toLocaleDateString('pt-BR');
@@ -2083,7 +2083,7 @@ function renderWorkout(wk) {
     '<div style="font-size:17px;font-weight:900;margin-bottom:6px">' + (wk.nome || 'Programa') + '</div>' +
     (wk.split ? '<div style="color:var(--g);font-size:16px;font-weight:800;margin-bottom:4px">' + wk.split + '</div>' : '') +
     (wk.duracao_semanas ? '<div style="color:var(--muted);font-size:16px">' + wk.duracao_semanas + ' semanas</div>' : '') +
-    (wk.progressao_semanal ? '<div style="color:var(--muted);font-size:16px;margin-top:8px;line-height:1.4;padding-top:8px;border-top:1px solid var(--border)"><b style="color:var(--g)">Progressao:</b> ' + wk.progressao_semanal + '</div>' : '');
+    (wk.progressao_semanal ? '<div style="color:var(--muted);font-size:16px;margin-top:8px;line-height:1.4;padding-top:8px;border-top:1px solid var(--border)"><b style="color:var(--g)">Progressão:</b> ' + wk.progressao_semanal + '</div>' : '');
 
   if (wkCreatedAt) {
     var _dtC = new Date(wkCreatedAt);
@@ -2109,7 +2109,7 @@ function renderWorkout(wk) {
     tabHtml += '<div class="tab' + (i === __wi0 ? ' active' : '') + '" data-wi="' + i + '">' + lbl + '</div>';
   });
   document.getElementById('week-tabs').innerHTML = tabHtml;
-  var __exp = false; try { __exp = !podeVip() && wkCreatedAt && (Date.now() - new Date(wkCreatedAt).getTime()) > 30 * 86400000; } catch (e) {} if (__exp) { document.getElementById('week-tabs').innerHTML = ''; document.getElementById('day-area').innerHTML = bannerVip('Seu treino do plano Free terminou (30 dias). No VIP o app ajusta seu treino, troca exercicios e sugere a carga certa.'); return; } renderWeek(semanas, __wi0); abrirDiaAtual(semanas, __wi0);
+  var __exp = false; try { __exp = !podeVip() && wkCreatedAt && (Date.now() - new Date(wkCreatedAt).getTime()) > 30 * 86400000; } catch (e) {} if (__exp) { document.getElementById('week-tabs').innerHTML = ''; show('workout'); document.getElementById('day-area').innerHTML = '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch"><div class="card" style="flex:1 1 260px;text-align:center;margin:0"><div style="font-weight:800;font-size:17px;margin-bottom:6px">Seu treino do mês terminou</div><div style="font-size:14px;color:var(--muted);margin-bottom:12px">No plano Free você gera 1 treino novo a cada 30 dias. Gere o treino do novo mês agora.</div><button type="button" class="btn btn-p" style="width:100%" onclick="generateWorkout()">Gerar treino do novo mês</button></div><div style="flex:1 1 260px">' + bannerVip('No VIP o app ajusta seu treino, troca exercícios e sugere a carga certa.') + '</div></div>'; return; } renderWeek(semanas, __wi0); abrirDiaAtual(semanas, __wi0);
 
   document.getElementById('week-tabs').querySelectorAll('.tab').forEach(function(t) {
     t.addEventListener('click', function() {
@@ -2183,7 +2183,7 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
   if (!exs.length) {
     html += '<p style="color:var(--muted);font-size:16px">Descanso ou sem exercicios.</p>';
   } else {
-    html += '<div class="ex-wrap"><table><thead><tr><th>Exercício</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Metodo</th><th onclick="alert(\'SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.\')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
+    html += '<div class="ex-wrap"><table><thead><tr><th>Exercício</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Método</th><th onclick="alert(\'SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.\')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
     exs.forEach(function(ex, ei) {
       var key = 'w' + wi + 'd' + di + 'e' + ei;
       var name = ex.nome || ex.exercicio || ex.name || '-';
@@ -3838,7 +3838,7 @@ if ('serviceWorker' in navigator) {
 }
 
 var __exCat=null,__swapUndo=null;
-async function trocarExercicio(wi,di,ei,btn){if(!podeVip()){if(confirm('Troca de exercicio equivalente e um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opção)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
+async function trocarExercicio(wi,di,ei,btn){if(!podeVip()){if(confirm('Troca de exercício equivalente é um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opção)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.swap-btn');if(b)trocarExercicio(parseInt(b.dataset.wi),parseInt(b.dataset.di),parseInt(b.dataset.ei),b)});
 try{if(/[?&]cadastro=1/.test(location.search))setTimeout(function(){if(typeof authTab==='function'&&document.getElementById('tab-up'))authTab('up')},400)}catch(e){}
 
@@ -3878,7 +3878,7 @@ aplicarGateAjusteForms=function(){try{if(!profile||profile.is_admin||podeVip())r
 try{new MutationObserver(function(){if(document.getElementById('mud-txt'))aplicarGateAjusteForms()}).observe(document.body,{childList:true,subtree:true})}catch(e){}
 try{var __aj=document.getElementById('ajuste-txt'),__cd=__aj&&__aj.closest('.card');if(__cd)__cd.innerHTML='<div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Suporte</div><div style="color:var(--muted);font-size:16px;margin-bottom:10px">D\u00favidas, sugest\u00f5es ou algum problema? Fale com a gente.</div><button type="button" class="btn btn-s" onclick="show(\'suporte\')">Abrir suporte</button>'}catch(e){}
 (function(){var o=renderPlanoCard;renderPlanoCard=function(){o.apply(this,arguments);try{var out=document.getElementById('plano-out');if(profile&&profile.plano_treino==='vip'&&out){out.querySelectorAll('button').forEach(function(b){if(/Oferta Black/.test(b.textContent)){var n=b.nextElementSibling;if(n&&/Black November/.test(n.textContent))n.remove();b.remove()}})}}catch(e){}}})();
-(function(){var o=oferecerInstalacao;oferecerInstalacao=function(){var busy=document.getElementById('troca-aviso')||document.querySelector('#push-toast.show,.ex-ov,#toast.show,.toast.show');if(busy){setTimeout(oferecerInstalacao,6000);return}return o.apply(this,arguments)}})();
+(function(){var o=oferecerInstalacao;oferecerInstalacao=function(){var busy=document.getElementById('troca-aviso')||document.querySelector('#push-toast.show,#motiv-toast.show,.ex-ov,.toast.show');if(busy){setTimeout(oferecerInstalacao,6000);return}return o.apply(this,arguments)}})();
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
