@@ -353,6 +353,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 
 .swap-btn{display:inline-flex;align-items:center;gap:4px;margin:6px 0 0 6px;padding:7px 12px;min-height:34px;border-radius:8px;border:1px solid var(--g);background:transparent;color:var(--g);font-size:12px;font-weight:700;cursor:pointer;vertical-align:middle}.swap-btn:active{opacity:.6}.swap-btn[disabled]{opacity:.5}@media (max-width:600px){.swap-btn{min-height:40px;font-size:13px;margin:8px 8px 0 0}}
 #a-terms-row{background:rgba(255,255,255,.04);border:1px solid var(--g);border-radius:10px;padding:12px;font-size:13px!important;color:var(--text,#fff)!important}#a-terms{width:22px;height:22px;min-width:22px;accent-color:var(--g)}
+.swap-btn.locked{border-style:dashed;color:var(--muted);border-color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1694,7 +1695,7 @@ function aplicarGateSuporte() {
   if (!c) return;
   if (!c.getAttribute('data-orig')) c.setAttribute('data-orig', c.innerHTML);
   if (true) { if (c.getAttribute('data-locked') === '1') { c.innerHTML = c.getAttribute('data-orig'); c.setAttribute('data-locked', '0'); } return; }
-  c.innerHTML = '<div class="ctitle">Suporte</div>' + bannerVip('A mensagem direta com o Thiago, com prioridade de resposta, é exclusiva do plano VIP.');
+  c.innerHTML = '<div class="ctitle">Suporte</div>' + bannerVip('Suporte disponível para os planos pagos.');
   c.setAttribute('data-locked', '1');
 }
 async function irNovidades() {
@@ -1800,12 +1801,12 @@ async function updateQuotaInfo() {
     var since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     var wRes = await sb.from('workouts').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('via_admin', false).gte('created_at', since);
     var aRes = await sb.from('ajustes').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('via_admin', false).gte('created_at', since);
-    var wCount = wRes.count || 0;
+    var L = await __getLimites(); var wCount = wRes.count || 0;
     var aCount = aRes.count || 0;
     var el = document.getElementById('quota-info');
     if (!el) return;
     el.style.display = 'flex';
-    el.innerHTML = '<span>Treinos gerados: ' + wCount + '/3 (30 dias)</span><span>Ajustes: ' + aCount + '/5 (30 dias)</span>';
+    el.innerHTML = '<span>Treinos gerados: ' + wCount + '/' + L.t + ' (' + L.tp + ' dias)</span><span>$1: ' + (L.a > 0 ? aCount + '/' + L.a + ' (' + L.ap + ' dias)' : 'so no VIP') + '</span>';
   } catch (e) {}
 }
 
@@ -2102,7 +2103,7 @@ function renderWorkout(wk) {
     tabHtml += '<div class="tab' + (i === __wi0 ? ' active' : '') + '" data-wi="' + i + '">' + lbl + '</div>';
   });
   document.getElementById('week-tabs').innerHTML = tabHtml;
-  renderWeek(semanas, __wi0); abrirDiaAtual(semanas, __wi0);
+  var __exp = false; try { __exp = !podeVip() && wkCreatedAt && (Date.now() - new Date(wkCreatedAt).getTime()) > 30 * 86400000; } catch (e) {} if (__exp) { document.getElementById('week-tabs').innerHTML = ''; document.getElementById('day-area').innerHTML = bannerVip('Seu treino do plano Free terminou (30 dias). No VIP o app ajusta seu treino, troca exercicios e sugere a carga certa.'); return; } renderWeek(semanas, __wi0); abrirDiaAtual(semanas, __wi0);
 
   document.getElementById('week-tabs').querySelectorAll('.tab').forEach(function(t) {
     t.addEventListener('click', function() {
@@ -2181,9 +2182,9 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes;
       var key = 'w' + wi + 'd' + di + 'e' + ei;
       var name = ex.nome || ex.exercicio || ex.name || '-';
       var ultima = ultimasCargas[String(name).trim().toLowerCase()] || {};
-      var saved = localStorage.getItem('ld_' + wkId + '_' + key) || (ultima.peso != null ? String(ultima.peso) : '');
-      var savedReps = localStorage.getItem('ldreps_' + wkId + '_' + key) || (ultima.reps != null ? String(ultima.reps) : '');
-      var savedRpe = localStorage.getItem('ldrpe_' + wkId + '_' + key) || (ultima.rpe != null ? String(ultima.rpe) : '');
+      var saved = localStorage.getItem('ld_' + wkId + '_' + key) || '';
+      var savedReps = localStorage.getItem('ldreps_' + wkId + '_' + key) || '';
+      var savedRpe = localStorage.getItem('ldrpe_' + wkId + '_' + key) || '';
       var vid = ex.video_url || ex.video || '';
       var parceiro = ex.parceiro || ex.partner || '';
       var metodo = ex.metodo || ex.method || '-';
@@ -2193,15 +2194,15 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes;
 
       html += '<tr class="' + (parceiro ? 'ex-row-top' : '') + '">' +
         '<td><div class="ex-name">' + name + '</div>' +
-        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') + '<button type="button" class="swap-btn" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">&#8646; Trocar</button>' +
+        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') + '<button type="button" class="swap-btn' + (podeVip() ? '' : ' locked') + '" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">' + (podeVip() ? '&#8646; Trocar' : '&#128274; Trocar') + '</button>' +
         '</td>' +
         '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
         '<td>' + series + '</td>' +
         '<td>' + reps + '</td>' +
         '<td>' + desc + '</td>' +
-        '<td><input class="ex-load" type="text" inputmode="decimal" placeholder="kg" value="' + saved + '" data-k="' + key + '" data-ex="' + encodeURIComponent(name) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">' +
-        '<input class="ex-mini" type="text" inputmode="numeric" placeholder="reps" value="' + savedReps + '" data-k="' + key + '" data-field="reps">' +
-        '<input class="ex-mini" type="text" inputmode="numeric" placeholder="RPE" value="' + savedRpe + '" data-k="' + key + '" data-field="rpe">' +
+        '<td><input class="ex-load" type="text" inputmode="decimal" placeholder="' + (ultima.peso != null ? 'ult. ' + ultima.peso + ' kg' : 'kg') + '" value="' + saved + '" data-k="' + key + '" data-ex="' + encodeURIComponent(name) + '" data-wi="' + wi + '" data-di="' + di + '" data-foco="' + encodeURIComponent(foco) + '">' +
+        '<input class="ex-mini" type="text" inputmode="numeric" placeholder="' + (ultima.reps != null ? 'ult. ' + ultima.reps : 'reps') + '" value="' + savedReps + '" data-k="' + key + '" data-field="reps">' +
+        '<input class="ex-mini" type="text" inputmode="numeric" placeholder="' + (ultima.rpe != null ? 'ult. ' + ultima.rpe : 'RPE') + '" value="' + savedRpe + '" data-k="' + key + '" data-field="rpe">' +
         '</td>' +
         '</tr>';
 
@@ -3657,7 +3658,7 @@ async function loadAdminMessages() {
   res.data.forEach(function(m) {
     html += '<div class="msg-banner">' +
       '<div class="msg-banner-title">&#128172; Mensagem do Thiago</div>' +
-      '<div class="msg-banner-txt">' + m.mensagem + '</div>' +
+      '<div class="msg-banner-txt">' + escChat(m.mensagem) + '</div>' +
       '<button onclick="markMsgRead(\'' + m.id + '\')">Ok, entendi</button>' +
       '</div>';
   });
@@ -3683,7 +3684,7 @@ async function sendReclamacao() {
   document.getElementById('rc-titulo').value = '';
   document.getElementById('rc-msg').value = '';
   sb.functions.invoke('send-push', { body: { target: 'admin', title: 'Nova sugestao/feedback', body: (profile && profile.nome ? profile.nome + ': ' : '') + (titulo || msg) } }).catch(function(){});
-  showMsg('rc-msg-out', 'Enviado! O Thiago vai analisar.', 'ok');
+  showMsg('rc-msg-out', 'Enviado! Recebemos sua mensagem.', 'ok');
 }
 
 // === ACTIONS ===
@@ -3820,9 +3821,11 @@ if ('serviceWorker' in navigator) {
 }
 
 var __exCat=null,__swapUndo=null;
-async function trocarExercicio(wi,di,ei,btn){var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opcao)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
+async function trocarExercicio(wi,di,ei,btn){if(!podeVip()){if(confirm('Troca de exercicio equivalente e um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opcao)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.swap-btn');if(b)trocarExercicio(parseInt(b.dataset.wi),parseInt(b.dataset.di),parseInt(b.dataset.ei),b)});
 try{if(/[?&]cadastro=1/.test(location.search))setTimeout(function(){if(typeof authTab==='function'&&document.getElementById('tab-up'))authTab('up')},400)}catch(e){}
+
+async function __getLimites(){try{if(!window.__planosCache){var r=await sb.from('planos').select('*').order('preco',{ascending:true});if(!r.error&&r.data)window.__planosCache=r.data}var id=(profile&&profile.plano_treino==='fit')?'fit':(podeVip()?'vip':'free');var p=(window.__planosCache||[]).find(function(x){return x.id===id});if(p)return{t:p.treinos_max,tp:p.treinos_periodo_dias,a:p.alteracoes_max,ap:p.alteracoes_periodo_dias}}catch(e){}return{t:1,tp:30,a:0,ap:30}}
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
