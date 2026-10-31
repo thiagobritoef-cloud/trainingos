@@ -362,7 +362,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .off-mode #gen-wrap-card,.off-mode #w-list,.off-mode .admin-view-banner{display:none!important}
 .logo{display:flex;align-items:center}.logo-img{height:30px;width:auto;display:block}.auth-logo-img{height:88px;width:auto;max-width:80%;display:block;margin:0 auto}@media (max-width:600px){.auth-logo-img{height:72px}.logo-img{height:26px}}
 </style>
-<style id="patch-resp">.sug-carga,.sug-alerta{white-space:normal;overflow-wrap:anywhere;max-width:100%}#ex-area td{min-width:0;max-width:100%}.planos-carousel,.planos-track{max-width:100%;box-sizing:border-box}#screen-auth{overflow-x:hidden}#screen-auth table,.mdl table{table-layout:fixed;width:100%}#screen-auth td,#screen-auth th{overflow-wrap:anywhere}.plano-feat{list-style:none;padding:0;margin:10px 0 14px;text-align:left;font-size:14px;line-height:1.4}.plano-feat li{padding:4px 0 4px 22px;position:relative}.plano-feat li::before{content:"✓";position:absolute;left:0;color:var(--g);font-weight:800}.vbtn-soon{display:inline-block;font-size:12px;color:var(--muted);margin:8px 8px 0 0}@media (max-width:600px){#ex-area td:nth-child(6){flex-wrap:wrap}#ex-area td:nth-child(6)::before{flex:0 0 100%}#ex-area td:nth-child(6) input{flex:1 1 30%;min-width:72px;width:auto}.planos-track{flex-direction:column;overflow-x:visible;scroll-snap-type:none;padding:14px 0}.plano-card-entrada{flex:1 1 auto;width:100%;box-sizing:border-box}}</style></head>
+<style id="patch-resp">.sug-carga,.sug-alerta{white-space:normal;overflow-wrap:anywhere;max-width:100%}#ex-area td{min-width:0;max-width:100%}.planos-carousel,.planos-track{max-width:100%;box-sizing:border-box}#screen-auth{overflow-x:hidden}#screen-auth table,.mdl table{table-layout:fixed;width:100%}#screen-auth td,#screen-auth th{overflow-wrap:anywhere}.plano-feat{list-style:none;padding:0;margin:10px 0 14px;text-align:left;font-size:14px;line-height:1.4}.plano-feat li{padding:4px 0 4px 22px;position:relative}.plano-feat li::before{content:"✓";position:absolute;left:0;color:var(--g);font-weight:800}.vbtn-soon{display:inline-block;font-size:12px;color:var(--muted);margin:8px 8px 0 0}@media (max-width:600px){#ex-area td:nth-child(6){flex-wrap:wrap}#ex-area td:nth-child(6)::before{flex:0 0 100%}#ex-area td:nth-child(6) input{flex:1 1 30%;min-width:72px;width:auto}.planos-track{flex-direction:column;overflow-x:visible;scroll-snap-type:none;padding:14px 0}.plano-card-entrada{flex:1 1 auto;width:100%;box-sizing:border-box}}#planos-comparativo table{min-width:0}</style></head>
 <body>
 
 <!-- ===== AUTH ===== -->
@@ -778,7 +778,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 <div id="ctreino-body" style="font-size:16px;line-height:1.5"></div>
 <div style="display:flex;gap:10px;margin-top:16px">
 <button class="btn btn-p" onclick="confirmTreinoAnswer(true)" style="flex:1">Sim, continua</button>
-<button class="btn btn-s" onclick="confirmTreinoAnswer(false)" style="flex:1">Nao, preciso atualizar</button>
+<button class="btn btn-s" onclick="confirmTreinoAnswer(false)" style="flex:1">Não, preciso atualizar</button>
 </div>
 </div>
 </div>
@@ -899,7 +899,7 @@ var MOTIV_GERADO = [
   'Novo ciclo, nova energia. Vamos nessa!',
   'Treino pronto! Todo grande resultado começa com o primeiro treino da semana.',
   'Seu programa foi montado pensando em você. Agora é hora de executar.',
-  'Treino na mao! O corpo que você quer se constroi um treino de cada vez.'
+  'Treino na mão! O corpo que você quer se constrói um treino de cada vez.'
 ];
 var MOTIV_ABRIR = [
   'Bora treinar! Foco na execução de hoje.',
@@ -1036,7 +1036,7 @@ var DICAS_USO = [
   {ic:'&#128200;', t:'Acompanhar seu progresso', d:'Na tela de Perfil, registre seu peso e uma foto periodicamente. Um grafico mostra sua evolucao ao longo do tempo.'},
   {ic:'&#128293;', t:'Sua consistencia', d:'A tela inicial mostra sua sequencia de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
   {ic:'&#128172;', t:'Pedir ajuste', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
-  {ic:'&#128241;', t:'Instalar no celular', d:'Toque no icone de celular no topo da tela inicial para adicionar o TO BE FITNESS na tela de início, como um aplicativo.'},
+  {ic:'&#128241;', t:'Instalar no celular', d:'Abra o menu do navegador (⋮ no Android, Compartilhar no iPhone) e toque em Instalar app ou Adicionar à Tela de Início para ter o TO BE FITNESS como um aplicativo.'},
   {ic:'&#128276;', t:'Mensagens do treinador', d:'Avisos e recados do Thiago aparecem automaticamente no topo da tela inicial.'}
 ];
 
@@ -1901,7 +1901,7 @@ function showConfirmTreinoStep() {
   if (ctreinoStep === 0) {
     var obj = p.objetivo || '(nao definido)';
     var det = (p.objetivo_detalhado || '').trim();
-    body.innerHTML = 'Seu objetivo cadastrado e <b>' + _escHtml(obj) + '</b>' + (det ? ' (' + _escHtml(det) + ')' : '') + '.<br><br>Continua o mesmo?';
+    body.innerHTML = 'Seu objetivo cadastrado é <b>' + _escHtml(obj) + '</b>' + (det ? ' (' + _escHtml(det) + ')' : '') + '.<br><br>Continua o mesmo?';
   } else {
     var mat = (p.materiais || '').trim() || 'nenhum equipamento informado';
     body.innerHTML = 'Seus materiais, aparelhos e equipamentos cadastrados: <b>' + _escHtml(mat) + '</b>.<br><br>Continuam os mesmos?';
