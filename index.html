@@ -362,7 +362,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .off-mode #gen-wrap-card,.off-mode #w-list,.off-mode .admin-view-banner{display:none!important}
 .logo{display:flex;align-items:center}.logo-img{height:30px;width:auto;display:block}.auth-logo-img{height:88px;width:auto;max-width:80%;display:block;margin:0 auto}@media (max-width:600px){.auth-logo-img{height:72px}.logo-img{height:26px}}
 </style>
-</head>
+<style id="patch-resp">.sug-carga,.sug-alerta{white-space:normal;overflow-wrap:anywhere;max-width:100%}#ex-area td{min-width:0;max-width:100%}.planos-carousel,.planos-track{max-width:100%;box-sizing:border-box}#screen-auth{overflow-x:hidden}#screen-auth table,.mdl table{table-layout:fixed;width:100%}#screen-auth td,#screen-auth th{overflow-wrap:anywhere}.plano-feat{list-style:none;padding:0;margin:10px 0 14px;text-align:left;font-size:14px;line-height:1.4}.plano-feat li{padding:4px 0 4px 22px;position:relative}.plano-feat li::before{content:"✓";position:absolute;left:0;color:var(--g);font-weight:800}.vbtn-soon{display:inline-block;font-size:12px;color:var(--muted);margin:8px 8px 0 0}@media (max-width:600px){#ex-area td:nth-child(6){flex-wrap:wrap}#ex-area td:nth-child(6)::before{flex:0 0 100%}#ex-area td:nth-child(6) input{flex:1 1 30%;min-width:72px;width:auto}.planos-track{flex-direction:column;overflow-x:visible;scroll-snap-type:none;padding:14px 0}.plano-card-entrada{flex:1 1 auto;width:100%;box-sizing:border-box}}</style></head>
 <body>
 
 <!-- ===== AUTH ===== -->
@@ -407,7 +407,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
       <div id="plano-msg" style="display:none"></div>
     </div>
     <div class="card">
-      <div class="ctitle">Perfil do aluno</div><div style="margin:-4px 0 12px"><a href="javascript:void(0)" onclick="goDicas()" style="color:var(--accent, #6BA83A);font-size:15px;text-decoration:underline;cursor:pointer">Duvidas? Toque aqui para ver explicacoes</a></div>
+      <div class="ctitle">Perfil do aluno</div><div style="margin:-4px 0 12px"><a href="javascript:void(0)" onclick="goDicas()" style="color:var(--accent, #6BA83A);font-size:15px;text-decoration:underline;cursor:pointer">Dúvidas? Toque aqui para ver explicações</a></div>
       <div id="p-msg"></div>
       <div class="fg"><label>Nome</label><input type="text" id="p-name" placeholder="Nome completo"></div>
       <div class="frow">
@@ -431,8 +431,8 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
           <select id="p-days">
             <option value="2">2x</option>
             <option value="3">3x</option>
-            <option value="4">4x</option>
-            <option value="5" selected>5x</option>
+            <option value="4" selected>4x</option>
+            <option value="5">5x</option>
             <option value="6">6x</option>
           </select>
         </div>
@@ -440,8 +440,8 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
           <label>Nível</label>
           <select id="p-level">
             <option>Iniciante</option>
-            <option>Intermediario</option>
-            <option>Avancado</option>
+            <option value="Intermediario" selected>Intermediário</option>
+            <option value="Avancado">Avançado</option>
           </select>
         </div>
       </div>
@@ -451,7 +451,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
           <select id="p-goal">
             <option>Hipertrofia</option>
             <option>Emagrecimento</option>
-            <option>Forca</option>
+            <option value="Forca">Força</option>
             <option>Condicionamento</option>
           </select>
         </div>
@@ -803,7 +803,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 <div class="ob-step"><div class="ob-num">1</div><div class="ob-txt"><b>Método de um personal com 10 anos de prática</b><span>Preencha seu perfil e gere seu treino em cerca de 30 segundos.</span></div></div>
 <div class="ob-step"><div class="ob-num">2</div><div class="ob-txt"><b>Registre suas cargas</b><span>Anote kg, repetições e esforço em cada exercício e acompanhe sua evolução e sua sequência de treinos.</span></div></div>
 <div class="ob-step"><div class="ob-num">3</div><div class="ob-txt"><b>Ajuste inteligente (VIP)</b><span>Peça mudanças e o app reformula o treino para você, sem perder o seu ritmo.</span></div></div>
-<button class="btn btn-p" onclick="closeOnboarding()">Vamos Comecar!</button>
+<button class="btn btn-p" onclick="closeOnboarding()">Vamos Começar!</button>
   </div>
 </div>
 
@@ -908,7 +908,7 @@ var MOTIV_ABRIR = [
   'Respira, foca e treina com intencao hoje.',
   'Voce ja deu o primeiro passo abrindo o app. Agora e so treinar!',
   'Disciplina vence motivacao nos dias dificeis. Bora!',
-  'Hoje e mais um degrau na sua evolucao.',
+  'Hoje é mais um degrau na sua evolução.',
   'Sem desculpas, so execucao. Vamos com tudo!'
 ];
 var MOTIV_VOLTA = [
@@ -1174,7 +1174,7 @@ async function renderPlanosEntrada() {
   if (!track) return;
   if (!__planosCache) {
     var res = await sb.from('planos').select('*').order('preco', { ascending: true });
-    if (res.error || !res.data) { track.innerHTML = '<p style="color:var(--muted);font-size:15px;text-align:center;padding:20px 0">Nao foi possivel carregar os planos.</p>'; return; }
+    if (res.error || !res.data) { track.innerHTML = '<p style="color:var(--muted);font-size:15px;text-align:center;padding:20px 0">Não foi possível carregar os planos.</p>'; return; }
     __planosCache = res.data;
   }
   track.innerHTML = __planosCache.filter(function(p) { return p.id === 'free' || p.id === 'vip'; }).map(function(p) {
@@ -1185,7 +1185,7 @@ async function renderPlanosEntrada() {
     return '<div class="plano-card-entrada' + (destaque ? ' destaque' : '') + '">' +
       (destaque ? '<div class="plano-badge">&#11088; Oferta Black</div>' : '') +
       '<div class="plano-nome">' + p.nome + '</div>' +
-      '<div class="plano-preco">' + precoTxt + '</div>' +
+      '<div class="plano-preco">' + precoTxt + '</div>' + (typeof planoFeat==='function'?planoFeat(p):'') +
       '<button class="btn ' + (destaque ? 'btn-p' : '') + '" onclick="verDetalhesPlano(\'' + p.id + '\')">Ver detalhes</button>' +
       '</div>';
   }).join('');
@@ -1812,7 +1812,7 @@ async function updateQuotaInfo() {
     var el = document.getElementById('quota-info');
     if (!el) return;
     el.style.display = 'flex';
-    el.innerHTML = '<span>Treinos gerados: ' + wCount + '/' + L.t + ' (' + L.tp + ' dias)</span><span>$1: ' + (L.a > 0 ? aCount + '/' + L.a + ' (' + L.ap + ' dias)' : 'so no VIP') + '</span>';
+    el.innerHTML = '<span>Treinos gerados: ' + wCount + '/' + L.t + ' (' + L.tp + ' dias)</span><span>Ajustes: ' + (L.a > 0 ? aCount + '/' + L.a + ' (' + L.ap + ' dias)' : 'só no VIP') + '</span>';
   } catch (e) {}
 }
 
@@ -1822,7 +1822,7 @@ function checkAutoGenerate(latest) {
   var dur = latest.duracao_semanas || (profile && profile.duracao) || 4;
   var fim = new Date(latest.created_at);
   fim.setDate(fim.getDate() + dur * 7);
-  if (new Date() >= fim) {
+  if (new Date() >= fim) { if (!podeVip()) return;
     var adiada = (profile && profile.troca_adiada_ate) ? new Date(profile.troca_adiada_ate) : null;
     if (adiada && new Date() < adiada) return;
     if (adiada) { limparAdiamentoTroca(); mostrarAvisoTroca(); return; }
@@ -2183,7 +2183,7 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
   if (!exs.length) {
     html += '<p style="color:var(--muted);font-size:16px">Descanso ou sem exercicios.</p>';
   } else {
-    html += '<div class="ex-wrap"><table><thead><tr><th>Exercicio</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Metodo</th><th onclick="alert(\'SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.\')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
+    html += '<div class="ex-wrap"><table><thead><tr><th>Exercício</th><th onclick="goDicas()" style="text-decoration:underline;cursor:pointer">Metodo</th><th onclick="alert(\'SERIES: numero de vezes que voce repete o bloco do exercicio.\n\nREPETICOES: numero de movimentos feitos em cada serie.\')" style="text-decoration:underline;cursor:pointer">Ser&#9432;</th><th>Rep</th><th>Des</th><th>Carga</th></tr></thead><tbody>';
     exs.forEach(function(ex, ei) {
       var key = 'w' + wi + 'd' + di + 'e' + ei;
       var name = ex.nome || ex.exercicio || ex.name || '-';
@@ -2199,8 +2199,8 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
       var desc = ex.descanso || ex.intervalo || ex.rest || '-';
 
       html += '<tr class="' + (parceiro ? 'ex-row-top' : '') + '">' +
-        '<td><div class="ex-name">' + name + '</div>' + sugestaoCarga(name, metodo, ultima) +
-        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') + '<button type="button" class="swap-btn' + (podeVip() ? '' : ' locked') + '" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">' + (podeVip() ? '&#8646; Trocar' : '&#128274; Trocar') + '</button>' +
+        '<td><div class="ex-name">' + name + '</div>' + sugestaoCarga(name, metodo, ultima, reps) +
+        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '<span class="vbtn-soon">V&iacute;deo em breve</span>') + '<button type="button" class="swap-btn' + (podeVip() ? '' : ' locked') + '" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">' + (podeVip() ? '&#8646; Trocar' : '&#128274; Trocar') + '</button>' +
         '</td>' +
         '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
         '<td>' + series + '</td>' +
@@ -2223,7 +2223,7 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
         var repsP = ex.parceiro_reps || reps;
         html += '<tr class="ex-row-partner">' +
           '<td><div class="ex-name">+ ' + parceiro + '</div>' +
-          (vidP ? '<button class="vbtn" data-url="' + vidP + '">&#9654; Video</button>' : '') +
+          (vidP ? '<button class="vbtn" data-url="' + vidP + '">&#9654; Video</button>' : '<span class="vbtn-soon">V&iacute;deo em breve</span>') +
           '</td>' +
           '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
           '<td>' + seriesP + '</td>' +
@@ -2403,7 +2403,7 @@ async function loadProgresso() {
   if (chartEl) chartEl.innerHTML = __lim ? bannerVip('Histórico completo e gráfico de evolução são exclusivos do plano VIP. No Free você vê os 3 últimos registros.') : (pontos.length > 1 ? svgSparkline(pontos) : '');
 
   var rows = res.data.slice().reverse();
-  var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Historico</div>';
+  var html = '<div style="font-size:16px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Histórico</div>';
   rows.forEach(function(r) {
     var d = new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR');
     html += '<div class="prog-item"><div><b>' + d + '</b>' + (r.peso ? ' &bull; ' + r.peso + ' kg' : '') + '</div>' +
@@ -2442,8 +2442,8 @@ function svgSparkline(pontos) {
 function renderPlanoCard() {
   var el = document.getElementById('plano-status');
   var out = document.getElementById('plano-out');
-  if (!el || !profile) return;
-  var pid = profile.plano_treino;
+  if (!el) return;
+  var pid = profile ? profile.plano_treino : null;
   var nomes = { free: 'Free', fit: 'Fit', vip: 'VIP' };
   el.innerHTML = pid ? ('Plano ' + (nomes[pid] || pid) + ' ativo') : 'Plano Free';
   if (out) out.innerHTML =
@@ -2971,9 +2971,9 @@ async function loadDashboardAdmin() {
       '<div class="card">' +
         '<div class="ctitle">Periodo de analise</div>' +
         '<select id="dash-periodo" style="width:100%;padding:10px;border-radius:8px;background:#111;color:#fff;border:1px solid #333;font-size:16px">' +
-          '<option value="7"' + (__dashPeriodDias === 7 ? ' selected' : '') + '>Ultimos 7 dias</option>' +
-          '<option value="30"' + (__dashPeriodDias === 30 ? ' selected' : '') + '>Ultimos 30 dias</option>' +
-          '<option value="90"' + (__dashPeriodDias === 90 ? ' selected' : '') + '>Ultimos 90 dias</option>' +
+          '<option value="7"' + (__dashPeriodDias === 7 ? ' selected' : '') + '>Últimos 7 dias</option>' +
+          '<option value="30"' + (__dashPeriodDias === 30 ? ' selected' : '') + '>Últimos 30 dias</option>' +
+          '<option value="90"' + (__dashPeriodDias === 90 ? ' selected' : '') + '>Últimos 90 dias</option>' +
         '</select>' +
       '</div>' +
       '<div class="dash-grid">' +
@@ -3799,7 +3799,7 @@ function offSnap(wk){try{if(!user||!wkId||window.__offMode)return;var p=Object.a
 function offBar(txt,showBtn){var b=document.getElementById('off-bar');if(!b){b=document.createElement('div');b.id='off-bar';b.style.cssText='position:relative;z-index:1400;background:#b26a00;color:#fff;font-size:13px;font-weight:700;padding:max(6px,env(safe-area-inset-top)) 12px 6px;text-align:center;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap';document.body.insertBefore(b,document.body.firstChild)}b.innerHTML='<span>'+txt+'</span>'+(showBtn?'<button type="button" onclick="location.reload()" style="background:#fff;color:#000;border:0;border-radius:8px;padding:6px 12px;font-weight:800;min-height:32px">Tentar de novo</button>':'');b.style.display='flex'}
 function offBarHide(){var b=document.getElementById('off-bar');if(b)b.style.display='none'}
 function restoreOffline(){try{var raw=localStorage.getItem('tos_off');if(!raw)return false;var s=JSON.parse(raw);if(!s||!s.user||!s.wk||!s.wk.programa)return false;window.__offMode=true;document.body.classList.add('off-mode');user=s.user;profile=s.profile||{};isAdmin=false;wkId=s.wk.id;wkData=s.wk.programa;wkSequencia=s.wk.sequencia||1;wkCreatedAt=s.wk.created_at||null;ultimasCargas=s.cargas||{};window.__hist=s.hist||{};show('workout');renderWorkout(wkData);offBar('Sem internet. Seu \u00faltimo treino est\u00e1 dispon\u00edvel e os registros ser\u00e3o enviados ao reconectar.',true);return true}catch(e){return false}}
-function filaOffline(rows){try{var q=JSON.parse(localStorage.getItem('tos_q')||'[]');q=q.concat(rows);localStorage.setItem('tos_q',JSON.stringify(q));showToast('Sem internet: treino salvo no aparelho e sera enviado ao reconectar','')}catch(e){}}
+function filaOffline(rows){try{var q=JSON.parse(localStorage.getItem('tos_q')||'[]');q=q.concat(rows);localStorage.setItem('tos_q',JSON.stringify(q));showToast('Sem internet: treino salvo no aparelho e será enviado ao reconectar','')}catch(e){}}
 var __syncing=false;
 async function syncFila(){if(__syncing||!user||navigator.onLine===false||window.__offMode)return;var q;try{q=JSON.parse(localStorage.getItem('tos_q')||'[]')}catch(e){q=[]}if(!q.length)return;__syncing=true;try{var mine=q.filter(function(r){return r.user_id===user.id});var other=q.filter(function(r){return r.user_id!==user.id});if(!mine.length)return;var r=await sb.from('logs_execucao').insert(mine);if(!r.error){localStorage.setItem('tos_q',JSON.stringify(other));showToast('Registros offline enviados ('+mine.length+')','');try{refreshGamificacao();loadUltimasCargas()}catch(e){}}}catch(e){}finally{__syncing=false}}
 window.addEventListener('online',function(){offBarHide();if(window.__offMode){location.reload();return}syncFila()});
@@ -3838,7 +3838,7 @@ if ('serviceWorker' in navigator) {
 }
 
 var __exCat=null,__swapUndo=null;
-async function trocarExercicio(wi,di,ei,btn){if(!podeVip()){if(confirm('Troca de exercicio equivalente e um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opcao)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
+async function trocarExercicio(wi,di,ei,btn){if(!podeVip()){if(confirm('Troca de exercicio equivalente e um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opção)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.swap-btn');if(b)trocarExercicio(parseInt(b.dataset.wi),parseInt(b.dataset.di),parseInt(b.dataset.ei),b)});
 try{if(/[?&]cadastro=1/.test(location.search))setTimeout(function(){if(typeof authTab==='function'&&document.getElementById('tab-up'))authTab('up')},400)}catch(e){}
 
@@ -3847,7 +3847,7 @@ async function __getLimites(){try{if(!window.__planosCache){var r=await sb.from(
 window.__regras=null;
 function regraDe(metodo){var m=String(metodo||'').toLowerCase().replace(/[-_]/g,' ');var R=window.__regras||[{metodo:'tradicional',reps_min:8,reps_max:12,inc_pct:5,sessoes_estagnacao:3},{metodo:'bi set',reps_min:10,reps_max:12,inc_pct:5},{metodo:'super set',reps_min:10,reps_max:12,inc_pct:5},{metodo:'rest pause',reps_min:6,reps_max:10,inc_pct:3.5},{metodo:'drop set',reps_min:8,reps_max:12,inc_pct:5}];var f=null;R.forEach(function(r){if(r.metodo!=='tradicional'&&m.indexOf(r.metodo)>-1)f=r});return f||R.find(function(r){return r.metodo==='tradicional'})}
 function fmtKg(n){return String(Math.round(n*10)/10).replace('.',',')}
-function sugestaoCarga(name,metodo,ultima){try{var key=String(name||'').trim().toLowerCase();var raw=(window.__hist&&window.__hist[key])||[];var h=[],seen={};raw.forEach(function(x){var p=parseFloat(String(x.peso).replace(',','.')),rp=parseInt(x.reps,10);if(!(p>0)||!(rp>0))return;if(seen[x.d])return;seen[x.d]=1;h.push({peso:p,reps:rp})});if(!h.length&&ultima&&ultima.peso!=null&&ultima.reps!=null){var p0=parseFloat(String(ultima.peso).replace(',','.')),r0=parseInt(ultima.reps,10);if(p0>0&&r0>0)h.push({peso:p0,reps:r0})}if(!h.length)return '';var L=h[0];var r=regraDe(metodo);var step=/halter|dumbbell|kettlebell/i.test(name)?1:2.5;var inc=Math.max(step,Math.round(L.peso*r.inc_pct/100/step)*step);var nSes=r.sessoes_estagnacao||3;var alerta='';if(h.length>=nSes){var parado=true;for(var i=0;i<nSes-1;i++){var A=h[i],B=h[i+1];if(A.peso>B.peso||(A.peso===B.peso&&A.reps>B.reps)){parado=false;break}}if(parado)alerta='<div class="sug-alerta">Sem evolu&ccedil;&atilde;o h&aacute; '+nSes+' sess&otilde;es. Toque em <b>Trocar</b> para destravar.</div>'}var txt,subiu=L.reps>=r.reps_max;if(!podeVip()){txt=subiu?'Voc&ecirc; fez '+L.reps+' reps com '+fmtKg(L.peso)+' kg. No <b>VIP</b>, seu pr&oacute;ximo treino j&aacute; viria com <b>'+fmtKg(L.peso+inc)+' kg</b>.':'No <b>VIP</b> o app calcula a carga de hoje a partir dos seus registros.';return '<div class="sug-carga" style="cursor:pointer" onclick="assinarPlano(\'vip\')">&#128274; '+txt+'</div>'}if(subiu){txt='Sugest&atilde;o hoje: <b>'+fmtKg(L.peso+inc)+' kg</b> (voc&ecirc; fez '+L.reps+' reps com '+fmtKg(L.peso)+' kg)'}else if(L.reps<r.reps_min&&h[1]&&h[1].reps<r.reps_min&&h[1].peso>=L.peso){var nv=Math.max(step,Math.round((L.peso-inc)/step)*step);txt='Sugest&atilde;o hoje: reduzir para <b>'+fmtKg(nv)+' kg</b> e buscar '+r.reps_min+' a '+r.reps_max+' reps (2 sess&otilde;es abaixo de '+r.reps_min+')'}else if(L.reps<r.reps_min){txt='Sugest&atilde;o hoje: <b>'+fmtKg(L.peso)+' kg</b> e busque '+r.reps_min+' a '+r.reps_max+' reps (&uacute;ltima: '+L.reps+')'}else{txt='Sugest&atilde;o hoje: <b>'+fmtKg(L.peso)+' kg</b> e busque '+r.reps_max+' reps (&uacute;ltima: '+L.reps+')'}return '<div class="sug-carga">'+txt+'</div>'+alerta}catch(e){return ''}}
+function sugestaoCarga(name,metodo,ultima){try{var key=String(name||'').trim().toLowerCase();var raw=(window.__hist&&window.__hist[key])||[];var h=[],seen={};raw.forEach(function(x){var p=parseFloat(String(x.peso).replace(',','.')),rp=parseInt(x.reps,10);if(!(p>0)||!(rp>0))return;if(seen[x.d])return;seen[x.d]=1;h.push({peso:p,reps:rp})});if(!h.length&&ultima&&ultima.peso!=null&&ultima.reps!=null){var p0=parseFloat(String(ultima.peso).replace(',','.')),r0=parseInt(ultima.reps,10);if(p0>0&&r0>0)h.push({peso:p0,reps:r0})}if(!h.length)return '';var L=h[0];var r=Object.assign({},regraDe(metodo));var __pm=String(arguments[3]||"").match(/(\d+)\s*[-–a]\s*(\d+)/);if(__pm){r.reps_min=+__pm[1];r.reps_max=+__pm[2]}else{var __p1=String(arguments[3]||"").match(/^\s*(\d+)\s*$/);if(__p1){r.reps_min=r.reps_max=+__p1[1]}}var step=/halter|dumbbell|kettlebell/i.test(name)?1:2.5;var inc=Math.max(step,Math.round(L.peso*r.inc_pct/100/step)*step);var nSes=r.sessoes_estagnacao||3;var alerta='';if(h.length>=nSes){var parado=true;for(var i=0;i<nSes-1;i++){var A=h[i],B=h[i+1];if(A.peso>B.peso||(A.peso===B.peso&&A.reps>B.reps)){parado=false;break}}if(parado)alerta='<div class="sug-alerta">Sem evolu&ccedil;&atilde;o h&aacute; '+nSes+' sess&otilde;es. Toque em <b>Trocar</b> para destravar.</div>'}var txt,subiu=L.reps>=r.reps_max;if(!podeVip()){txt=subiu?'Voc&ecirc; fez '+L.reps+' reps com '+fmtKg(L.peso)+' kg. No <b>VIP</b>, seu pr&oacute;ximo treino j&aacute; viria com <b>'+fmtKg(L.peso+inc)+' kg</b>.':'No <b>VIP</b> o app calcula a carga de hoje a partir dos seus registros.';return '<div class="sug-carga" style="cursor:pointer" onclick="assinarPlano(\'vip\')">&#128274; '+txt+'</div>'}if(subiu){txt='Sugest&atilde;o hoje: <b>'+fmtKg(L.peso+inc)+' kg</b> (voc&ecirc; fez '+L.reps+' reps com '+fmtKg(L.peso)+' kg)'}else if(L.reps<r.reps_min&&h[1]&&h[1].reps<r.reps_min&&h[1].peso>=L.peso){var nv=Math.max(step,Math.round((L.peso-inc)/step)*step);txt='Sugest&atilde;o hoje: reduzir para <b>'+fmtKg(nv)+' kg</b> e buscar '+r.reps_min+' a '+r.reps_max+' reps (2 sess&otilde;es abaixo de '+r.reps_min+')'}else if(L.reps<r.reps_min){txt='Sugest&atilde;o hoje: <b>'+fmtKg(L.peso)+' kg</b> e busque '+r.reps_min+' a '+r.reps_max+' reps (&uacute;ltima: '+L.reps+')'}else{txt='Sugest&atilde;o hoje: <b>'+fmtKg(L.peso)+' kg</b> e busque '+r.reps_max+' reps (&uacute;ltima: '+L.reps+')'}return '<div class="sug-carga">'+txt+'</div>'+alerta}catch(e){return ''}}
 (async function(){try{var r=await sb.from('progressao_regras').select('*');if(!r.error&&r.data&&r.data.length)window.__regras=r.data}catch(e){}})();
 
 var __ex=null;
@@ -3871,6 +3871,14 @@ setTimeout(function(){try{syncFila()}catch(e){}},4000);
 
 try{var __rpc=renderPlanoCard;renderPlanoCard=function(){var r=__rpc.apply(this,arguments);try{var out=document.getElementById('plano-out');var pid=profile&&profile.plano_treino;if(out&&(pid==='vip'||pid==='fit')&&!out.querySelector('.btn-portal')){out.insertAdjacentHTML('beforeend','<button type="button" class="btn btn-portal" style="width:100%;margin-top:10px;min-height:46px" onclick="abrirPortal(this)">Gerenciar assinatura / cancelar</button><div id="portal-msg" style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center;line-height:1.4">Cancelamento sem multa. O acesso continua at\u00e9 o fim do per\u00edodo j\u00e1 pago.</div>')}}catch(e){}return r}}catch(e){}
 async function abrirPortal(btn){var m=document.getElementById('portal-msg');try{if(btn){btn.disabled=true;btn.textContent='Abrindo...'}var res=await sb.functions.invoke('stripe-checkout',{body:{action:'portal'}});var data=res.data;if(typeof data==='string'){try{data=JSON.parse(data)}catch(e){}}if(res.error)throw new Error(res.error.message||'Erro');if(!data||!data.ok||!data.url)throw new Error((data&&data.error)||'N\u00e3o foi poss\u00edvel abrir o portal');location.href=data.url}catch(e){if(m){m.style.color='#e57373';m.textContent=e.message||'Erro ao abrir o portal'}if(btn){btn.disabled=false;btn.textContent='Gerenciar assinatura / cancelar'}}}
+
+/* ---- patch: correcoes de teste ---- */
+function planoFeat(p){try{var n=function(x,s,pl){return x+' '+(x===1?s:pl)};var l=['At\u00e9 '+n(p.treinos_max,'treino','treinos')+' a cada '+p.treinos_periodo_dias+' dias',p.alteracoes_max?('At\u00e9 '+n(p.alteracoes_max,'ajuste inteligente','ajustes inteligentes')):'Sem ajustes inteligentes',p.id==='vip'?'Troca de exerc\u00edcio com um toque e carga sugerida pelo app':'Registro de cargas e hist\u00f3rico'];return '<ul class="plano-feat">'+l.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'}catch(e){return ''}}
+aplicarGateAjusteForms=function(){try{if(!profile||profile.is_admin||podeVip())return;['mud-txt','ajuste-txt'].forEach(function(id){var t=document.getElementById(id);if(!t)return;var card=t.closest('.card')||t.parentElement;if(!card)return;card.innerHTML=bannerVip('O ajuste inteligente do treino \u00e9 exclusivo do plano VIP.')})}catch(e){}};
+try{new MutationObserver(function(){if(document.getElementById('mud-txt'))aplicarGateAjusteForms()}).observe(document.body,{childList:true,subtree:true})}catch(e){}
+try{var __aj=document.getElementById('ajuste-txt'),__cd=__aj&&__aj.closest('.card');if(__cd)__cd.innerHTML='<div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Suporte</div><div style="color:var(--muted);font-size:16px;margin-bottom:10px">D\u00favidas, sugest\u00f5es ou algum problema? Fale com a gente.</div><button type="button" class="btn btn-s" onclick="show(\'suporte\')">Abrir suporte</button>'}catch(e){}
+(function(){var o=renderPlanoCard;renderPlanoCard=function(){o.apply(this,arguments);try{var out=document.getElementById('plano-out');if(profile&&profile.plano_treino==='vip'&&out){out.querySelectorAll('button').forEach(function(b){if(/Oferta Black/.test(b.textContent)){var n=b.nextElementSibling;if(n&&/Black November/.test(n.textContent))n.remove();b.remove()}})}}catch(e){}}})();
+(function(){var o=oferecerInstalacao;oferecerInstalacao=function(){var busy=document.getElementById('troca-aviso')||document.querySelector('#push-toast.show,.ex-ov,#toast.show,.toast.show');if(busy){setTimeout(oferecerInstalacao,6000);return}return o.apply(this,arguments)}})();
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
