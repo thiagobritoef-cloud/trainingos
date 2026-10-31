@@ -354,6 +354,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 .swap-btn{display:inline-flex;align-items:center;gap:4px;margin:6px 0 0 6px;padding:7px 12px;min-height:34px;border-radius:8px;border:1px solid var(--g);background:transparent;color:var(--g);font-size:12px;font-weight:700;cursor:pointer;vertical-align:middle}.swap-btn:active{opacity:.6}.swap-btn[disabled]{opacity:.5}@media (max-width:600px){.swap-btn{min-height:40px;font-size:13px;margin:8px 8px 0 0}}
 #a-terms-row{background:rgba(255,255,255,.04);border:1px solid var(--g);border-radius:10px;padding:12px;font-size:13px!important;color:var(--text,#fff)!important}#a-terms{width:22px;height:22px;min-width:22px;accent-color:var(--g)}
 .swap-btn.locked{border-style:dashed;color:var(--muted);border-color:var(--muted)}
+.sug-carga{margin-top:4px;font-size:12px;color:var(--g);line-height:1.35}
 </style>
 </head>
 <body>
@@ -2193,7 +2194,7 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes;
       var desc = ex.descanso || ex.intervalo || ex.rest || '-';
 
       html += '<tr class="' + (parceiro ? 'ex-row-top' : '') + '">' +
-        '<td><div class="ex-name">' + name + '</div>' +
+        '<td><div class="ex-name">' + name + '</div>' + sugestaoCarga(name, metodo, ultima) +
         (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') + '<button type="button" class="swap-btn' + (podeVip() ? '' : ' locked') + '" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">' + (podeVip() ? '&#8646; Trocar' : '&#128274; Trocar') + '</button>' +
         '</td>' +
         '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
@@ -3826,6 +3827,12 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 try{if(/[?&]cadastro=1/.test(location.search))setTimeout(function(){if(typeof authTab==='function'&&document.getElementById('tab-up'))authTab('up')},400)}catch(e){}
 
 async function __getLimites(){try{if(!window.__planosCache){var r=await sb.from('planos').select('*').order('preco',{ascending:true});if(!r.error&&r.data)window.__planosCache=r.data}var id=(profile&&profile.plano_treino==='fit')?'fit':(podeVip()?'vip':'free');var p=(window.__planosCache||[]).find(function(x){return x.id===id});if(p)return{t:p.treinos_max,tp:p.treinos_periodo_dias,a:p.alteracoes_max,ap:p.alteracoes_periodo_dias}}catch(e){}return{t:1,tp:30,a:0,ap:30}}
+
+window.__regras=null;
+function regraDe(metodo){var m=String(metodo||'').toLowerCase().replace(/[-_]/g,' ');var R=window.__regras||[{metodo:'tradicional',reps_min:8,reps_max:12,inc_pct:5},{metodo:'bi set',reps_min:10,reps_max:12,inc_pct:5},{metodo:'super set',reps_min:10,reps_max:12,inc_pct:5},{metodo:'rest pause',reps_min:6,reps_max:10,inc_pct:3.5},{metodo:'drop set',reps_min:8,reps_max:12,inc_pct:5}];var f=null;R.forEach(function(r){if(r.metodo!=='tradicional'&&m.indexOf(r.metodo)>-1)f=r});return f||R.find(function(r){return r.metodo==='tradicional'})}
+function fmtKg(n){return String(Math.round(n*10)/10).replace('.',',')}
+function sugestaoCarga(name,metodo,ultima){try{if(!ultima||ultima.peso==null||ultima.reps==null)return '';var peso=parseFloat(String(ultima.peso).replace(',','.'));var reps=parseInt(ultima.reps,10);if(!(peso>0)||!(reps>0))return '';var r=regraDe(metodo);var step=/halter|dumbbell|kettlebell/i.test(name)?1:2.5;var txt;if(reps>=r.reps_max){var inc=Math.max(step,Math.round(peso*r.inc_pct/100/step)*step);txt='Sugest&atilde;o hoje: <b>'+fmtKg(peso+inc)+' kg</b> (voc&ecirc; fez '+reps+' reps com '+fmtKg(peso)+' kg)'}else if(reps<r.reps_min){txt='Sugest&atilde;o hoje: <b>'+fmtKg(peso)+' kg</b> e busque '+r.reps_min+' a '+r.reps_max+' reps (&uacute;ltima: '+reps+')'}else{txt='Sugest&atilde;o hoje: <b>'+fmtKg(peso)+' kg</b> e busque '+r.reps_max+' reps (&uacute;ltima: '+reps+')'}return '<div class="sug-carga">'+txt+'</div>'}catch(e){return ''}}
+(async function(){try{var r=await sb.from('progressao_regras').select('*');if(!r.error&&r.data&&r.data.length)window.__regras=r.data}catch(e){}})();
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
