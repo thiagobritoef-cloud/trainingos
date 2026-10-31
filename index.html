@@ -578,7 +578,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
   <div class="cnt">
     <div class="card" id="prog-card">
       <div class="ctitle">Progresso: Peso e Fotos</div>
-      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Registre seu peso e uma foto periodicamente para acompanhar sua evolucao.</div>
+      <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Registre seu peso e uma foto periodicamente para acompanhar sua evolução.</div>
       <div class="frow">
         <div class="fg"><label>Peso (kg)</label><input type="number" id="prog-peso" step="0.1" placeholder="kg"></div>
         <div class="fg"><label>Data</label><input type="date" id="prog-data"></div>
@@ -1031,13 +1031,13 @@ var SPLITS_INFO = [
 
 var DICAS_USO = [
   {ic:'&#9889;', t:'Gerar seu treino', d:'Toque em "Gerar Novo Treino" na tela inicial. A IA monta um programa completo baseado no seu perfil em cerca de 30 segundos.'},
-  {ic:'&#127909;', t:'Assistir aos videos', d:'Cada exercicio tem um video demonstrativo. Assista antes de executar o movimento pela primeira vez.'},
-  {ic:'&#9997;', t:'Registrar carga, reps e RPE', d:'Preencha carga, reps e RPE de cada exercicio e toque no botao "Registrar Treino" no final da tela para salvar tudo de uma vez. RPE e o esforco percebido de 1 a 10 (10 = falha total) e ajuda o Thiago a acompanhar sua evolucao.'},
+  {ic:'&#127909;', t:'Assistir aos videos', d:'Os exercícios com vídeo têm um botão de vídeo demonstrativo. Assista antes de executar o movimento pela primeira vez.'},
+  {ic:'&#9997;', t:'Registrar carga, reps e RPE', d:'Preencha carga, reps e RPE de cada exercicio e toque no botao "Registrar Treino" no final da tela para salvar tudo de uma vez. RPE é o esforço percebido de 1 a 10 (10 = falha total) e alimenta o histórico e as sugestões de carga do app.'},
   {ic:'&#128200;', t:'Acompanhar seu progresso', d:'Na tela de Perfil, registre seu peso e uma foto periodicamente. Um grafico mostra sua evolucao ao longo do tempo.'},
-  {ic:'&#128293;', t:'Sua consistencia', d:'A tela inicial mostra sua sequencia de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
-  {ic:'&#128172;', t:'Pedir ajuste', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e envie direto para o treinador.'},
+  {ic:'&#128293;', t:'Sua consistencia', d:'Em Meus Resultados você vê sua sequência de dias treinados e o total geral. Quanto mais consistente, maior o numero.'},
+  {ic:'&#128172;', t:'Pedir ajuste', d:'Dentro do treino, escreva o que quer mudar (ex: trocar um exercicio, menos volume) e o app reformula o treino para você (recurso do plano VIP).'},
   {ic:'&#128241;', t:'Instalar no celular', d:'Abra o menu do navegador (⋮ no Android, Compartilhar no iPhone) e toque em Instalar app ou Adicionar à Tela de Início para ter o TO BE FITNESS como um aplicativo.'},
-  {ic:'&#128276;', t:'Mensagens do treinador', d:'Avisos e recados do Thiago aparecem automaticamente no topo da tela inicial.'}
+  {ic:'&#128276;', t: 'Avisos do app', d: 'Avisos e novidades do app aparecem automaticamente no topo da tela inicial.'}
 ];
 
 function renderDicasUso() {
@@ -3879,6 +3879,16 @@ try{new MutationObserver(function(){if(document.getElementById('mud-txt'))aplica
 try{var __aj=document.getElementById('ajuste-txt'),__cd=__aj&&__aj.closest('.card');if(__cd)__cd.innerHTML='<div style="font-weight:900;font-size:16px;margin-bottom:4px">&#128172; Suporte</div><div style="color:var(--muted);font-size:16px;margin-bottom:10px">D\u00favidas, sugest\u00f5es ou algum problema? Fale com a gente.</div><button type="button" class="btn btn-s" onclick="show(\'suporte\')">Abrir suporte</button>'}catch(e){}
 (function(){var o=renderPlanoCard;renderPlanoCard=function(){o.apply(this,arguments);try{var out=document.getElementById('plano-out');if(profile&&profile.plano_treino==='vip'&&out){out.querySelectorAll('button').forEach(function(b){if(/Oferta Black/.test(b.textContent)){var n=b.nextElementSibling;if(n&&/Black November/.test(n.textContent))n.remove();b.remove()}})}}catch(e){}}})();
 (function(){var o=oferecerInstalacao;oferecerInstalacao=function(){var busy=document.getElementById('troca-aviso')||document.querySelector('#push-toast.show,#motiv-toast.show,.ex-ov,.toast.show');if(busy){setTimeout(oferecerInstalacao,6000);return}return o.apply(this,arguments)}})();
+
+/* acentos na tela Dicas (somente texto exibido) */
+(function(){
+var M={combinacao:'combina\u00e7\u00e3o',exercicios:'exerc\u00edcios',exercicio:'exerc\u00edcio',musculo:'m\u00fasculo',sinergicos:'sin\u00e9rgicos',biceps:'b\u00edceps',triceps:'tr\u00edceps',intermediario:'intermedi\u00e1rio',intermediaria:'intermedi\u00e1ria',tres:'tr\u00eas',sequencia:'sequ\u00eancia',aerobia:'aer\u00f3bia',varios:'v\u00e1rios',sedentario:'sedent\u00e1rio',metabolica:'metab\u00f3lica',metabolico:'metab\u00f3lico',inicio:'in\u00edcio',mantem:'mant\u00e9m',maxima:'m\u00e1xima',maximo:'m\u00e1ximo',faca:'fa\u00e7a',ate:'at\u00e9',estimulos:'est\u00edmulos',estimulo:'est\u00edmulo',avancado:'avan\u00e7ado',alem:'al\u00e9m',serie:'s\u00e9rie',series:'s\u00e9ries',dinamica:'din\u00e2mica',proximo:'pr\u00f3ximo',padroes:'padr\u00f5es',bracos:'bra\u00e7os',gluteo:'gl\u00fateo',classico:'cl\u00e1ssico',classica:'cl\u00e1ssica',critico:'cr\u00edtico',padrao:'padr\u00e3o',sab:'S\u00e1b',otimo:'\u00f3timo',pelvica:'p\u00e9lvica',videos:'v\u00eddeos',video:'v\u00eddeo',botao:'bot\u00e3o',esforco:'esfor\u00e7o',grafico:'gr\u00e1fico',numero:'n\u00famero',voce:'voc\u00ea',metodo:'m\u00e9todo',metodos:'m\u00e9todos',forca:'for\u00e7a',tecnicas:'t\u00e9cnicas',tecnica:'t\u00e9cnica',potencia:'pot\u00eancia',glossario:'gloss\u00e1rio',nao:'n\u00e3o',sao:'s\u00e3o',mao:'m\u00e3o',pos:'p\u00f3s',ultimas:'\u00faltimas',ultima:'\u00faltima',ultimo:'\u00faltimo',proxima:'pr\u00f3xima',tambem:'tamb\u00e9m',medio:'m\u00e9dio',media:'m\u00e9dia',frequencia:'frequ\u00eancia',cadencia:'cad\u00eancia',excentrica:'exc\u00eantrica',concentrica:'conc\u00eantrica',isometrica:'isom\u00e9trica',abdomen:'abd\u00f4men'};
+function fix(w){var l=w.toLowerCase(),r=M[l];if(!r){if(l.length>5&&/cao$/.test(l))r=l.slice(0,-3)+'\u00e7\u00e3o';else if(l.length>6&&/coes$/.test(l))r=l.slice(0,-4)+'\u00e7\u00f5es';else if(l.length>6&&/encia$/.test(l))r=l.slice(0,-5)+'\u00eancia';else if(l.length>6&&/ancia$/.test(l))r=l.slice(0,-5)+'\u00e2ncia';else if(l.length>5&&/sao$/.test(l))r=l.slice(0,-2)+'\u00e3o'}
+if(!r||r===l)return w;if(w.length>1&&w===w.toUpperCase())return r.toUpperCase();if(w[0]!==l[0])return r[0].toUpperCase()+r.slice(1);return r}
+function acent(root){var tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n,list=[];while(n=tw.nextNode())list.push(n);list.forEach(function(n){var s=n.nodeValue;if(!/[A-Za-z]{2}/.test(s))return;var o=s.replace(/[A-Za-z]{2,}/g,fix);if(o!==s)n.nodeValue=o})}
+window.acentuarTela=acent;
+var sc=document.getElementById('screen-dicas');if(sc){var busy=0;new MutationObserver(function(){if(busy)return;busy=1;setTimeout(function(){try{acent(sc)}catch(e){}busy=0},30)}).observe(sc,{childList:true,subtree:true})}
+})();
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
