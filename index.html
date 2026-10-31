@@ -350,6 +350,9 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
 #ex-area td:nth-child(6)::before { content: 'Carga: '; color: var(--muted); }
 #ex-area td:nth-child(6) input { flex: 1; min-width: 0; width: auto; }
 }
+
+.swap-btn{display:inline-flex;align-items:center;gap:4px;margin:6px 0 0 6px;padding:7px 12px;min-height:34px;border-radius:8px;border:1px solid var(--g);background:transparent;color:var(--g);font-size:12px;font-weight:700;cursor:pointer;vertical-align:middle}.swap-btn:active{opacity:.6}.swap-btn[disabled]{opacity:.5}@media (max-width:600px){.swap-btn{min-height:40px;font-size:13px;margin:8px 8px 0 0}}
+#a-terms-row{background:rgba(255,255,255,.04);border:1px solid var(--g);border-radius:10px;padding:12px;font-size:13px!important;color:var(--text,#fff)!important}#a-terms{width:22px;height:22px;min-width:22px;accent-color:var(--g)}
 </style>
 </head>
 <body>
@@ -369,7 +372,7 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     <div id="auth-msg"></div>
     <div class="fg"><label>Email</label><input type="email" id="a-email" placeholder="seu@email.com"></div>
     <div class="fg"><label>Senha</label><input type="password" id="a-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doAuth()"></div>
-    <div id="a-terms-row" style="display:none;margin:2px 0 12px;font-size:12px;color:var(--muted);line-height:1.45"><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" id="a-terms" style="margin-top:2px"><span>Li e aceito os <a href="termos.html" target="_blank" style="color:var(--g)">Termos de Uso</a>, incluindo as regras de cobrança e cancelamento.</span></label></div>
+    <div id="a-terms-row" style="display:none;margin:2px 0 12px;font-size:12px;color:var(--muted);line-height:1.45"><label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" id="a-terms" style="margin-top:2px"><span>Tenho 18 anos ou mais e li e aceito os <a href="termos.html" target="_blank" style="color:var(--g);font-weight:700">Termos de Uso</a> (incluindo cobran&ccedil;a e cancelamento) e a <a href="privacidade.html" target="_blank" style="color:var(--g);font-weight:700">Pol&iacute;tica de Privacidade</a>.</span></label></div>
     <div id="link-esqueci-senha" style="text-align:right;margin:-8px 0 14px"><a href="javascript:void(0)" onclick="abrirEsqueciSenha()" style="color:var(--muted);font-size:13px;text-decoration:underline">Esqueci minha senha</a></div>
 <button class="btn btn-p" id="auth-btn" onclick="doAuth()">Entrar</button>
 <div style="text-align:center;margin-top:12px;font-size:12px"><a href="termos.html" target="_blank" style="color:var(--muted)">Termos de Uso</a> &middot; <a href="privacidade.html" target="_blank" style="color:var(--muted)">Privacidade</a></div>
@@ -2149,7 +2152,7 @@ function renderWeek(semanas, wi) {
   });
 }
 
-function renderDay(sessoes, di, wi) {
+function renderDay(sessoes, di, wi) { window.__rdS = sessoes;
   var sess = sessoes[di] || {};
   var exs = sess.exercicios || [];
   var aquecimento = sess.aquecimento || [];
@@ -2190,7 +2193,7 @@ function renderDay(sessoes, di, wi) {
 
       html += '<tr class="' + (parceiro ? 'ex-row-top' : '') + '">' +
         '<td><div class="ex-name">' + name + '</div>' +
-        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') +
+        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : '') + '<button type="button" class="swap-btn" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">&#8646; Trocar</button>' +
         '</td>' +
         '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
         '<td>' + series + '</td>' +
@@ -3815,6 +3818,11 @@ if ('serviceWorker' in navigator) {
     if (e.data && e.data.type === 'push-toast') { showPushToast(e.data.title, e.data.body, e.data.url); }
   });
 }
+
+var __exCat=null,__swapUndo=null;
+async function trocarExercicio(wi,di,ei,btn){var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opcao)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.swap-btn');if(b)trocarExercicio(parseInt(b.dataset.wi),parseInt(b.dataset.di),parseInt(b.dataset.ei),b)});
+try{if(/[?&]cadastro=1/.test(location.search))setTimeout(function(){if(typeof authTab==='function'&&document.getElementById('tab-up'))authTab('up')},400)}catch(e){}
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
