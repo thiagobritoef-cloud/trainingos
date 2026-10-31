@@ -1,4 +1,4 @@
-var V = 'tos-v11';
+var V = 'tos-v12';
 self.addEventListener('install', function(e) {
   self.skipWaiting();
 });
@@ -12,16 +12,25 @@ self.addEventListener('activate', function(e) {
   );
 });
 self.addEventListener('fetch', function(e) {
-  var url = e.request.url;
-  if (url.indexOf('supabase') >= 0 || url.indexOf('cdn.jsdelivr') >= 0) return;
+  var req = e.request;
+  var url = req.url;
+  if (req.method !== 'GET' || url.indexOf('supabase.co') >= 0 || url.indexOf('stripe.com') >= 0) return;
   e.respondWith(
-    fetch(e.request, { cache: 'no-cache' }).then(function(res) {
-      return caches.open(V).then(function(c) {
-        c.put(e.request, res.clone());
-        return res;
-      });
+    fetch(req, { cache: 'no-cache' }).then(function(res) {
+      if (res && (res.ok || res.type === 'opaque')) {
+        var cp = res.clone();
+        caches.open(V).then(function(c) { c.put(req, cp); });
+      }
+      return res;
     }).catch(function() {
-      return caches.match(e.request);
+      return caches.match(req).then(function(m) {
+        if (m) return m;
+        return caches.match(req, { ignoreSearch: true }).then(function(m2) {
+          if (m2) return m2;
+          if (req.mode === 'navigate') return caches.match('/index.html').then(function(m3) { return m3 || caches.match('/'); });
+          return Response.error();
+        });
+      });
     })
   );
 });
