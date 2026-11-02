@@ -3896,7 +3896,7 @@ var G='Crucifixo com Halteres|Dumbbell_Flyes;Crossover no Cabo|Cable_Crossover;F
 var MAP={};function nm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
 G.split(';').forEach(function(p){var q=p.split('|');MAP[nm(q[0])]=q[1]});
 var BASE='https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/';
-window.gifDe=function(name){return MAP[nm(name)]||''};
+window.gifDe=function(name){var n=nm(name);if(MAP[n])return MAP[n];var best='',bl=0;for(var k in MAP){if((n.indexOf(k)===0||k.indexOf(n)===0)&&k.length>bl&&Math.min(k.length,n.length)>=8){best=MAP[k];bl=k.length}}return best};
 function anim(f){return '<div class="ex-anim"><img src="'+BASE+f+'/0.jpg" alt="" loading="lazy"><img class="b" src="'+BASE+f+'/1.jpg" alt="" loading="lazy"></div>'}
 function media(it,E){var ex=null;try{ex=window.__rdS[E.di].exercicios[it.ei]}catch(e){}
 var url=ex&&(ex.video_url||ex.video||'');var id=null;try{id=url&&typeof ytId==='function'?ytId(url):null}catch(e){}
