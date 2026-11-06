@@ -3276,6 +3276,7 @@ function admCardHtml(a) {
           '</select></div>' +
     '<div class="al-actions">' +
       '<button class="pri" onclick="verTreinoAluno(\'' + a.id + '\')">Ver treino</button>' +
+      '<button onclick="verCadastroAluno(\'' + a.id + '\')">Cadastro</button>' +
       '<button onclick="openMsgModal(\'' + a.id + '\',\'' + nomeSafe + '\')">Mensagem</button>' +
       '<button class="danger' + (isBlocked ? ' on' : '') + '" onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
     '</div>' +
@@ -3927,6 +3928,46 @@ var oc=execConcluir;
 execConcluir=function(){var E=__ex;try{if(E&&E.mode!=='rest'){var ex=exP(E);if(ex){var it=E.items[E.i];var rp0=parseInt((document.getElementById('eo-rp')||{}).value,10);if(rp0>0){var kg=parseFloat(String((document.getElementById('eo-kgp')||{}).value).replace(',','.'));var rp=parseInt((document.getElementById('eo-rpp')||{}).value,10);if(!(rp>0)){showToast('Informe as repeticoes do parceiro','');return}if(isNaN(kg))kg=0;(it.psets=it.psets||[]).push({peso:kg,reps:rp})}}}}catch(e){}return oc.apply(this,arguments)};
 var of=execFinalizar;
 execFinalizar=function(){try{var E=__ex;var area=document.getElementById('ex-area');if(E&&area){E.items.forEach(function(it){if(!it.psets||!it.psets.length)return;var best=it.psets.reduce(function(a,b){return(b.peso>a.peso||(b.peso===a.peso&&b.reps>a.reps))?b:a});var key='w'+E.wi+'d'+E.di+'e'+it.ei+'p';var set=function(sel,val,lsk){var el=area.querySelector(sel+'[data-k="'+key+'"]');if(el){el.value=val;el.dataset.touched='1'}try{localStorage.setItem(lsk+wkId+'_'+key,String(val))}catch(e){}};if(best.peso>0)set('.ex-load',best.peso,'ld_');set('.ex-mini[data-field="reps"]',best.reps,'ldreps_')})}}catch(e){}return of.apply(this,arguments)};
+})();
+
+/* admin: ver cadastro e origem do aluno */
+(function(){
+var LBL={nome:'Nome',email:'E-mail',plano:'Plano',plano_treino:'Plano de treino',objetivo:'Objetivo',nivel:'N&iacute;vel',data_nascimento:'Nascimento',telefone:'Telefone',whatsapp:'WhatsApp',sexo:'Sexo',peso:'Peso',altura:'Altura',materiais:'Materiais',equipamentos:'Equipamentos',duracao_semanas:'Dura&ccedil;&atilde;o do treino (sem.)',dias_semana:'Dias por semana',lesoes:'Les&otilde;es / restri&ccedil;&otilde;es',created_at:'Cadastro em',last_seen_at:'&Uacute;ltimo acesso',bloqueado:'Bloqueado'};
+var SKIP=/(^id$|_id$|token|stripe|password|senha|push|is_admin|updated_at|tutorial|aceite|termos_|^avatar)/i;
+function fd(s){try{var x=new Date(s);if(isNaN(x))return null;return x.toLocaleDateString('pt-BR')+' '+x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}catch(e){return null}}
+function val(k,v){if(v===true)return 'Sim';if(v===false)return 'N&atilde;o';if(Array.isArray(v))return _escHtml(v.join(', '));if(typeof v==='object')return _escHtml(JSON.stringify(v));if(/(_at|nascimento)$/.test(k)&&typeof v==='string'){var f=k==='data_nascimento'?(new Date(v+'T12:00:00').toLocaleDateString('pt-BR')):fd(v);if(f&&f!=='Invalid Date')return f}return _escHtml(String(v))}
+function row(l,v){return '<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="flex:0 0 40%;color:var(--muted);font-size:13px">'+l+'</div><div style="flex:1;font-size:14px;word-break:break-word">'+v+'</div></div>'}
+window.verCadastroAluno=async function(id){
+ var old=document.getElementById('cad-ov');if(old)old.remove();
+ var ov=document.createElement('div');ov.id='cad-ov';ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center';
+ ov.innerHTML='<div style="background:var(--dark,#111);border:1px solid var(--border);border-radius:16px 16px 0 0;width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:16px 16px 22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:18px">Cadastro do aluno</b><button type="button" id="cad-x" style="padding:6px 12px">Fechar</button></div><div id="cad-body" style="color:var(--muted)">Carregando...</div></div>';
+ document.body.appendChild(ov);
+ ov.addEventListener('click',function(e){if(e.target===ov||e.target.id==='cad-x')ov.remove()});
+ var body=document.getElementById('cad-body');
+ try{
+  var pr=await sb.from('profiles').select('*').eq('id',id).single();
+  if(pr.error)throw pr.error;var p=pr.data;var h='';
+  var keys=Object.keys(LBL).filter(function(k){return k in p});
+  Object.keys(p).forEach(function(k){if(keys.indexOf(k)<0)keys.push(k)});
+  keys.forEach(function(k){var v=p[k];if(v===null||v===''||v===undefined||SKIP.test(k))return;h+=row(LBL[k]||_escHtml(k.replace(/_/g,' ')),val(k,v))});
+  var org='',orgOk=true;
+  try{
+   var ci=await sb.from('convites').select('id,nome,tipo,status,created_at,accepted_at').eq('user_id',id);
+   if(ci.error)throw ci.error;
+   var usos=await sb.from('convite_usos').select('*').eq('user_id',id);
+   var lst=[];
+   (ci.data||[]).forEach(function(c){lst.push('Convite individual &ldquo;'+_escHtml(c.nome||'sem nome')+'&rdquo;'+(c.accepted_at?' &middot; aceito em '+fd(c.accepted_at):''))});
+   if(usos&&!usos.error&&(usos.data||[]).length){
+    var ids=usos.data.map(function(u){return u.convite_id});
+    var cg=await sb.from('convites').select('id,nome').in('id',ids);
+    var nm={};(cg.data||[]).forEach(function(c){nm[c.id]=c.nome});
+    usos.data.forEach(function(u){lst.push('Link geral &ldquo;'+_escHtml(nm[u.convite_id]||'sem nome')+'&rdquo;'+(u.created_at?' &middot; em '+fd(u.created_at):''))})}
+   org=lst.length?lst.join('<br>'):'Cadastro direto no app (sem convite registrado)';
+  }catch(e){orgOk=false;org='Origem n&atilde;o registrada'}
+  body.style.color='';
+  body.innerHTML='<div style="background:rgba(76,175,80,.1);border:1px solid var(--g);border-radius:12px;padding:10px 12px;margin:8px 0 10px"><div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--g);margin-bottom:3px">DE ONDE VEIO</div><div style="font-size:15px">'+org+'</div></div>'+h;
+ }catch(e){body.innerHTML='Erro ao carregar: '+_escHtml((e&&e.message)||String(e))}
+};
 })();
 </script>
 <div id="tut-overlay">
