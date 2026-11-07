@@ -3969,6 +3969,36 @@ window.verCadastroAluno=async function(id){
  }catch(e){body.innerHTML='Erro ao carregar: '+_escHtml((e&&e.message)||String(e))}
 };
 })();
+
+/* admin: origem do aluno no card + separar Free x VIP */
+(function(){
+function nPlano(a){return String(a.plano_treino||'').toLowerCase()}
+function cnt(p){var l=(admData.alunos||[]);if(p==='')return l.length;return l.filter(function(a){return nPlano(a)===p}).length}
+function chips(){
+ var el=document.getElementById('adm-selects');if(!el)return;
+ var sel=el.querySelectorAll('select');if(sel[1])sel[1].style.display='none';
+ var old=document.getElementById('adm-plano-chips');if(old)old.remove();
+ var cur=admData.planoF||'';
+ var defs=[['','Todos'],['free','Free'],['vip','VIP']];
+ if(cnt('fit'))defs.splice(2,0,['fit','Fit']);
+ var h='<div id="adm-plano-chips" style="display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap;width:100%">'+defs.map(function(f){var on=cur===f[0];return '<button type="button" onclick="setAdmPlano(\''+f[0]+'\')" style="flex:1;min-width:70px;padding:9px 6px;border-radius:10px;border:1px solid '+(on?'var(--g)':'var(--border)')+';background:'+(on?'rgba(76,175,80,.18)':'transparent')+';color:'+(on?'var(--g)':'var(--text)')+';font-weight:700;font-size:14px">'+f[1]+' <small style="opacity:.7">'+cnt(f[0])+'</small></button>'}).join('')+'</div>';
+ el.insertAdjacentHTML('beforebegin',h);
+}
+var oS=renderAdmSelects;renderAdmSelects=function(){oS.apply(this,arguments);try{chips()}catch(e){}};
+var oP=setAdmPlano;setAdmPlano=function(v){oP.call(this,v);try{chips()}catch(e){}};
+async function origens(){
+ var m={};
+ try{
+  var ci=await sb.from('convites').select('id,nome,tipo,user_id');
+  var nm={};(ci.data||[]).forEach(function(c){nm[c.id]=c;if(c.user_id)m[c.user_id]={t:'Convite',n:c.nome}});
+  var us=await sb.from('convite_usos').select('*');
+  if(!us.error)(us.data||[]).forEach(function(u){var c=nm[u.convite_id];if(u.user_id)m[u.user_id]={t:'Link geral',n:c?c.nome:''}});
+  admData.origem=m;admData.origemOk=!ci.error;
+ }catch(e){admData.origemOk=false}
+}
+var oL=loadAdmin;loadAdmin=async function(){var r=await oL.apply(this,arguments);try{await origens();renderAdmGrid();chips()}catch(e){}return r};
+var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)return h;var o=admData.origem&&admData.origem[a.id];var txt=o?(o.t+(o.n?' &ldquo;'+_escHtml(o.n)+'&rdquo;':'')):'Cadastro direto no app';var line='<div style="font-size:12px;color:var(--muted);margin:2px 0 8px">Entrou por: <b style="color:var(--text)">'+txt+'</b></div>';var i=h.indexOf('<div class="al-actions">');if(i>0)h=h.slice(0,i)+line+h.slice(i)}catch(e){}return h};
+})();
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
