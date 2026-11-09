@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script>(function(){try{var q=new URLSearchParams(location.search),o={},has=false;['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid'].forEach(function(x){var v=q.get(x);if(v){o[x]=v;has=true}});var old=localStorage.getItem('tbf_attr'),po=old?JSON.parse(old):null;if(!po||(has&&!po.gclid&&!po.utm_source)){o.landing=location.pathname;o.referrer=document.referrer||'';localStorage.setItem('tbf_attr',JSON.stringify(o))}}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3523,6 +3524,12 @@ async function renomearConvite(btn) {
   loadConvites();
 }
 
+function copiarConviteLista(btn) {
+  var link = 'https://app.tobefit.com.br/?c=' + btn.dataset.t + conviteSlug(decodeURIComponent(btn.dataset.nome || ''));
+  var ok = function() { var o = btn.textContent; btn.textContent = 'Copiado!'; setTimeout(function() { btn.textContent = o; }, 1500); };
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(link).then(ok, function() { prompt('Copie o link:', link); }); }
+  else { prompt('Copie o link:', link); }
+}
 function copiarConvite() {
   var box = document.getElementById('conv-link-box');
   var link = box ? (box.dataset.link || '') : '';
@@ -3537,7 +3544,7 @@ function copiarConvite() {
 async function loadConvites() {
   var listEl = document.getElementById('conv-list');
   if (!listEl) return;
-  var res = await sb.from('convites').select('id,nome,status,tipo,created_at,accepted_at,user_id').order('created_at', { ascending: false });
+  var res = await sb.from('convites').select('id,nome,status,tipo,created_at,accepted_at,user_id,token').order('created_at', { ascending: false });
   if (res.error || !res.data) { listEl.innerHTML = ''; return; }
   var ids = res.data.map(function(c) { return c.user_id; }).filter(function(v, i, a) { return v && a.indexOf(v) === i; });
   var profMap = {};
@@ -3553,6 +3560,7 @@ async function loadConvites() {
   }
   var html = '<div style="font-size:16px;color:#888;margin-bottom:6px">Convites enviados</div>';
   res.data.forEach(function(c) {
+    if ((c.tipo !== 'geral' && c.status === 'aceito') || c.status === 'cancelado') return;
     var statusTxt, statusColor;
     if (c.tipo === 'geral') {
       if (c.status === 'cancelado') {
@@ -3581,6 +3589,7 @@ async function loadConvites() {
       '</div>' +
       (p && c.tipo !== 'geral' ? '<div style="font-size:13px;color:' + (mismatch ? '#e55' : 'var(--muted)') + ';margin-top:2px">' + (mismatch ? '&#9888; Cadastrado como: ' : 'Cadastrado como: ') + _escHtml(p.nome || p.email || '') + '</div>' : '') +
       (c.status !== 'cancelado' ? '<button class="btn btn-s" style="margin-top:6px;margin-right:6px;padding:4px 10px;font-size:13px" data-id="' + c.id + '" data-nome="' + encodeURIComponent(c.nome || '') + '" onclick="renomearConvite(this)">Editar nome</button>' : '') +
+      ((c.tipo === 'geral' ? c.status !== 'cancelado' : c.status === 'pendente') ? '<button class="btn btn-s" style="margin-top:6px;margin-right:6px;padding:4px 10px;font-size:13px" data-t="' + c.token + '" data-nome="' + encodeURIComponent(c.nome || '') + '" onclick="copiarConviteLista(this)">Copiar link</button>' : '') +
       ((c.tipo === 'geral' ? c.status !== 'cancelado' : c.status === 'pendente') ? '<button class="btn btn-s" style="margin-top:6px;padding:4px 10px;font-size:13px" onclick="cancelarConvite(\'' + c.id + '\')">Cancelar convite</button>' : '') +
       '</div>';
   });
@@ -4152,5 +4161,20 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
     </div>
   </div>
 </div>
+<script>
+/* === Origem do aluno (Google Ads/UTM) === */
+(function(){
+var done=false;
+async function send(){try{if(done||localStorage.getItem('tbf_attr_sent'))return;var raw=localStorage.getItem('tbf_attr');if(!raw||typeof sb==='undefined')return;var s=await sb.auth.getSession();if(!s.data||!s.data.session)return;var r=await sb.rpc('registrar_origem',{p:JSON.parse(raw)});if(!r.error){done=true;localStorage.setItem('tbf_attr_sent','1')}}catch(e){}}
+setTimeout(send,2500);setTimeout(send,9000);
+try{sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_IN')setTimeout(send,1500)})}catch(e){}
+var OR={};
+async function carregarOrig(){try{var r=await sb.from('profiles').select('id,origem_canal,utm_campaign,utm_term').not('origem_canal','is',null);OR={};(r.data||[]).forEach(function(p){OR[p.id]=p})}catch(e){}}
+var oC2=admCardHtml;
+admCardHtml=function(a){var h=oC2(a);try{var p=OR[a.id];if(!p)return h;var t=p.origem_canal;var lab=t==='google_ads'?'Google Ads':(t==='organico'?'Direto / org\u00e1nico':t);var det=[p.utm_campaign&&('campanha: '+p.utm_campaign),p.utm_term&&('busca: '+p.utm_term)].filter(Boolean).join(' \u00b7 ');var line='<div style="font-size:12px;color:var(--muted);margin:2px 0 8px">Canal: <b style="color:var(--text)">'+_escHtml(lab)+'</b>'+(det?' \u00b7 '+_escHtml(det):'')+'</div>';var i=h.indexOf('<div class="al-actions">');return i>=0?h.slice(0,i)+line+h.slice(i):h+line}catch(e){return h}};
+var oL2=loadAdmin;
+loadAdmin=async function(){var r=await oL2.apply(this,arguments);try{await carregarOrig();renderAdmGrid()}catch(e){}return r};
+})();
+</script>
 </body>
 </html>
