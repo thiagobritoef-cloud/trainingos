@@ -4003,7 +4003,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
 /* === Pagamentos (admin) === */
 (function(){
   var __pagN = 0, __pagF = 'problemas';
-  var LBL = {pago:'Pago', recusa:'Recusa', bloqueio_radar:'Bloqueio Radar', disputa:'Disputa', fraude:'Alerta de fraude'};
+  var LBL = {pago:'Pago', recusa:'Recusa', bloqueio_radar:'Bloqueio Radar', disputa:'Disputa', fraude:'Alerta de fraude', cancelamento:'Cancelamento'};
   function esc(s){ return (typeof _escHtml==='function') ? _escHtml(String(s==null?'':s)) : String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function brl(c){ return 'R$ ' + ((c||0)/100).toFixed(2).replace('.',','); }
   function fdt(s){ try{ return new Date(s).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
@@ -4015,6 +4015,8 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       if (t) t.firstChild.textContent = 'Pagamentos' + (__pagN>0 ? ' (' + __pagN + ')' : '');
     }catch(e){}
   }
+  async function iaResumo(){ try{ var r = await sb.from('uso_ia').select('created_at,custo_brl').gte('created_at', new Date(Date.now()-30*864e5).toISOString()).limit(5000); var d=r.data||[]; var tot=d.reduce(function(a,x){return a+Number(x.custo_brl||0);},0); return {n:d.length,tot:tot,med:d.length?tot/d.length:0}; }catch(e){ return {n:0,tot:0,med:0}; } }
+  function r2(n){ return Number(n||0).toFixed(2).replace('.',','); }
   async function renderPag(){
     var pv = document.getElementById('pag-view'); if(!pv) return;
     pv.innerHTML = '<div class="loading"><div class="spin"></div></div>';
@@ -4024,6 +4026,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       var rows = r.data || [];
       var shown = rows.filter(function(p){
         if (__pagF==='problemas') return p.tipo!=='pago' && p.status==='aberto';
+        if (__pagF==='cancelamentos') return p.tipo==='cancelamento';
         if (__pagF==='recuperados') return p.status==='recuperado';
         if (__pagF==='pagos') return p.tipo==='pago';
         return true;
@@ -4031,15 +4034,22 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       var pagos = rows.filter(function(p){return p.tipo==='pago';});
       var soma = pagos.reduce(function(a,p){return a+(p.valor_centavos||0);},0);
       var nProb = rows.filter(function(p){return p.tipo!=='pago' && p.status==='aberto';}).length;
-      var chips = [['problemas','Problemas ('+nProb+')'],['recuperados','Recuperados'],['pagos','Pagos'],['todos','Todos']].map(function(c){
+      var ia = await iaResumo();
+      var rec30 = pagos.filter(function(p){return new Date(p.created_at).getTime() >= Date.now()-30*864e5;}).reduce(function(a,p){return a+(p.valor_centavos||0);},0)/100;
+      var chips = [['problemas','Problemas ('+nProb+')'],['recuperados','Recuperados'],['pagos','Pagos'],['cancelamentos','Cancelamentos'],['todos','Todos']].map(function(c){
         return '<button class="pg-chip'+(c[0]===__pagF?' on':'')+'" data-f="'+c[0]+'">'+c[1]+'</button>';
       }).join('');
       var html = '<div class="card"><div class="ctitle">Pagamentos</div>'
         + '<div style="font-size:14px;color:var(--muted);margin-bottom:10px">'+pagos.length+' pagos registrados · '+brl(soma)+' · '+nProb+' problema(s) em aberto</div>'
-        + '<div class="pg-chips">'+chips+'</div></div>';
+        + '<div class="pg-chips">'+chips+'</div>'
+        + '<div class="pg-act"><button class="pg-btn" id="pg-sync">Sincronizar com Stripe</button></div></div>'
+        + '<div class="card"><div class="ctitle">Custo da IA (30 dias)</div>'
+        + '<div class="pg-sub">'+ia.n+' treinos gerados · total R$ '+r2(ia.tot)+' · média R$ '+Number(ia.med).toFixed(3).replace('.',',')+' por treino</div>'
+        + '<div class="pg-sub">Receita 30 dias: R$ '+r2(rec30)+(rec30>0?' · IA consome '+(ia.tot/rec30*100).toFixed(1).replace('.',',')+'% da receita':'')+'</div>'
+        + '<div class="pg-sub">Estimativa: Haiku 4.5 (US$ 1 entrada / US$ 5 saída por milhão de tokens), dólar a R$ 5,50. Registro começa em 09/11/2026.</div></div>';
       if (!shown.length) html += '<div class="card" style="color:var(--muted)">Nada por aqui.</div>';
       shown.forEach(function(p){
-        var prob = p.tipo!=='pago';
+        var prob = p.tipo!=='pago' && p.tipo!=='cancelamento';
         html += '<div class="card pg-card'+(prob?' pg-prob':'')+'">'
           + '<div class="pg-top"><span class="pg-badge pg-'+esc(p.tipo)+'">'+esc(LBL[p.tipo]||p.tipo)+'</span>'
           + '<span class="pg-val">'+brl(p.valor_centavos)+'</span></div>'
@@ -4054,6 +4064,17 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
           + '</div></div>';
       });
       pv.innerHTML = html;
+      var sy = pv.querySelector('#pg-sync');
+      if (sy) sy.onclick = async function(){
+        sy.disabled = true; sy.textContent = 'Sincronizando...';
+        try{
+          var r = await sb.functions.invoke('stripe-webhook', { headers: { 'x-sync': '1' }, body: {} });
+          if (r.error) throw r.error;
+          var d = r.data || {}; if (d.error) throw new Error(d.error);
+          alert('Sincronizado: ' + d.pagos + ' pagos, ' + d.recusas + ' recusas, ' + d.cancelamentos + ' cancelamentos');
+        }catch(e){ alert('Erro: ' + (e.message || e)); }
+        renderPag();
+      };
       pv.querySelectorAll('.pg-chip').forEach(function(b){ b.onclick=function(){ __pagF=b.dataset.f; renderPag(); }; });
       pv.querySelectorAll('[data-rec]').forEach(function(b){ b.onclick=async function(){
         b.disabled=true;
@@ -4100,7 +4121,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
   var _la = loadAdmin;
   loadAdmin = async function(){ var r = await _la.apply(this, arguments); refreshN().then(function(){ try{ renderAdminTabs(); }catch(e){} }); return r; };
   var st = document.createElement('style');
-  st.textContent = '#pag-view .pg-card{padding:14px}#pag-view .pg-prob{border-left:4px solid #e5484d}#pag-view .pg-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#pag-view .pg-val{font-weight:700;font-size:18px}#pag-view .pg-nome{font-weight:600;font-size:16px}#pag-view .pg-sub{font-size:13px;color:var(--muted);margin-top:2px}#pag-view .pg-mot{font-size:14px;margin-top:6px;color:#e5484d}#pag-view .pg-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:#2a2a2a;color:#fff}#pag-view .pg-recusa,#pag-view .pg-bloqueio_radar,#pag-view .pg-fraude,#pag-view .pg-disputa{background:#e5484d}#pag-view .pg-pago{background:#2e9e5b}#pag-view .pg-chips{display:flex;gap:8px;flex-wrap:wrap}#pag-view .pg-chip{border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:99px;padding:7px 14px;font-size:14px;cursor:pointer}#pag-view .pg-chip.on{background:#fff;color:#000;font-weight:700}#pag-view .pg-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#pag-view .pg-btn{border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:10px;padding:9px 14px;font-size:14px;text-decoration:none;cursor:pointer}';
+  st.textContent = '#pag-view .pg-card{padding:14px}#pag-view .pg-prob{border-left:4px solid #e5484d}#pag-view .pg-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#pag-view .pg-val{font-weight:700;font-size:18px}#pag-view .pg-nome{font-weight:600;font-size:16px}#pag-view .pg-sub{font-size:13px;color:var(--muted);margin-top:2px}#pag-view .pg-mot{font-size:14px;margin-top:6px;color:#e5484d}#pag-view .pg-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:#2a2a2a;color:#fff}#pag-view .pg-recusa,#pag-view .pg-bloqueio_radar,#pag-view .pg-fraude,#pag-view .pg-disputa{background:#e5484d}#pag-view .pg-pago{background:#2e9e5b}#pag-view .pg-cancelamento{background:#b7791f}#pag-view .pg-chips{display:flex;gap:8px;flex-wrap:wrap}#pag-view .pg-chip{border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:99px;padding:7px 14px;font-size:14px;cursor:pointer}#pag-view .pg-chip.on{background:#fff;color:#000;font-weight:700}#pag-view .pg-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#pag-view .pg-btn{border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:10px;padding:9px 14px;font-size:14px;text-decoration:none;cursor:pointer}';
   document.head.appendChild(st);
 })();
 </script>
