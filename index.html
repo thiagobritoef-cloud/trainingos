@@ -3999,6 +3999,110 @@ async function origens(){
 var oL=loadAdmin;loadAdmin=async function(){var r=await oL.apply(this,arguments);try{await origens();renderAdmGrid();chips()}catch(e){}return r};
 var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)return h;var o=admData.origem&&admData.origem[a.id];var txt=o?(o.t+(o.n?' &ldquo;'+_escHtml(o.n)+'&rdquo;':'')):'Cadastro direto no app';var line='<div style="font-size:12px;color:var(--muted);margin:2px 0 8px">Entrou por: <b style="color:var(--text)">'+txt+'</b></div>';var i=h.indexOf('<div class="al-actions">');if(i>0)h=h.slice(0,i)+line+h.slice(i)}catch(e){}return h};
 })();
+
+/* === Pagamentos (admin) === */
+(function(){
+  var __pagN = 0, __pagF = 'problemas';
+  var LBL = {pago:'Pago', recusa:'Recusa', bloqueio_radar:'Bloqueio Radar', disputa:'Disputa', fraude:'Alerta de fraude'};
+  function esc(s){ return (typeof _escHtml==='function') ? _escHtml(String(s==null?'':s)) : String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function brl(c){ return 'R$ ' + ((c||0)/100).toFixed(2).replace('.',','); }
+  function fdt(s){ try{ return new Date(s).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+  async function refreshN(){
+    try{
+      var r = await sb.from('pagamentos').select('id',{count:'exact',head:true}).neq('tipo','pago').eq('status','aberto');
+      __pagN = r.count || 0;
+      var t = document.querySelector('#admin-main-tabs .tab[data-atab="pagamentos"]');
+      if (t) t.firstChild.textContent = 'Pagamentos' + (__pagN>0 ? ' (' + __pagN + ')' : '');
+    }catch(e){}
+  }
+  async function renderPag(){
+    var pv = document.getElementById('pag-view'); if(!pv) return;
+    pv.innerHTML = '<div class="loading"><div class="spin"></div></div>';
+    try{
+      var r = await sb.from('pagamentos').select('*').order('created_at',{ascending:false}).limit(150);
+      if (r.error) throw r.error;
+      var rows = r.data || [];
+      var shown = rows.filter(function(p){
+        if (__pagF==='problemas') return p.tipo!=='pago' && p.status==='aberto';
+        if (__pagF==='recuperados') return p.status==='recuperado';
+        if (__pagF==='pagos') return p.tipo==='pago';
+        return true;
+      });
+      var pagos = rows.filter(function(p){return p.tipo==='pago';});
+      var soma = pagos.reduce(function(a,p){return a+(p.valor_centavos||0);},0);
+      var nProb = rows.filter(function(p){return p.tipo!=='pago' && p.status==='aberto';}).length;
+      var chips = [['problemas','Problemas ('+nProb+')'],['recuperados','Recuperados'],['pagos','Pagos'],['todos','Todos']].map(function(c){
+        return '<button class="pg-chip'+(c[0]===__pagF?' on':'')+'" data-f="'+c[0]+'">'+c[1]+'</button>';
+      }).join('');
+      var html = '<div class="card"><div class="ctitle">Pagamentos</div>'
+        + '<div style="font-size:14px;color:var(--muted);margin-bottom:10px">'+pagos.length+' pagos registrados · '+brl(soma)+' · '+nProb+' problema(s) em aberto</div>'
+        + '<div class="pg-chips">'+chips+'</div></div>';
+      if (!shown.length) html += '<div class="card" style="color:var(--muted)">Nada por aqui.</div>';
+      shown.forEach(function(p){
+        var prob = p.tipo!=='pago';
+        html += '<div class="card pg-card'+(prob?' pg-prob':'')+'">'
+          + '<div class="pg-top"><span class="pg-badge pg-'+esc(p.tipo)+'">'+esc(LBL[p.tipo]||p.tipo)+'</span>'
+          + '<span class="pg-val">'+brl(p.valor_centavos)+'</span></div>'
+          + '<div class="pg-nome">'+esc(p.nome||p.email||'(sem nome)')+'</div>'
+          + (p.email?'<div class="pg-sub">'+esc(p.email)+'</div>':'')
+          + '<div class="pg-sub">'+esc(p.plano||'')+' · '+fdt(p.created_at)+'</div>'
+          + (p.motivo?'<div class="pg-mot">'+esc(p.motivo)+(p.codigo?' ('+esc(p.codigo)+')':'')+'</div>':'')
+          + (prob?'<div class="pg-sub">'+(p.email_enviado_em?'E-mail de recuperação enviado em '+fdt(p.email_enviado_em):'E-mail de recuperação: não enviado')+'</div>':'')
+          + '<div class="pg-act">'
+          + (prob&&p.email?'<a class="pg-btn" href="mailto:'+esc(p.email)+'?subject='+encodeURIComponent('Seu pagamento no TO BE FITNESS')+'">Escrever e-mail</a>':'')
+          + (prob&&p.status==='aberto'?'<button class="pg-btn" data-rec="'+esc(p.id)+'">Marcar recuperado</button>':'')
+          + '</div></div>';
+      });
+      pv.innerHTML = html;
+      pv.querySelectorAll('.pg-chip').forEach(function(b){ b.onclick=function(){ __pagF=b.dataset.f; renderPag(); }; });
+      pv.querySelectorAll('[data-rec]').forEach(function(b){ b.onclick=async function(){
+        b.disabled=true;
+        var u = await sb.from('pagamentos').update({status:'recuperado'}).eq('id',b.dataset.rec);
+        if (u.error){ b.disabled=false; alert('Erro: '+u.error.message); return; }
+        refreshN(); renderPag();
+      }; });
+      __pagN = nProb;
+      var t = document.querySelector('#admin-main-tabs .tab[data-atab="pagamentos"]');
+      if (t) t.firstChild.textContent = 'Pagamentos' + (nProb>0 ? ' (' + nProb + ')' : '');
+    }catch(e){
+      pv.innerHTML = '<div class="card" style="color:#e55">Erro ao carregar: '+esc(e.message||e)+'</div>';
+    }
+  }
+  var _rt = renderAdminTabs, _sv = switchAdminView;
+  renderAdminTabs = function(){
+    _rt();
+    var el = document.getElementById('admin-main-tabs'); if(!el) return;
+    var d = document.createElement('div');
+    d.className = 'tab' + (adminTab==='pagamentos' ? ' active' : '');
+    d.setAttribute('data-atab','pagamentos');
+    d.appendChild(document.createTextNode('Pagamentos' + (__pagN>0 ? ' (' + __pagN + ')' : '')));
+    d.addEventListener('click', function(){
+      adminTab = 'pagamentos';
+      try{ localStorage.setItem('tos_atab', adminTab); }catch(e){}
+      renderAdminTabs(); switchAdminView(adminTab);
+    });
+    el.appendChild(d);
+  };
+  switchAdminView = function(t){
+    var pv = document.getElementById('pag-view');
+    if (t === 'pagamentos'){
+      document.querySelectorAll('#screen-admin .cnt > .card').forEach(function(c){ c.style.display='none'; });
+      ['adm-list','chat-view','planos-view','dashboard-view','disparo-view'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
+      var sa = document.getElementById('screen-admin'); if (sa) sa.classList.remove('dash-wide');
+      if (!pv){ pv = document.createElement('div'); pv.id='pag-view'; document.querySelector('#screen-admin .cnt').appendChild(pv); }
+      pv.style.display = '';
+      renderPag();
+      return;
+    }
+    if (pv) pv.style.display = 'none';
+    _sv(t);
+  };
+  var _la = loadAdmin;
+  loadAdmin = async function(){ var r = await _la.apply(this, arguments); refreshN().then(function(){ try{ renderAdminTabs(); }catch(e){} }); return r; };
+  var st = document.createElement('style');
+  st.textContent = '#pag-view .pg-card{padding:14px}#pag-view .pg-prob{border-left:4px solid #e5484d}#pag-view .pg-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}#pag-view .pg-val{font-weight:700;font-size:18px}#pag-view .pg-nome{font-weight:600;font-size:16px}#pag-view .pg-sub{font-size:13px;color:var(--muted);margin-top:2px}#pag-view .pg-mot{font-size:14px;margin-top:6px;color:#e5484d}#pag-view .pg-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:#2a2a2a;color:#fff}#pag-view .pg-recusa,#pag-view .pg-bloqueio_radar,#pag-view .pg-fraude,#pag-view .pg-disputa{background:#e5484d}#pag-view .pg-pago{background:#2e9e5b}#pag-view .pg-chips{display:flex;gap:8px;flex-wrap:wrap}#pag-view .pg-chip{border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:99px;padding:7px 14px;font-size:14px;cursor:pointer}#pag-view .pg-chip.on{background:#fff;color:#000;font-weight:700}#pag-view .pg-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#pag-view .pg-btn{border:1px solid var(--border,#444);background:transparent;color:inherit;border-radius:10px;padding:9px 14px;font-size:14px;text-decoration:none;cursor:pointer}';
+  document.head.appendChild(st);
+})();
 </script>
 <div id="tut-overlay">
   <div class="tut-card">
