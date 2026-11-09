@@ -4165,8 +4165,8 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
 /* === Origem do aluno (Google Ads/UTM) === */
 (function(){
 var done=false;
-async function send(){try{if(done||localStorage.getItem('tbf_attr_sent'))return;var raw=localStorage.getItem('tbf_attr');if(!raw||typeof sb==='undefined')return;var s=await sb.auth.getSession();if(!s.data||!s.data.session)return;var r=await sb.rpc('registrar_origem',{p:JSON.parse(raw)});if(!r.error){done=true;localStorage.setItem('tbf_attr_sent','1')}}catch(e){}}
-setTimeout(send,2500);setTimeout(send,9000);
+async function send(){try{if(done||localStorage.getItem('tbf_attr_sent'))return;var raw=localStorage.getItem('tbf_attr');if(!raw||typeof sb==='undefined')return;var t0=+localStorage.getItem('tbf_t0')||Date.now();localStorage.setItem('tbf_t0',t0);if(Date.now()-t0>2.5*864e5){localStorage.setItem('tbf_attr_sent','1');return}var s=await sb.auth.getSession();if(!s.data||!s.data.session)return;var r=await sb.rpc('registrar_origem',{p:JSON.parse(raw)});if(!r.error&&r.data===true){done=true;localStorage.setItem('tbf_attr_sent','1')}}catch(e){}}
+setTimeout(send,2500);var _n=0,_i=setInterval(function(){if(done||++_n>12)clearInterval(_i);else send()},15000);
 try{sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_IN')setTimeout(send,1500)})}catch(e){}
 var OR={};
 async function carregarOrig(){try{var r=await sb.from('profiles').select('id,origem_canal,utm_campaign,utm_term').not('origem_canal','is',null);OR={};(r.data||[]).forEach(function(p){OR[p.id]=p})}catch(e){}}
