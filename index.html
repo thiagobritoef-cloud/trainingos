@@ -4034,7 +4034,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       var pagos = rows.filter(function(p){return p.tipo==='pago';});
       var soma = pagos.reduce(function(a,p){return a+(p.valor_centavos||0);},0);
       var nProb = rows.filter(function(p){return p.tipo!=='pago' && p.status==='aberto';}).length;
-      var ia = await iaResumo();
+      var ia = await iaResumo(); var pend = rows.filter(function(p){return p.tipo==='recusa'&&p.status==='aberto'&&p.email&&!p.email_enviado_em;});
       var rec30 = pagos.filter(function(p){return new Date(p.created_at).getTime() >= Date.now()-30*864e5;}).reduce(function(a,p){return a+(p.valor_centavos||0);},0)/100;
       var chips = [['problemas','Problemas ('+nProb+')'],['recuperados','Recuperados'],['pagos','Pagos'],['cancelamentos','Cancelamentos'],['todos','Todos']].map(function(c){
         return '<button class="pg-chip'+(c[0]===__pagF?' on':'')+'" data-f="'+c[0]+'">'+c[1]+'</button>';
@@ -4042,7 +4042,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       var html = '<div class="card"><div class="ctitle">Pagamentos</div>'
         + '<div style="font-size:14px;color:var(--muted);margin-bottom:10px">'+pagos.length+' pagos registrados · '+brl(soma)+' · '+nProb+' problema(s) em aberto</div>'
         + '<div class="pg-chips">'+chips+'</div>'
-        + '<div class="pg-act"><button class="pg-btn" id="pg-sync">Sincronizar com Stripe</button></div></div>'
+        + '<div class="pg-act"><button class="pg-btn" id="pg-sync">Sincronizar com Stripe</button>'+(pend.length?'<button class="pg-btn" id="pg-bulk">Enviar recuperação para pendentes ('+pend.length+')</button>':'')+'</div></div>'
         + '<div class="card"><div class="ctitle">Custo da IA (30 dias)</div>'
         + '<div class="pg-sub">'+ia.n+' treinos gerados · total R$ '+r2(ia.tot)+' · média R$ '+Number(ia.med).toFixed(3).replace('.',',')+' por treino</div>'
         + '<div class="pg-sub">Receita 30 dias: R$ '+r2(rec30)+(rec30>0?' · IA consome '+(ia.tot/rec30*100).toFixed(1).replace('.',',')+'% da receita':'')+'</div>'
@@ -4060,10 +4060,24 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
           + (prob?'<div class="pg-sub">'+(p.email_enviado_em?'E-mail de recuperação enviado em '+fdt(p.email_enviado_em):'E-mail de recuperação: não enviado')+'</div>':'')
           + '<div class="pg-act">'
           + (prob&&p.email?'<a class="pg-btn" href="mailto:'+esc(p.email)+'?subject='+encodeURIComponent('Seu pagamento no TO BE FITNESS')+'">Escrever e-mail</a>':'')
+          + (prob&&p.tipo==='recusa'&&p.status==='aberto'&&p.email?'<button class="pg-btn" data-send="'+esc(p.id)+'">'+(p.email_enviado_em?'Reenviar e-mail':'Enviar e-mail de recuperação')+'</button>':'')
           + (prob&&p.status==='aberto'?'<button class="pg-btn" data-rec="'+esc(p.id)+'">Marcar recuperado</button>':'')
           + '</div></div>';
       });
       pv.innerHTML = html;
+      var enviarRec = async function(ids, btn){
+        btn.disabled = true; btn.textContent = 'Enviando...';
+        try{
+          var r = await sb.functions.invoke('stripe-webhook', { headers: { 'x-sync': '1' }, body: { action: 'enviar', ids: ids } });
+          if (r.error) throw r.error;
+          var d = r.data || {}; if (d.error) throw new Error(d.error);
+          alert('E-mails enviados: ' + d.enviados);
+        }catch(e){ alert('Erro: ' + (e.message || e)); }
+        renderPag();
+      };
+      pv.querySelectorAll('[data-send]').forEach(function(b){ b.onclick = function(){ if (confirm('Enviar e-mail de recuperação para este cliente?')) enviarRec([b.dataset.send], b); }; });
+      var bk = pv.querySelector('#pg-bulk');
+      if (bk) bk.onclick = function(){ if (confirm('Enviar o e-mail de recuperação para ' + pend.length + ' cliente(s) com recusa em aberto que ainda não receberam e-mail?')) enviarRec(pend.slice(0,100).map(function(p){ return p.id; }), bk); };
       var sy = pv.querySelector('#pg-sync');
       if (sy) sy.onclick = async function(){
         sy.disabled = true; sy.textContent = 'Sincronizando...';
