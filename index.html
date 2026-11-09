@@ -4024,6 +4024,8 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       var r = await sb.from('pagamentos').select('*').order('created_at',{ascending:false}).limit(150);
       if (r.error) throw r.error;
       var rows = r.data || [];
+      var cntK = {}; rows.forEach(function(p){ if(p.tipo==='recusa'||p.tipo==='bloqueio_radar'){ var k=String(p.email||p.id).toLowerCase()+'|'+p.tipo+'|'+p.status; cntK[k]=(cntK[k]||0)+1; } });
+      var seenK = {}; rows = rows.filter(function(p){ if(p.tipo==='recusa'||p.tipo==='bloqueio_radar'){ var k=String(p.email||p.id).toLowerCase()+'|'+p.tipo+'|'+p.status; if(seenK[k]) return false; seenK[k]=1; p.__n=cntK[k]; } return true; });
       var shown = rows.filter(function(p){
         if (__pagF==='problemas') return p.tipo!=='pago' && p.status==='aberto';
         if (__pagF==='cancelamentos') return p.tipo==='cancelamento';
@@ -4055,7 +4057,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
           + '<span class="pg-val">'+brl(p.valor_centavos)+'</span></div>'
           + '<div class="pg-nome">'+esc(p.nome||p.email||'(sem nome)')+'</div>'
           + (p.email?'<div class="pg-sub">'+esc(p.email)+'</div>':'')
-          + '<div class="pg-sub">'+esc(p.plano||'')+' · '+fdt(p.created_at)+'</div>'
+          + '<div class="pg-sub">'+esc(p.plano||'')+' · '+fdt(p.created_at)+(p.__n>1?' · '+p.__n+' tentativas recusadas':'')+'</div>'
           + (p.motivo?'<div class="pg-mot">'+esc(p.motivo)+(p.codigo?' ('+esc(p.codigo)+')':'')+'</div>':'')
           + (prob?'<div class="pg-sub">'+(p.email_enviado_em?'E-mail de recuperação enviado em '+fdt(p.email_enviado_em):'E-mail de recuperação: não enviado')+'</div>':'')
           + '<div class="pg-act">'
@@ -4092,7 +4094,7 @@ var oC=admCardHtml;admCardHtml=function(a){var h=oC(a);try{if(!admData.origemOk)
       pv.querySelectorAll('.pg-chip').forEach(function(b){ b.onclick=function(){ __pagF=b.dataset.f; renderPag(); }; });
       pv.querySelectorAll('[data-rec]').forEach(function(b){ b.onclick=async function(){
         b.disabled=true;
-        var u = await sb.from('pagamentos').update({status:'recuperado'}).eq('id',b.dataset.rec);
+        var rowRec = rows.find(function(x){ return x.id===b.dataset.rec; }); var qRec = sb.from('pagamentos').update({status:'recuperado'}); var u = await ((rowRec && rowRec.email) ? qRec.eq('email',rowRec.email).eq('status','aberto').neq('tipo','pago') : qRec.eq('id',b.dataset.rec));
         if (u.error){ b.disabled=false; alert('Erro: '+u.error.message); return; }
         refreshN(); renderPag();
       }; });
