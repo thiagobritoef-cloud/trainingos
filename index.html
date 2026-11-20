@@ -1647,7 +1647,7 @@ updateQuotaInfo();
 
 var res = await sb.from('workouts')
 .select('id,nome,dividir,created_at,duracao_semanas')
-.eq('user_id', user.id)
+.eq('user_id', (adminViewMode && adminAlunoId) ? adminAlunoId : user.id)
 .order('created_at', { ascending: false });
 
 if (res.error || !res.data || !res.data.length) {
@@ -1656,7 +1656,7 @@ window.__latestWorkoutId = null;
 return;
 }
 
-checkAutoGenerate(res.data[0]);
+if (!adminViewMode) checkAutoGenerate(res.data[0]);
 window.__latestWorkoutId = res.data[0].id;
 
 var total = res.data.length;
@@ -2549,7 +2549,7 @@ async function verTreinoAluno(alunoId) {
 
   var wkRes = await sb.from('workouts').select('*').eq('user_id', alunoId).order('created_at', { ascending: false }).limit(1).maybeSingle();
 
-  show('workout');
+  show('workout'); loadWorkouts();
   document.getElementById('admin-view-banner').style.display = 'flex';
   document.getElementById('admin-view-banner-txt').textContent = 'Visualizando treino de ' + (adminAlunoProfile.nome || 'aluno') + ' (modo admin)';
   document.getElementById('admin-gen-new-btn').style.display = 'block';
