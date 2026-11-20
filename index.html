@@ -4329,6 +4329,91 @@ loadAdmin=async function(){var r=await oL2.apply(this,arguments);try{await carre
   ensure();
 })();
 </script>
+<script>
+/* Tutorial VIP: guia de uso para quem vira VIP */
+(function(){
+  var steps=[
+   {ic:'&#11088;',t:'Seu VIP está ativo',d:'Agora você desbloqueou: <b>pedir ajustes</b> no treino, <b>trocar exercícios</b> por equivalentes, <b>histórico completo</b> e gráfico de evolução, e as <b>novidades em primeira mão</b>. Vamos ver, em poucos passos, o que é cada coisa. Leva 2 minutos.'},
+   {ic:'&#128197;',t:'Como seu treino é organizado',d:'No topo você vê as abas <b>SEM 1, SEM 2, SEM 3…</b>: são as semanas do seu ciclo (4, 6 ou 8 semanas). Cada semana tem os dias de treino (segunda, terça…). O campo <b>Progressão</b> explica o que muda de uma semana para outra (carga, repetições, método).<br><br>Cada dia começa com o <b>Aquecimento &amp; Mobilidade</b>: faça antes dos exercícios principais para proteger as articulações.'},
+   {ic:'&#128209;',t:'Lendo a tabela do treino',d:'<b>EXERCÍCIO</b> – o movimento a executar.<br><b>MÉTODO</b> – a técnica usada (veja o próximo passo).<br><b>SÉR</b> – quantas séries (rodadas) fazer.<br><b>REP</b> – repetições em cada série.<br><b>DES</b> – descanso entre as séries.<br><b>CARGA</b> – o peso (kg) que você usou; é onde você anota.'},
+   {ic:'&#128293;',t:'Métodos e siglas',d:'<b>Drop Set</b> – ao chegar perto do limite, você reduz a carga e continua. Ex.: <i>10→drop→10→drop→10</i> = 10 reps, reduz o peso, mais 10, reduz de novo, mais 10.<br><b>Bi Set</b> – dois exercícios seguidos, sem descanso entre eles (o segundo aparece como <b>+ PARCEIRO</b>).<br><b>RPE</b> – seu esforço de 1 a 10: 10 é “não conseguiria fazer mais nenhuma repetição”; 7–8 é “sobraram umas 2–3”.<br><b>Sequência</b> – o bloco da periodização (de 1 a 36). A cada treino novo você avança na sequência.<br>Todos os métodos estão explicados no <b>Glossário dos Métodos</b>, dentro de “Como usar o app”.'},
+   {ic:'&#9654;&#65039;',t:'Treinar série a série',d:'Toque em <b>▶ INICIAR TREINO SÉRIE A SÉRIE</b> para ser guiado por exercício. Nos exercícios com <b>▶ VÍDEO</b>, assista antes de executar pela primeira vez. Em alguns exercícios aparece <b>“Sugestão hoje”</b>: é uma sugestão de carga baseada no que você registrou antes. É só uma referência – você decide.'},
+   {ic:'&#9997;&#65039;',t:'Registre carga, reps e RPE',d:'Em cada exercício, anote a <b>carga (kg)</b>, as <b>repetições</b> e o <b>RPE</b>. No fim, toque em <b>Registrar Treino</b> para salvar. Seu histórico fica guardado e alimenta <b>Meus Resultados</b> e <b>Minha Evolução</b>. Quanto mais você registra, mais útil fica a sugestão de carga.'},
+   {ic:'&#8646;',t:'Trocar um exercício',d:'Não gostou de um exercício, sentiu desconforto ou a carga estagnou? Toque em <b>⇆ Trocar</b> ao lado dele e escolha um equivalente. É um recurso exclusivo VIP.'},
+   {ic:'&#128172;',t:'Pedir ajustes no treino',d:'Na tela do treino há a caixa <b>“Quer alguma alteração nesse treino?”</b>. Escreva (ou fale) o que quer mudar, por exemplo: <i>“troca agachamento por leg press”</i> ou <i>“menos volume no dia de perna”</i>. O treino é reformulado e o app guarda suas preferências para os próximos.'},
+   {ic:'&#127381;',t:'Novo treino e validade',d:'Seu treino tem validade (4, 6 ou 8 semanas, conforme você escolheu no perfil). Perto do fim o app avisa e você escolhe <b>Mudar</b> agora ou <b>Esperar</b> mais alguns dias. Para criar outro, toque em <b>Gerar Novo Treino</b>: o app confirma seu objetivo e seus materiais antes de gerar.<br><span id="vt-lim"></span>'},
+   {ic:'&#128276;',t:'Suporte, novidades e avisos',d:'Em <b>Suporte</b> você envia dúvidas, sugestões e feedback. Em <b>Novidades</b> ficam as melhorias do app. Ative as <b>notificações</b> para saber quando seu treino novo ou ajuste ficar pronto. Para rever este tutorial a qualquer momento, use o botão <b>“Rever tutorial VIP”</b> na área de ajuda.'}
+  ];
+  var cur=0;
+  function ov(){
+    var o=document.getElementById('viptour-ov');
+    if(!o){
+      o=document.createElement('div');o.id='viptour-ov';
+      o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100001;display:none;align-items:center;justify-content:center;padding:16px';
+      o.innerHTML='<div style="background:var(--card,#181818);color:var(--text,#f0f0f0);border:1px solid var(--border,#252525);border-radius:16px;max-width:480px;width:100%;max-height:92vh;overflow:auto;padding:20px;position:relative">'
+       +'<div id="vt-prog" style="font-size:12px;color:var(--muted,#777);letter-spacing:1px;margin-bottom:10px"></div>'
+       +'<div id="vt-ic" style="font-size:34px;line-height:1;margin-bottom:8px"></div>'
+       +'<div id="vt-t" style="font-size:21px;font-weight:900;margin-bottom:10px"></div>'
+       +'<div id="vt-d" style="font-size:16px;line-height:1.5;color:var(--text,#f0f0f0)"></div>'
+       +'<div id="vt-dots" style="display:flex;gap:5px;justify-content:center;margin:16px 0 12px"></div>'
+       +'<div style="display:flex;gap:8px"><button id="vt-back" class="btn btn-s" style="flex:1">Voltar</button><button id="vt-next" class="btn btn-p" style="flex:2">Próximo</button></div>'
+       +'<div style="text-align:center;margin-top:10px"><a href="javascript:void(0)" id="vt-skip" style="color:var(--muted,#777);font-size:13px">Pular tutorial</a></div></div>';
+      document.body.appendChild(o);
+      o.querySelector('#vt-back').onclick=function(){go(cur-1);};
+      o.querySelector('#vt-next').onclick=function(){if(cur>=steps.length-1)fechar();else go(cur+1);};
+      o.querySelector('#vt-skip').onclick=fechar;
+    }
+    return o;
+  }
+  function go(i){
+    cur=Math.max(0,Math.min(steps.length-1,i));
+    var s=steps[cur],o=ov();
+    o.querySelector('#vt-prog').textContent='PASSO '+(cur+1)+' DE '+steps.length;
+    o.querySelector('#vt-ic').innerHTML=s.ic;
+    o.querySelector('#vt-t').textContent=s.t;
+    o.querySelector('#vt-d').innerHTML=s.d;
+    o.querySelector('#vt-dots').innerHTML=steps.map(function(_,k){return '<span style="width:'+(k===cur?18:7)+'px;height:7px;border-radius:4px;background:'+(k===cur?'var(--g,#4CAF50)':'var(--border,#444)')+'"></span>';}).join('');
+    o.querySelector('#vt-back').style.visibility=cur===0?'hidden':'visible';
+    o.querySelector('#vt-next').textContent=cur>=steps.length-1?'Concluir':'Próximo';
+    o.querySelector('#vt-skip').style.display=cur>=steps.length-1?'none':'inline';
+    var lim=o.querySelector('#vt-lim');
+    if(lim&&typeof __getLimites==='function'){__getLimites().then(function(L){if(L&&lim.isConnected)lim.innerHTML='<br>No VIP: até <b>'+L.t+' treinos</b> e <b>'+L.a+' ajustes</b> a cada '+L.tp+' dias.';}).catch(function(){});}
+    o.scrollTop=0;
+  }
+  function marcar(){
+    try{localStorage.setItem('tbf_viptour_'+user.id,'1');}catch(e){}
+    try{if(profile)profile.vip_tour_visto=new Date().toISOString();}catch(e){}
+    try{sb.from('profiles').update({vip_tour_visto:new Date().toISOString()}).eq('id',user.id).then(function(){}).catch(function(){});}catch(e){}
+  }
+  function fechar(){ov().style.display='none';marcar();}
+  window.showVipTour=function(){go(0);ov().style.display='flex';};
+  function eligible(){
+    try{
+      if(typeof profile==='undefined'||!profile||typeof user==='undefined'||!user)return false;
+      if(window.adminViewMode)return false;
+      var vip=profile.plano_treino==='vip'||profile.plano_treino==='fit';
+      if(!vip||profile.vip_tour_visto)return false;
+      if(localStorage.getItem('tbf_viptour_'+user.id))return false;
+      var home=document.getElementById('screen-home');
+      if(!home||!home.classList.contains('active'))return false;
+      if(document.querySelector('.overlay.show'))return false;
+      if(document.getElementById('viptour-ov')&&document.getElementById('viptour-ov').style.display==='flex')return false;
+      return true;
+    }catch(e){return false;}
+  }
+  setInterval(function(){if(eligible())window.showVipTour();},2500);
+  function addBtn(){
+    var b=document.querySelector('button[onclick="showOnboarding()"]');
+    if(b&&!document.getElementById('vt-rever')&&typeof podeVip==='function'&&podeVip()){
+      var n=document.createElement('button');n.id='vt-rever';n.className=b.className;n.style.cssText=b.style.cssText+';margin-top:8px';
+      n.textContent='Rever tutorial VIP';n.onclick=function(){window.showVipTour();};
+      b.parentNode.insertBefore(n,b.nextSibling);
+    }
+  }
+  new MutationObserver(addBtn).observe(document.body,{childList:true,subtree:true});
+  addBtn();
+})();
+</script>
 </body>
 </html>
 
