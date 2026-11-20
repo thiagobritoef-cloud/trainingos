@@ -4292,6 +4292,43 @@ loadAdmin=async function(){var r=await oL2.apply(this,arguments);try{await carre
   };
 })();
 </script>
+<style id="al-list-css">
+.al-viewtog{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle}
+.al-viewtog button{background:var(--card,#181818);color:var(--muted,#777);border:1px solid var(--border,#252525);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer}
+.al-viewtog button.on{background:var(--g,#4CAF50);color:#fff;border-color:var(--g,#4CAF50)}
+#adm-grid.al-list-mode{display:flex!important;flex-direction:column;gap:6px}
+#adm-grid.al-list-mode .al-card{display:grid!important;grid-template-columns:minmax(210px,1.4fr) auto auto minmax(150px,1fr);align-items:center;gap:12px;padding:8px 14px!important}
+#adm-grid.al-list-mode .al-row,#adm-grid.al-list-mode .al-actions,#adm-grid.al-list-mode .al-card>div:not(.al-top):not(.al-badges):not(.al-stats):not(.al-info){display:none!important}
+#adm-grid.al-list-mode .al-stats{display:flex!important;gap:6px;margin:0!important}
+#adm-grid.al-list-mode .al-stats div{display:flex!important;align-items:baseline;gap:4px;padding:3px 8px!important;min-width:0!important}
+#adm-grid.al-list-mode .al-stats span{font-size:9px!important;white-space:nowrap}
+#adm-grid.al-list-mode .al-badges{margin:0!important}
+#adm-grid.al-list-mode .al-info{margin:0!important;font-size:13px}
+@media(max-width:900px){#adm-grid.al-list-mode .al-card{grid-template-columns:1fr auto}#adm-grid.al-list-mode .al-stats,#adm-grid.al-list-mode .al-info{display:none!important}}
+</style>
+<script>
+/* Alternar visualizacao: cards / lista */
+(function(){
+  function apply(m){
+    var g=document.getElementById('adm-grid');
+    if(g)g.classList.toggle('al-list-mode',m==='lista');
+    document.querySelectorAll('.al-viewtog button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===m);});
+  }
+  function mode(){try{return localStorage.getItem('tbf_alview')||'cards';}catch(e){return 'cards';}}
+  function ensure(){
+    var bar=document.querySelector('.al-bar');
+    if(bar&&!bar.querySelector('.al-viewtog')){
+      var w=document.createElement('span');w.className='al-viewtog';
+      w.innerHTML='<button data-m="cards" title="Ver em cards">&#9638; Cards</button><button data-m="lista" title="Ver em lista">&#9776; Lista</button>';
+      w.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var m=b.getAttribute('data-m');try{localStorage.setItem('tbf_alview',m);}catch(x){}apply(m);});
+      bar.appendChild(w);
+    }
+    apply(mode());
+  }
+  new MutationObserver(function(){ensure();}).observe(document.body,{childList:true,subtree:true});
+  ensure();
+})();
+</script>
 </body>
 </html>
 
