@@ -4176,6 +4176,44 @@ var oL2=loadAdmin;
 loadAdmin=async function(){var r=await oL2.apply(this,arguments);try{await carregarOrig();renderAdmGrid()}catch(e){}return r};
 })();
 </script>
+<script>
+/* Chat admin: historico continuo da conversa */
+(function(){
+  function fmt(d){try{var x=new Date(d);return x.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function getBox(){
+    var box=document.getElementById('msg-hist');
+    if(!box){
+      var ta=document.getElementById('msg-txt');
+      box=document.createElement('div');box.id='msg-hist';
+      box.style.cssText='max-height:45vh;overflow-y:auto;margin:10px 0;padding:8px;background:#0b0b0b;border:1px solid #222;border-radius:8px;display:flex;flex-direction:column;gap:6px';
+      ta.parentNode.insertBefore(box,ta);
+    }
+    return box;
+  }
+  async function carregarHist(id){
+    var box=getBox();box.style.display='flex';
+    box.innerHTML='<div style="color:#777;font-size:13px">Carregando conversa...</div>';
+    var a=await sb.from('reclamacoes').select('titulo,mensagem,created_at').eq('user_id',id);
+    var b=await sb.from('mensagens_admin').select('mensagem,created_at').eq('user_id',id);
+    if(window.msgTargetId!==id&&typeof msgTargetId!=='undefined'&&msgTargetId!==id)return;
+    var all=[];
+    (a.data||[]).forEach(function(r){all.push({de:'aluno',t:r.created_at,m:(r.titulo?r.titulo+': ':'')+(r.mensagem||'')});});
+    (b.data||[]).forEach(function(r){all.push({de:'admin',t:r.created_at,m:r.mensagem||''});});
+    all.sort(function(x,y){return new Date(x.t)-new Date(y.t);});
+    if(!all.length){box.innerHTML='<div style="color:#777;font-size:13px">Nenhuma mensagem ainda com este aluno.</div>';return;}
+    box.innerHTML=all.map(function(r){
+      var me=r.de==='admin';
+      return '<div style="align-self:'+(me?'flex-end':'flex-start')+';max-width:85%;background:'+(me?'#1f5a2a':'#222')+';color:#fff;border-radius:10px;padding:7px 10px;font-size:15px;white-space:pre-wrap;word-break:break-word">'+esc(r.m)+'<div style="font-size:11px;opacity:.6;margin-top:3px;text-align:right">'+(me?'Voce':'Aluno')+' · '+fmt(r.t)+'</div></div>';
+    }).join('');
+    box.scrollTop=box.scrollHeight;
+  }
+  var _o=window.openMsgModal;
+  window.openMsgModal=function(id,nome){_o(id,nome);carregarHist(id);};
+  var _a=window.openMsgModalAll;
+  if(_a)window.openMsgModalAll=function(){_a();var b=document.getElementById('msg-hist');if(b)b.style.display='none';};
+})();
+</script>
 </body>
 </html>
 
