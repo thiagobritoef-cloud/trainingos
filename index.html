@@ -1890,6 +1890,7 @@ function adiarTroca(dias) {
 // === GENERATE ===
 var ctreinoStep = 0;
 function generateWorkout(isAuto) {
+if (adminViewMode && adminAlunoId && !isAuto) { adminGerarNovoTreino(); return; }
   if (!profile) { if (!isAuto) { alert('Configure seu perfil primeiro.'); goProfile(); } return; }
   if (isAuto) { generateWorkoutRun(true); return; }
   ctreinoStep = 0;
@@ -2552,7 +2553,7 @@ async function verTreinoAluno(alunoId) {
   show('workout'); loadWorkouts();
   document.getElementById('admin-view-banner').style.display = 'flex';
   document.getElementById('admin-view-banner-txt').textContent = 'Visualizando treino de ' + (adminAlunoProfile.nome || 'aluno') + ' (modo admin)';
-  document.getElementById('admin-gen-new-btn').style.display = 'block';
+  var __agb = document.getElementById('admin-gen-new-btn'); if (__agb) __agb.style.display = 'block';
   var delBtn = document.getElementById('del-workout-btn');
   if (delBtn) delBtn.style.display = 'none';
   document.getElementById('quota-info') && (document.getElementById('quota-info').style.display = 'none');
@@ -2578,7 +2579,7 @@ async function adminGerarNovoTreino() {
   if (!adminAlunoId || !adminAlunoProfile) return;
   if (!confirm('Gerar um treino totalmente novo para ' + (adminAlunoProfile.nome || 'este aluno') + '? Isso substitui o treino atual em exibicao e nao conta nos creditos dele.')) return;
 
-  var btn = document.getElementById('admin-gen-new-btn');
+  var btn = document.getElementById('admin-gen-new-btn') || document.getElementById('gen-btn');
   btn.disabled = true;
   document.getElementById('ajuste-loading').style.display = 'block';
   showMsg('ajuste-err', '');
