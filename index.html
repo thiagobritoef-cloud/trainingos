@@ -4215,6 +4215,83 @@ loadAdmin=async function(){var r=await oL2.apply(this,arguments);try{await carre
   if(_a)window.openMsgModalAll=function(){_a();var b=document.getElementById('msg-hist');if(b)b.style.display='none';};
 })();
 </script>
+<script>
+/* Ficha do aluno (admin): clique no card */
+(function(){
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function brl(c){return 'R$ '+(Number(c||0)/100).toFixed(2).replace('.',',');}
+  function dt(d,h){if(!d)return '-';try{var x=new Date(d);return x.toLocaleDateString('pt-BR')+(h?' '+x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'');}catch(e){return '-';}}
+  var _o=window.admCardHtml;
+  if(_o){window.admCardHtml=function(a){var h=_o(a);return h.replace('class="al-card','data-uid="'+esc(a.id)+'" style="cursor:pointer" class="al-card');};}
+  document.addEventListener('click',function(e){
+    var c=e.target.closest&&e.target.closest('.al-card[data-uid]');
+    if(!c)return;
+    if(e.target.closest('button,select,a,input,textarea,label'))return;
+    abrirFicha(c.getAttribute('data-uid'));
+  });
+  function ov(){
+    var o=document.getElementById('ficha-ov');
+    if(!o){
+      o=document.createElement('div');o.id='ficha-ov';
+      o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow:auto';
+      o.addEventListener('click',function(e){if(e.target===o)o.style.display='none';});
+      document.body.appendChild(o);
+    }
+    return o;
+  }
+  function box(t){return '<div style="background:var(--card,#fff);border:1px solid var(--border,#ddd);border-radius:12px;padding:12px;min-width:0"><div style="font-size:12px;color:var(--muted,#777);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+t[0]+'</div><div style="font-size:20px;font-weight:800;color:var(--text,#111);word-break:break-word">'+t[1]+'</div>'+(t[2]?'<div style="font-size:12px;color:var(--muted,#777);margin-top:2px">'+t[2]+'</div>':'')+'</div>';}
+  window.abrirFicha=async function(id){
+    var o=ov();o.style.display='flex';
+    o.innerHTML='<div style="background:var(--card,#fff);color:var(--text,#111);border-radius:14px;max-width:820px;width:100%;padding:18px"><div class="loading"><div class="spin"></div></div></div>';
+    var since=new Date(Date.now()-30*864e5).toISOString();
+    var pr=await sb.from('profiles').select('*').eq('id',id).single();
+    var p=pr.data||{};
+    var q1=sb.from('pagamentos').select('*').eq('user_id',id);
+    var q2=p.email?sb.from('pagamentos').select('*').ilike('email',p.email):Promise.resolve({data:[]});
+    var r=await Promise.all([
+      q1,q2,
+      sb.from('assinaturas').select('*').eq('user_id',id).order('created_at',{ascending:false}),
+      sb.from('workouts').select('id',{count:'exact',head:true}).eq('user_id',id),
+      sb.from('ajustes').select('id',{count:'exact',head:true}).eq('user_id',id).gte('created_at',since),
+      sb.from('reclamacoes').select('titulo,mensagem,created_at').eq('user_id',id),
+      sb.from('mensagens_admin').select('mensagem,created_at').eq('user_id',id)
+    ]);
+    var pg={};(r[0].data||[]).concat(r[1].data||[]).forEach(function(x){pg[x.id]=x;});
+    var pags=Object.keys(pg).map(function(k){return pg[k];}).sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);});
+    var pagos=pags.filter(function(x){return x.tipo==='pago'&&x.status==='ok';});
+    var ltv=pagos.reduce(function(s,x){return s+(x.valor_centavos||0);},0);
+    var ass=(r[2].data||[])[0];
+    var msgs=[];
+    (r[5].data||[]).forEach(function(x){msgs.push({de:'a',t:x.created_at,m:(x.titulo?x.titulo+': ':'')+(x.mensagem||'')});});
+    (r[6].data||[]).forEach(function(x){msgs.push({de:'t',t:x.created_at,m:x.mensagem||''});});
+    msgs.sort(function(a,b){return new Date(a.t)-new Date(b.t);});
+    var plano=(p.plano_treino||'free').toUpperCase();
+    var h='<div style="background:var(--dark,#f3f5f8);color:var(--text,#111);border-radius:14px;max-width:820px;width:100%;padding:18px;position:relative">'
+    +'<button onclick="document.getElementById(\'ficha-ov\').style.display=\'none\'" style="position:absolute;right:12px;top:10px;background:none;border:0;font-size:22px;color:var(--muted,#777);cursor:pointer">&times;</button>'
+    +'<div style="font-size:22px;font-weight:900">'+esc(p.nome||'Sem nome')+' <span style="font-size:12px;font-weight:800;background:var(--g,#2e7d32);color:#fff;border-radius:20px;padding:3px 10px;vertical-align:middle">'+esc(plano)+'</span>'+(p.bloqueado?' <span style="font-size:12px;background:#b42318;color:#fff;border-radius:20px;padding:3px 10px">BLOQUEADO</span>':'')+'</div>'
+    +'<div style="color:var(--muted,#777);margin-bottom:12px">'+esc(p.email||'')+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">'
+    +box(['LTV (total pago)',brl(ltv),pagos.length+' pagamento(s)'])
+    +box(['Assinatura',ass?esc(ass.status||'-'):'Sem assinatura',ass?(esc(ass.plano||'')+(ass.valor!=null?' · R$ '+Number(ass.valor).toFixed(2).replace('.',','):'')+(ass.proxima_cobranca?' · prox. '+dt(ass.proxima_cobranca):'')):''])
+    +box(['Treinos gerados',r[3].count||0,'ajustes 30d: '+(r[4].count||0)])
+    +box(['Mensagens',msgs.length,msgs.filter(function(m){return m.de==='a';}).length+' do aluno'])
+    +box(['Cadastro',dt(p.created_at),'ultimo acesso: '+dt(p.last_seen_at||p.last_seen,true)])
+    +box(['Origem',esc(p.origem_canal||'-'),esc(p.utm_campaign||'')])
+    +'</div>'
+    +'<div style="color:var(--muted,#777);font-size:14px;margin-bottom:12px">Objetivo: <b style="color:var(--text,#111)">'+esc(p.objetivo||'-')+'</b> · Nivel: <b style="color:var(--text,#111)">'+esc(p.nivel||'-')+'</b> · Dias/sem: <b style="color:var(--text,#111)">'+esc(p.dias_semana||'-')+'</b></div>'
+    +'<div style="font-weight:800;margin:6px 0">Pagamentos</div>'
+    +(pags.length?'<div style="background:var(--card,#fff);border:1px solid var(--border,#ddd);border-radius:10px;overflow:hidden;margin-bottom:14px">'+pags.slice(0,12).map(function(x){return '<div style="display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border,#eee);font-size:14px"><span>'+dt(x.created_at)+' · '+esc(x.tipo)+' · '+esc(x.status)+'</span><b>'+brl(x.valor_centavos)+'</b></div>';}).join('')+'</div>':'<div style="color:var(--muted,#777);margin-bottom:14px;font-size:14px">Nenhum pagamento registrado.</div>')
+    +'<div style="font-weight:800;margin:6px 0">Conversa</div>'
+    +'<div style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:var(--card,#fff);border:1px solid var(--border,#ddd);border-radius:10px;padding:8px;margin-bottom:12px">'
+    +(msgs.length?msgs.slice(-30).map(function(m){var me=m.de==='t';return '<div style="align-self:'+(me?'flex-end':'flex-start')+';max-width:85%;background:'+(me?'#1f5a2a':'#e6eaf0')+';color:'+(me?'#fff':'#1b1f24')+';border-radius:10px;padding:7px 10px;font-size:14px;white-space:pre-wrap;word-break:break-word">'+esc(m.m)+'<div style="font-size:11px;opacity:.65;text-align:right;margin-top:2px">'+(me?'Voce':'Aluno')+' · '+dt(m.t,true)+'</div></div>';}).join(''):'<div style="color:var(--muted,#777);font-size:14px">Sem mensagens.</div>')
+    +'</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-p" style="flex:1;min-width:140px" onclick="document.getElementById(\'ficha-ov\').style.display=\'none\';openMsgModal(\''+esc(id)+'\',decodeURIComponent(\''+encodeURIComponent(p.nome||'Aluno')+'\'))">Responder</button>'
+    +'<button class="btn btn-s" style="flex:1;min-width:140px" onclick="document.getElementById(\'ficha-ov\').style.display=\'none\';verTreinoAluno(\''+esc(id)+'\')">Ver treino</button></div>'
+    +'</div>';
+    o.innerHTML=h;
+  };
+})();
+</script>
 </body>
 </html>
 
