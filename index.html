@@ -1170,6 +1170,7 @@ function goProfile() {
 
 // === AUTH ===
 var __planosCache = null;
+function bnOn(){try{var p=(__planosCache||[]).filter(function(x){return x.id==='vip';})[0];if(p)return Number(p.preco)>0&&Number(p.preco)<29.9;}catch(e){}return new Date()<new Date('2026-12-01T03:00:00Z');}
 async function renderPlanosEntrada() {
   var track = document.getElementById('planos-track');
   if (!track) return;
@@ -1184,7 +1185,7 @@ async function renderPlanosEntrada() {
     var precoTxt = 'R$ ' + precoNum.toFixed(2).replace('.', ',') + (precoNum > 0 ? '<small>/mês</small>' : '');
       if (p.id === 'vip' && precoNum > 0 && precoNum < 29.9) { precoTxt = '<div style="font-size:13px;font-weight:600;color:var(--muted);text-decoration:line-through">de R$ 29,90</div>' + precoTxt + '<div style="font-size:12px;font-weight:700;color:var(--g);margin-top:4px">Black November, até 30/11/2026: R$ 19,99/mês por 12 meses. Depois, o valor vigente da tabela, hoje R$ 29,90/mês, com aviso prévio por e-mail.</div>'; }
     return '<div class="plano-card-entrada' + (destaque ? ' destaque' : '') + '">' +
-      (destaque ? '<div class="plano-badge">&#11088; Oferta Black</div>' : '') +
+      (destaque ? '<div class="plano-badge">&#11088; ' + (bnOn() ? 'Oferta Black' : 'Mais procurado') + '</div>' : '') +
       '<div class="plano-nome">' + p.nome + '</div>' +
       '<div class="plano-preco">' + precoTxt + '</div>' + (typeof planoFeat==='function'?planoFeat(p):'') +
       '<button class="btn ' + (destaque ? 'btn-p' : '') + '" onclick="verDetalhesPlano(\'' + p.id + '\')">Ver detalhes</button>' +
@@ -1204,7 +1205,7 @@ async function renderPlanosEntrada() {
             ['Novidades em primeira mão', 'Não', 'Sim'],
       ['Valor', 'Grátis', 'Promocional: R$ ' + Number(pv.preco).toFixed(2).replace('.', ',') + '/mês por 12 meses']
     ];
-    cmpEl.innerHTML = '<div style="margin-top:18px;padding:14px;border:1px solid var(--g);border-radius:14px"><div style="font-size:15px;font-weight:800;text-align:center;margin-bottom:8px">Por que ser VIP</div><div style="font-size:14px;line-height:1.6">&#10003; <b>Ajuste inteligente:</b> peça mudanças e o treino é reformulado<br>&#10003; <b>Mais treinos:</b> gere novos programas quando precisar<br>&#10003; <b>Evolução completa:</b> histórico inteiro e gráfico das suas cargas</div><div style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center">Menos de R$ 0,70 por dia. Oferta Black válida até 30/11/2026. 7 dias para desistir: não gostou, devolvemos.</div></div>' + '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
+    cmpEl.innerHTML = '<div style="margin-top:18px;padding:14px;border:1px solid var(--g);border-radius:14px"><div style="font-size:15px;font-weight:800;text-align:center;margin-bottom:8px">Por que ser VIP</div><div style="font-size:14px;line-height:1.6">&#10003; <b>Ajuste inteligente:</b> peça mudanças e o treino é reformulado<br>&#10003; <b>Mais treinos:</b> gere novos programas quando precisar<br>&#10003; <b>Evolução completa:</b> histórico inteiro e gráfico das suas cargas</div><div style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center">' + (bnOn() ? 'Menos de R$ 0,70 por dia. Oferta Black válida até 30/11/2026.' : 'Menos de R$ 1,00 por dia.') + ' 7 dias para desistir: não gostou, devolvemos.</div></div>' + '<div style="margin-top:18px;font-size:15px;font-weight:800;text-align:center">Free x VIP</div>' +
       '<table style="width:100%;table-layout:fixed;word-break:break-word;border-collapse:collapse;margin-top:8px"><tr><th style="' + cs + 'text-align:left"></th><th style="' + cs + 'text-align:center">Free</th><th style="' + cs + 'text-align:center;color:var(--g)">VIP</th></tr>' +
       rows.map(function(r) { return '<tr><td style="' + cs + 'color:var(--muted)">' + r[0] + '</td><td style="' + cs + 'text-align:center">' + r[1] + '</td><td style="' + cs + 'text-align:center;font-weight:700">' + r[2] + '</td></tr>'; }).join('') +
       '</table>';
@@ -1695,7 +1696,7 @@ function podeVip() {
   return !!p.created_at && new Date(p.created_at) < new Date('2026-10-19T00:00:00-03:00');
 }
 function bannerVip(txt) {
-  return '<div style="margin:12px 0;padding:14px;border:1px solid var(--g);border-radius:12px;text-align:center;font-size:14px"><div style="font-weight:800;margin-bottom:6px">Recurso VIP</div><div style="color:var(--muted);margin-bottom:10px">' + txt + '</div><button class="btn btn-p" onclick="assinarPlano(\'vip\')">Assinar VIP - R$ 19,99/mês</button></div>';
+  return '<div style="margin:12px 0;padding:14px;border:1px solid var(--g);border-radius:12px;text-align:center;font-size:14px"><div style="font-weight:800;margin-bottom:6px">Recurso VIP</div><div style="color:var(--muted);margin-bottom:10px">' + txt + '</div><button class="btn btn-p" onclick="assinarPlano(\'vip\')">Assinar VIP - R$ ' + (bnOn() ? '19,99' : '29,90') + '/mês</button></div>';
 }
 function aplicarGateSuporte() {
   var c = document.getElementById('rc-card');
@@ -2450,8 +2451,8 @@ function renderPlanoCard() {
   el.innerHTML = pid ? ('Plano ' + (nomes[pid] || pid) + ' ativo') : 'Plano Free';
   if (out) out.innerHTML =
     '<div style="margin-top:8px">' +
-    '<button class="btn ' + (pid === 'vip' ? 'btn-p' : '') + '" style="width:100%" onclick="assinarPlano(\'vip\')" ' + (pid === 'vip' ? 'disabled' : '') + '>Assinar VIP - Oferta Black R$19,99/mês</button>' +
-    '<div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center"><s>de R$ 29,90</s> &middot; Black November: R$ 19,99/mês por 12 meses. Depois, o valor vigente da tabela, hoje R$ 29,90/mês, com aviso prévio por e-mail. 7 dias para desistir.</div>' +
+    '<button class="btn ' + (pid === 'vip' ? 'btn-p' : '') + '" style="width:100%" onclick="assinarPlano(\'vip\')" ' + (pid === 'vip' ? 'disabled' : '') + '>' + (bnOn() ? 'Assinar VIP - Oferta Black R$19,99/mês' : 'Assinar VIP - R$29,90/mês') + '</button>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center">' + (bnOn() ? '<s>de R$ 29,90</s> &middot; Black November: R$ 19,99/mês por 12 meses. Depois, o valor vigente da tabela, hoje R$ 29,90/mês, com aviso prévio por e-mail. 7 dias para desistir.' : 'R$ 29,90/mês, cancele quando quiser. 7 dias para desistir.') + '</div>' +
     '<a href="#" style="display:block;text-align:center;font-size:12px;color:var(--g);margin-top:8px" onclick="var d=document.getElementById(\'plano-detalhes\');d.style.display=d.style.display===\'none\'?\'block\':\'none\';return false;">detalhes</a>' +
     '<div id="plano-detalhes" style="display:none;margin-top:8px">' + "<table style=\"width:100%;border-collapse:collapse;font-size:12px\"><tr><th style=\"text-align:left;padding:6px 4px\"></th><th style=\"padding:6px 4px\">Free</th><th style=\"padding:6px 4px;color:var(--g)\">VIP</th></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Treinos personalizados</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">1 por mês</td><td style=\"padding:6px 4px;text-align:center\">Até 10 por mês</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Ajuste inteligente</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não incluído</td><td style=\"padding:6px 4px;text-align:center\">Até 30 por mês</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Vídeos explicativos</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Sim</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Histórico e evolução</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Últimos 3 registros</td><td style=\"padding:6px 4px;text-align:center\">Completo, com gráfico</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Novidades em primeira mão</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Não</td><td style=\"padding:6px 4px;text-align:center\">Sim</td></tr><tr style=\"border-top:1px solid var(--border,#2a2a2a)\"><td style=\"padding:6px 4px;text-align:left\">Valor</td><td style=\"padding:6px 4px;text-align:center;color:var(--muted)\">Grátis</td><td style=\"padding:6px 4px;text-align:center\">Black: R$ 19,99/mês por 12 meses</td></tr></table>" + '</div>' +
     '</div>';
