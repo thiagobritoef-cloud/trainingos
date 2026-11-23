@@ -1456,7 +1456,7 @@ function fillProfileForm() { if (!profile) return; try { renderPlanoCard(); } ca
   setVal('p-goal', p.objetivo || 'Hipertrofia');
   setVal('p-goal-desc', p.objetivo_detalhado || '');
   setVal('p-dur', p.duracao || 4);
-  setVal('p-mat', p.materiais || '');
+  setVal('p-mat', p.materiais || ''); try{gateMat();}catch(e){}
   setVal('p-rest', p.restricoes || '');
 }
 
@@ -1689,6 +1689,7 @@ else { generateWorkout(); }
 // - Free novo NAO tem chat direto com o Thiago (Suporte), historico completo/grafico de evolucao nem novidades em primeira mao (exclusivos do VIP).
 // - Contas criadas ANTES de 19/10/2026 (legado) mantem esses recursos. A mesma data de corte esta no banco: funcao public.can_direct_chat() (RLS de reclamacoes).
 // - Fit e VIP sempre tem acesso. Para mudar a data de corte, altere aqui E na funcao SQL.
+function gateMat(){var t=document.getElementById('p-mat');if(!t)return;var g=document.getElementById('p-mat-gate');if(podeVip()){t.disabled=false;if(g)g.remove();return}t.disabled=true;t.placeholder='Treino de acordo com o seu material é do VIP';if(!g){g=document.createElement('div');g.id='p-mat-gate';t.parentNode.insertBefore(g,t.nextSibling)}g.innerHTML=bannerVip('Treino de acordo com o seu material (casa, halteres, academia) é do VIP. No Free, o treino usa uma academia completa.')}
 function podeVip() {
   var p = profile || {};
   if (p.is_admin) return true;
@@ -1907,7 +1908,7 @@ function showConfirmTreinoStep() {
     body.innerHTML = 'Seu objetivo cadastrado é <b>' + _escHtml(obj) + '</b>' + (det ? ' (' + _escHtml(det) + ')' : '') + '.<br><br>Continua o mesmo?';
   } else {
     var mat = (p.materiais || '').trim() || 'nenhum equipamento informado';
-    body.innerHTML = 'Seus materiais, aparelhos e equipamentos cadastrados: <b>' + _escHtml(mat) + '</b>.<br><br>Continuam os mesmos?';
+    body.innerHTML = podeVip() ? ('Seus materiais, aparelhos e equipamentos cadastrados: <b>' + _escHtml(mat) + '</b>.<br><br>Continuam os mesmos?') : 'No plano Free o treino usa uma academia completa. No VIP ele respeita o seu material.<br><br>Gerar o treino?';
   }
   document.getElementById('confirm-treino-overlay').classList.add('show');
 }
@@ -1963,7 +1964,7 @@ async function generateWorkoutRun(isAuto) {
           objetivo: p.objetivo,
           objetivo_detalhado: p.objetivo_detalhado || '',
           duracao_semanas: p.duracao || 4,
-          materiais: p.materiais || 'Nenhum',
+          materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
           restricoes: p.restricoes || 'Nenhuma'
         },
         sequencia_atual: seqAtual
@@ -2606,7 +2607,7 @@ async function adminGerarNovoTreino() {
           objetivo: p.objetivo,
           objetivo_detalhado: p.objetivo_detalhado || '',
           duracao_semanas: p.duracao || 4,
-          materiais: p.materiais || 'Nenhum',
+          materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
           restricoes: p.restricoes || 'Nenhuma'
         },
         sequencia_atual: seqAtual,
@@ -2677,7 +2678,7 @@ async function pedirAjuste() {
         objetivo: p.objetivo,
         objetivo_detalhado: p.objetivo_detalhado || '',
         duracao_semanas: p.duracao || 4,
-        materiais: p.materiais || 'Nenhum',
+        materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
         restricoes: p.restricoes || 'Nenhuma'
       },
       sequencia_atual: wkSequencia,
@@ -2770,7 +2771,7 @@ async function fazerMudancasTreino() {
         objetivo: p.objetivo,
         objetivo_detalhado: p.objetivo_detalhado || '',
         duracao_semanas: p.duracao || 4,
-        materiais: p.materiais || 'Nenhum',
+        materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
         restricoes: p.restricoes || 'Nenhuma'
       },
       sequencia_atual: wkSequencia,
