@@ -1689,7 +1689,8 @@ else { generateWorkout(); }
 // - Free novo NAO tem chat direto com o Thiago (Suporte), historico completo/grafico de evolucao nem novidades em primeira mao (exclusivos do VIP).
 // - Contas criadas ANTES de 19/10/2026 (legado) mantem esses recursos. A mesma data de corte esta no banco: funcao public.can_direct_chat() (RLS de reclamacoes).
 // - Fit e VIP sempre tem acesso. Para mudar a data de corte, altere aqui E na funcao SQL.
-function podeVipPago(){var p=(typeof profile!=='undefined'&&profile)||{};return !!p.is_admin||p.plano_treino==='vip'||p.plano_treino==='fit'}
+function podeVipPago(){var p=(typeof profile!=='undefined'&&profile)||{};return !!p.is_admin||p.plano_treino==='vip'||p.plano_treino==='fit'||window.__legado===true}
+(function(){var iv=setInterval(function(){try{if(typeof sb==='undefined'||typeof user==='undefined'||!user)return;clearInterval(iv);sb.from('beneficio_legado').select('user_id').eq('user_id',user.id).then(function(r){if(r&&r.data&&r.data.length){window.__legado=true;try{gateMat()}catch(e){}}}).catch(function(){})}catch(e){}},3000)})();
 function gateMat(){var t=document.getElementById('p-mat');if(!t)return;var g=document.getElementById('p-mat-gate');if(podeVipPago()){t.disabled=false;if(g)g.remove();return}t.disabled=true;t.placeholder='Treino de acordo com o seu material é do VIP';if(!g){g=document.createElement('div');g.id='p-mat-gate';t.parentNode.insertBefore(g,t.nextSibling)}g.innerHTML=bannerVip('Treino de acordo com o seu material (casa, halteres, academia) é do VIP. No Free, o treino usa uma academia completa.')}
 function podeVip() {
   var p = profile || {};
