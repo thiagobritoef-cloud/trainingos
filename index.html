@@ -1689,7 +1689,8 @@ else { generateWorkout(); }
 // - Free novo NAO tem chat direto com o Thiago (Suporte), historico completo/grafico de evolucao nem novidades em primeira mao (exclusivos do VIP).
 // - Contas criadas ANTES de 19/10/2026 (legado) mantem esses recursos. A mesma data de corte esta no banco: funcao public.can_direct_chat() (RLS de reclamacoes).
 // - Fit e VIP sempre tem acesso. Para mudar a data de corte, altere aqui E na funcao SQL.
-function gateMat(){var t=document.getElementById('p-mat');if(!t)return;var g=document.getElementById('p-mat-gate');if(podeVip()){t.disabled=false;if(g)g.remove();return}t.disabled=true;t.placeholder='Treino de acordo com o seu material é do VIP';if(!g){g=document.createElement('div');g.id='p-mat-gate';t.parentNode.insertBefore(g,t.nextSibling)}g.innerHTML=bannerVip('Treino de acordo com o seu material (casa, halteres, academia) é do VIP. No Free, o treino usa uma academia completa.')}
+function podeVipPago(){var p=(typeof profile!=='undefined'&&profile)||{};return !!p.is_admin||p.plano_treino==='vip'||p.plano_treino==='fit'}
+function gateMat(){var t=document.getElementById('p-mat');if(!t)return;var g=document.getElementById('p-mat-gate');if(podeVipPago()){t.disabled=false;if(g)g.remove();return}t.disabled=true;t.placeholder='Treino de acordo com o seu material é do VIP';if(!g){g=document.createElement('div');g.id='p-mat-gate';t.parentNode.insertBefore(g,t.nextSibling)}g.innerHTML=bannerVip('Treino de acordo com o seu material (casa, halteres, academia) é do VIP. No Free, o treino usa uma academia completa.')}
 function podeVip() {
   var p = profile || {};
   if (p.is_admin) return true;
@@ -1908,7 +1909,7 @@ function showConfirmTreinoStep() {
     body.innerHTML = 'Seu objetivo cadastrado é <b>' + _escHtml(obj) + '</b>' + (det ? ' (' + _escHtml(det) + ')' : '') + '.<br><br>Continua o mesmo?';
   } else {
     var mat = (p.materiais || '').trim() || 'nenhum equipamento informado';
-    body.innerHTML = podeVip() ? ('Seus materiais, aparelhos e equipamentos cadastrados: <b>' + _escHtml(mat) + '</b>.<br><br>Continuam os mesmos?') : 'No plano Free o treino usa uma academia completa. No VIP ele respeita o seu material.<br><br>Gerar o treino?';
+    body.innerHTML = podeVipPago() ? ('Seus materiais, aparelhos e equipamentos cadastrados: <b>' + _escHtml(mat) + '</b>.<br><br>Continuam os mesmos?') : 'No plano Free o treino usa uma academia completa. No VIP ele respeita o seu material.<br><br>Gerar o treino?';
   }
   document.getElementById('confirm-treino-overlay').classList.add('show');
 }
@@ -1964,7 +1965,7 @@ async function generateWorkoutRun(isAuto) {
           objetivo: p.objetivo,
           objetivo_detalhado: p.objetivo_detalhado || '',
           duracao_semanas: p.duracao || 4,
-          materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
+          materiais: (podeVipPago() ? (p.materiais || 'Nenhum') : 'Academia completa'),
           restricoes: p.restricoes || 'Nenhuma'
         },
         sequencia_atual: seqAtual
@@ -2607,7 +2608,7 @@ async function adminGerarNovoTreino() {
           objetivo: p.objetivo,
           objetivo_detalhado: p.objetivo_detalhado || '',
           duracao_semanas: p.duracao || 4,
-          materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
+          materiais: (podeVipPago() ? (p.materiais || 'Nenhum') : 'Academia completa'),
           restricoes: p.restricoes || 'Nenhuma'
         },
         sequencia_atual: seqAtual,
@@ -2678,7 +2679,7 @@ async function pedirAjuste() {
         objetivo: p.objetivo,
         objetivo_detalhado: p.objetivo_detalhado || '',
         duracao_semanas: p.duracao || 4,
-        materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
+        materiais: (podeVipPago() ? (p.materiais || 'Nenhum') : 'Academia completa'),
         restricoes: p.restricoes || 'Nenhuma'
       },
       sequencia_atual: wkSequencia,
@@ -2771,7 +2772,7 @@ async function fazerMudancasTreino() {
         objetivo: p.objetivo,
         objetivo_detalhado: p.objetivo_detalhado || '',
         duracao_semanas: p.duracao || 4,
-        materiais: (podeVip() ? (p.materiais || 'Nenhum') : 'Academia completa'),
+        materiais: (podeVipPago() ? (p.materiais || 'Nenhum') : 'Academia completa'),
         restricoes: p.restricoes || 'Nenhuma'
       },
       sequencia_atual: wkSequencia,
@@ -3851,7 +3852,7 @@ if ('serviceWorker' in navigator) {
 }
 
 var __exCat=null,__swapUndo=null;
-async function trocarExercicio(wi,di,ei,btn){if(!podeVip()){if(confirm('Troca de exercício equivalente é um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opção)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
+async function trocarExercicio(wi,di,ei,btn){if(!podeVipPago()){if(confirm('Troca de exercício equivalente é um recurso VIP. Ver o plano VIP?'))assinarPlano('vip');return}var S=window.__rdS;if(!S||!S[di]||!S[di].exercicios||!S[di].exercicios[ei])return;if(btn)btn.disabled=true;try{if(!__exCat){var rc=await sb.from('exercicios').select('exercicio,grupo_muscular,subgrupo,equipamento,nivel,padrao_movimento,variacoes,contraindicacoes,video_url');if(rc.error||!rc.data)throw new Error('cat');__exCat=rc.data}var ex=S[di].exercicios[ei];var nome=String(ex.nome||ex.exercicio||ex.name||'').trim();var low=function(s){return String(s||'').toLowerCase()};var cur=__exCat.find(function(c){return low(c.exercicio)===low(nome)});if(!cur){showToast('Sem equivalente para este exercicio','');return}var p=(typeof profile!=='undefined'&&profile)?profile:{};var mat=low(p.materiais),rest=low(p.restricoes);var used={};S.forEach(function(s){(s.exercicios||[]).forEach(function(e){used[low(e.nome||e.exercicio||e.name)]=1})});var semEq=/sem equip|peso do corpo|nenhum|casa|calistenia/.test(mat)&&mat.length<80;var cands=__exCat.filter(function(c){if(low(c.exercicio)===low(nome)||used[low(c.exercicio)])return false;if(c.grupo_muscular!==cur.grupo_muscular)return false;if(rest&&c.contraindicacoes){var cs=low(c.contraindicacoes).split(/[,;|]/);for(var i=0;i<cs.length;i++){var t=cs[i].trim();if(t.length>3&&rest.indexOf(t)>-1)return false}}if(mat&&c.equipamento){var eq=low(c.equipamento);if(semEq&&!/(peso|corpo|nenhum|sem)/.test(eq))return false}return true});cands.forEach(function(c){var s=0;if(cur.padrao_movimento&&c.padrao_movimento===cur.padrao_movimento)s+=4;if(cur.subgrupo&&c.subgrupo===cur.subgrupo)s+=3;if(cur.nivel&&c.nivel===cur.nivel)s+=1;if(low(cur.variacoes).indexOf(low(c.exercicio))>-1)s+=5;c.__s=s+Math.random()});cands.sort(function(a,b){return b.__s-a.__s});var top=cands.filter(function(c){return c.__s>=cands[0].__s-1}).slice(0,3);var nv=top[Math.floor(Math.random()*top.length)];if(!nv){showToast('Sem equivalente disponivel','');return}__swapUndo={di:di,ei:ei,old:JSON.parse(JSON.stringify(ex)),wi:wi};if(ex.nome!==undefined)ex.nome=nv.exercicio;else if(ex.exercicio!==undefined)ex.exercicio=nv.exercicio;else ex.nome=nv.exercicio;ex.video_url=nv.video_url||'';if(ex.video)ex.video=nv.video_url||'';renderDay(S,di,wi);showToast('Trocado por '+nv.exercicio+' (toque em Trocar para outra opção)','');try{if(wkId&&wkData)await sb.from('workouts').update({programa:wkData}).eq('id',wkId)}catch(e2){}}catch(e){showToast('Nao foi possivel trocar agora','')}finally{if(btn)btn.disabled=false}}
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.swap-btn');if(b)trocarExercicio(parseInt(b.dataset.wi),parseInt(b.dataset.di),parseInt(b.dataset.ei),b)});
 try{if(/[?&]cadastro=1/.test(location.search))setTimeout(function(){if(typeof authTab==='function'&&document.getElementById('tab-up'))authTab('up')},400)}catch(e){}
 
