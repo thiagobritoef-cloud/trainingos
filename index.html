@@ -1696,7 +1696,7 @@ function podeVip() {
   var p = profile || {};
   if (p.is_admin) return true;
   if (p.plano_treino === 'vip' || p.plano_treino === 'fit') return true;
-  return !!p.created_at && new Date(p.created_at) < new Date('2026-10-19T00:00:00-03:00');
+  return window.__legado === true;
 }
 function bannerVip(txt) {
   return '<div style="margin:12px 0;padding:14px;border:1px solid var(--g);border-radius:12px;text-align:center;font-size:14px"><div style="font-weight:800;margin-bottom:6px">Recurso VIP</div><div style="color:var(--muted);margin-bottom:10px">' + txt + '</div><button class="btn btn-p" onclick="assinarPlano(\'vip\')">Assinar VIP - R$ ' + (bnOn() ? '19,99' : '29,90') + '/mês</button></div>';
