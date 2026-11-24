@@ -2579,14 +2579,15 @@ async function verTreinoAluno(alunoId) {
   renderWorkout(d);
 }
 
+function admMsg(m, ok){ try{ var el=document.getElementById('ajuste-err'); if(el && typeof showMsg==='function'){ showMsg('ajuste-err', m, ok?'ok':undefined); return; } }catch(e){} if(typeof showToast==='function'){ showToast(m, ''); } else { alert(m); } }
 async function adminGerarNovoTreino() {
   if (!adminAlunoId || !adminAlunoProfile) return;
   if (!confirm('Gerar um treino totalmente novo para ' + (adminAlunoProfile.nome || 'este aluno') + '? Isso substitui o treino atual em exibicao e nao conta nos creditos dele.')) return;
 
   var btn = document.getElementById('admin-gen-new-btn') || document.getElementById('gen-btn');
   btn.disabled = true;
-  document.getElementById('ajuste-loading').style.display = 'block';
-  showMsg('ajuste-err', '');
+  var __al=document.getElementById('ajuste-loading'); if(__al) __al.style.display='block'; var __btxt=btn.textContent; btn.textContent='Gerando treino... aguarde ate 1 minuto'; admMsg('Gerando treino... isso leva cerca de 1 minuto. Nao feche a tela.');
+  
 
   var p = adminAlunoProfile;
   var imc = (p.peso && p.altura) ? (p.peso / Math.pow(p.altura / 100, 2)).toFixed(1) : '?';
@@ -2641,13 +2642,13 @@ async function adminGerarNovoTreino() {
       renderWorkout(workout);
       sb.functions.invoke('send-push', { body: { target: 'user', user_id: adminAlunoId, title: 'Treino novo pronto', body: 'Seu treino novo j\u00e1 est\u00e1 pronto e dispon\u00edvel no seu aplicativo.' } }).catch(function(){});
     }
-    showMsg('ajuste-err', 'Treino novo gerado para ' + (p.nome || 'o aluno') + '! (nao contou nos creditos dele)', 'ok');
+    admMsg('Treino novo gerado para ' + (p.nome || 'o aluno') + '! (nao contou nos creditos dele)', true);
 
   } catch(e) {
-    showMsg('ajuste-err', 'Erro: ' + e.message);
+    admMsg('Erro ao gerar: ' + e.message);
   } finally {
     btn.disabled = false;
-    document.getElementById('ajuste-loading').style.display = 'none';
+    var __al2=document.getElementById('ajuste-loading'); if(__al2) __al2.style.display='none'; if(typeof __btxt!=='undefined') btn.textContent=__btxt;
   }
 }
 
