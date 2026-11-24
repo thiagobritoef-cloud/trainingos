@@ -3247,6 +3247,7 @@ function renderAdmGrid() {
   el.innerHTML = lista.map(admCardHtml).join('');
 }
 
+async function admGerarNovoDoCard(id){ try{ await verTreinoAluno(id); setTimeout(function(){ adminGerarNovoTreino(); }, 700); }catch(e){ alert('Erro ao abrir o aluno.'); } }
 function admCardHtml(a) {
   var nome = a.nome || 'Sem nome';
   var isBlocked = !!a.bloqueado;
@@ -3281,7 +3282,7 @@ function admCardHtml(a) {
           '<option value="vip"' + (plano === 'vip' ? ' selected' : '') + '>VIP</option>' +
           '</select></div>' +
     '<div class="al-actions">' +
-      '<button class="pri" onclick="verTreinoAluno(\'' + a.id + '\')">Ver treino</button>' +
+      '<button class="pri" onclick="verTreinoAluno(\'' + a.id + '\')">Ver treino</button>' + '<button onclick="admGerarNovoDoCard(\'' + a.id + '\')">Gerar novo treino</button>' +
       '<button onclick="verCadastroAluno(\'' + a.id + '\')">Cadastro</button>' +
       '<button onclick="openMsgModal(\'' + a.id + '\',\'' + nomeSafe + '\')">Mensagem</button>' +
       '<button class="danger' + (isBlocked ? ' on' : '') + '" onclick="toggleBloqueado(\'' + a.id + '\',' + isBlocked + ')">' + (isBlocked ? 'Desbloquear' : 'Bloquear') + '</button>' +
