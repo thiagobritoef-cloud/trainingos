@@ -2021,6 +2021,20 @@ async function generateWorkoutRun(isAuto) {
     loadWorkouts();
 
   } catch(e) {
+    if (!isAuto && /Failed to send|Failed to fetch|NetworkError|Load failed/i.test(String(e && e.message))) {
+      var okGen = false;
+      for (var tg = 0; tg < 24 && !okGen; tg++) {
+        await new Promise(function(r) { setTimeout(r, 5000); });
+        try { var c2 = await sb.from('workouts').select('id', { count: 'exact', head: true }).eq('user_id', user.id); if ((c2.count || 0) >= seqAtual) okGen = true; } catch (e2) {}
+      }
+      if (okGen) {
+        document.getElementById('gen-loading').style.display = 'none';
+        document.getElementById('gen-wrap').style.display = 'block';
+        showToast(pickRandom(MOTIV_GERADO), '&#127881;');
+        updateQuotaInfo(); loadWorkouts();
+        return;
+      }
+    }
     document.getElementById('gen-loading').style.display = 'none';
     document.getElementById('gen-wrap').style.display = 'block';
     if (!isAuto) {
@@ -2213,7 +2227,7 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
 
       html += '<tr class="' + (parceiro ? 'ex-row-top' : '') + '">' +
         '<td><div class="ex-name">' + name + '</div>' + sugestaoCarga(name, metodo, ultima, reps) +
-        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : (typeof gifDe==='function'&&gifDe(name)?'<button type="button" class="vbtn-gif" data-gif="'+gifDe(name)+'">&#9654; Demo</button>':'<span class="vbtn-soon">V&iacute;deo em breve</span>')) + '<button type="button" class="swap-btn' + (podeVip() ? '' : ' locked') + '" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">' + (podeVip() ? '&#8646; Trocar' : '&#128274; Trocar') + '</button>' +
+        (vid ? '<button class="vbtn" data-url="' + vid + '">&#9654; Video</button>' : (typeof gifDe==='function'&&gifDe(name)?'<button type="button" class="vbtn-gif" data-gif="'+gifDe(name)+'">&#9654; Demo</button>':'<button type="button" class="vbtn" data-url="https://www.youtube.com/results?search_query='+encodeURIComponent('como fazer '+name+' execucao correta')+'">&#9654; Buscar vídeo</button>')) + '<button type="button" class="swap-btn' + (podeVip() ? '' : ' locked') + '" data-wi="' + wi + '" data-di="' + di + '" data-ei="' + ei + '">' + (podeVip() ? '&#8646; Trocar' : '&#128274; Trocar') + '</button>' +
         '</td>' +
         '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
         '<td>' + series + '</td>' +
@@ -2236,7 +2250,7 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
         var repsP = ex.parceiro_reps || reps;
         html += '<tr class="ex-row-partner">' +
           '<td><div class="ex-name"><span class="ex-ptag">+ PARCEIRO</span>' + parceiro + '</div>' +
-          (vidP ? '<button class="vbtn" data-url="' + vidP + '">&#9654; Video</button>' : (typeof gifDe==='function'&&gifDe(parceiro)?'<button type="button" class="vbtn-gif" data-gif="'+gifDe(parceiro)+'">&#9654; Demo</button>':'<span class="vbtn-soon">V&iacute;deo em breve</span>')) +
+          (vidP ? '<button class="vbtn" data-url="' + vidP + '">&#9654; Video</button>' : (typeof gifDe==='function'&&gifDe(parceiro)?'<button type="button" class="vbtn-gif" data-gif="'+gifDe(parceiro)+'">&#9654; Demo</button>':'<button type="button" class="vbtn" data-url="https://www.youtube.com/results?search_query='+encodeURIComponent('como fazer '+parceiro+' execucao correta')+'">&#9654; Buscar vídeo</button>')) +
           '</td>' +
           '<td><div class="ex-method" style="text-decoration:underline;cursor:pointer" onclick="showMetodoInfo(decodeURIComponent(\'' + encodeURIComponent(metodo) + '\'))">' + metodo + '</div></td>' +
           '<td>' + seriesP + '</td>' +
