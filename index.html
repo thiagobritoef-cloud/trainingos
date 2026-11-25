@@ -619,7 +619,8 @@ td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:
     </div>
   </div>
   <div class="cnt">
-    <div class="card" id="rc-card">
+    <div class="card" id="tobi-card" style="display:none"><div class="ctitle">Tobi, sua assistente VIP</div><div style="color:var(--muted);font-size:14px;margin-bottom:10px">Tire d&uacute;vidas de treino, pe&ccedil;a um treino novo ou resolva assinatura e conta. A Tobi &eacute; uma IA e passa os casos delicados para o Thiago.</div><div id="tobi-msgs" style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 8px"></div><div id="tobi-typing" style="display:none;color:var(--muted);font-size:14px;margin-bottom:6px">Tobi est&aacute; escrevendo...</div><div class="fg"><textarea id="tobi-in" rows="2" maxlength="1500" placeholder="Escreva para a Tobi..."></textarea></div><button class="btn btn-p" id="tobi-send" onclick="tobiEnviar()">Enviar</button></div><div class="card" id="tobi-free" style="display:none"><div class="ctitle">Suporte com IA no VIP</div><div style="color:var(--muted);font-size:15px">No VIP voc&ecirc; conversa com a Tobi, nossa assistente com IA: ela tira d&uacute;vidas, monta treinos sob medida e resolve assinatura e conta.</div></div>
+<div class="card" id="rc-card">
       <div class="ctitle">Suporte</div>
       <div style="color:var(--muted);font-size:16px;margin-bottom:10px">Tem uma sugestao, feedback ou encontrou algum problema? Conte pra gente.</div>
       <div class="fg"><input type="text" id="rc-titulo" placeholder="Assunto"></div>
@@ -1145,10 +1146,16 @@ function closeInstall() {
 }
 
 // === SCREENS ===
+var __tobiBusy=false;
+function tobiEh(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+function tobiLimpa(s){return String(s||'').replace(/\*\*/g,'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu,'').replace(/^#+\s*/gm,'').trim()}
+function tobiBolha(role,txt,link){var box=document.getElementById('tobi-msgs');if(!box)return;var d=document.createElement('div');var eu=role==='user';d.style.cssText='max-width:86%;padding:10px 12px;border-radius:14px;font-size:15px;line-height:1.4;'+(eu?'align-self:flex-end;background:var(--g);color:#000;':'align-self:flex-start;background:#1f1f1f;color:#fff;');d.innerHTML=tobiEh(eu?txt:tobiLimpa(txt));if(link){var b=document.createElement('a');b.href=link;b.target='_blank';b.rel='noopener';b.textContent='Gerenciar ou cancelar assinatura';b.style.cssText='display:block;margin-top:8px;padding:9px;border-radius:10px;background:var(--g);color:#000;font-weight:800;text-align:center;text-decoration:none';d.appendChild(b)}box.appendChild(d);box.scrollTop=box.scrollHeight}
+async function tobiInit(){var vip=!!(profile&&(profile.is_admin||profile.plano_treino==='vip'||profile.plano_treino==='fit'));var c=document.getElementById('tobi-card'),f=document.getElementById('tobi-free');if(c)c.style.display=vip?'block':'none';if(f)f.style.display=vip?'none':'block';if(!vip||!c||c.getAttribute('data-ok')==='1')return;c.setAttribute('data-ok','1');try{var r=await sb.functions.invoke('suporte-ia',{body:{action:'historico'}});var m=(r.data&&r.data.mensagens)||[];document.getElementById('tobi-msgs').innerHTML='';if(!m.length){tobiBolha('assistant','Oi, '+String((profile&&profile.nome)||'').split(' ')[0]+'! Eu sou a Tobi, assistente com IA do To Be Fitness. Posso tirar dúvidas de treino, montar um treino novo para você e ajudar com sua assinatura. Como posso ajudar?')}else{m.forEach(function(x){tobiBolha(x.role,x.content)})}}catch(e){}}
+async function tobiEnviar(){if(__tobiBusy)return;var inp=document.getElementById('tobi-in');var txt=(inp.value||'').trim();if(!txt)return;__tobiBusy=true;inp.value='';tobiBolha('user',txt);var ty=document.getElementById('tobi-typing'),bt=document.getElementById('tobi-send');ty.style.display='block';bt.disabled=true;try{var r=await sb.functions.invoke('suporte-ia',{body:{message:txt}});var d=r.data||{};if(r.error||!d.ok){tobiBolha('assistant',d.error||'Não consegui responder agora. Tente de novo em instantes.')}else{tobiBolha('assistant',d.reply,d.link);if(d.treino_gerado){try{showToast('Treino novo pronto no app','');loadWorkouts()}catch(e){}}}}catch(e){tobiBolha('assistant','Não consegui responder agora. Tente de novo em instantes.')}finally{ty.style.display='none';bt.disabled=false;__tobiBusy=false}}
 function show(id) {
   var screens = document.querySelectorAll('.screen');
   for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
-  document.getElementById('screen-' + id).classList.add('active');
+  document.getElementById('screen-' + id).classList.add('active'); if(id==='suporte'){try{tobiInit()}catch(e){}}
   window.scrollTo(0, 0);
 }
 
