@@ -2288,7 +2288,8 @@ function renderDay(sessoes, di, wi) { window.__rdS = sessoes; window.__rdDi = di
     btn.addEventListener('click', function() { openVideo(this.dataset.url); });
   });
 
-  var regBtn = document.getElementById('reg-treino-btn');
+  exArea.querySelectorAll('.vbtn-gif').forEach(function(btn) { btn.addEventListener('click', function() { var f = this.dataset.gif; if (!f) return; var B = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/'; document.getElementById('vid-box').innerHTML = '<div class="ex-media"><div class="ex-anim"><img src="' + B + f + '/0.jpg" alt=""><img class="b" src="' + B + f + '/1.jpg" alt=""></div><div class="ex-cap">Demonstra&ccedil;&atilde;o do movimento</div></div>'; document.getElementById('vid-overlay').classList.add('show'); }); });
+    var regBtn = document.getElementById('reg-treino-btn');
   if (regBtn) regBtn.addEventListener('click', registrarTreinoCompleto);
 }
 
